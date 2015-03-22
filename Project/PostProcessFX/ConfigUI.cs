@@ -38,6 +38,14 @@ namespace PostProcessFX
 		public float motionblurMinVelocity = 0.1f;
 		public float motionblurMaxVelocity = 8.0f;
 
+		//public float fieldOfView = 60.0f;
+		public int toggleUIKey = (int)KeyCode.F9;
+
+		// Modifier keys for toggling the ui.
+		public bool ctrlKey = false;
+		public bool shiftKey = false;
+		public bool altKey = false;
+
 		public static void Serialize(String filename, object instance)
 		{
 			TextWriter writer = null;
@@ -87,6 +95,7 @@ namespace PostProcessFX
 	class ConfigUI : MonoBehaviour
 	{
 		public const String configFilename = "PostProcessFXConfig.xml";
+		private String m_toggleUIString;
 
 		private BloomEffect m_bloom;
 		private MotionblurEffect m_motionblur;
@@ -113,7 +122,7 @@ namespace PostProcessFX
 			m_antiAliasing = new AntiAliasingEffect();
 			m_sunLensflare = new SunLensflare();
 			m_motionblur = new MotionblurEffect();
-
+			
 			apply();
 		}
 
@@ -144,43 +153,51 @@ namespace PostProcessFX
 
 		public void drawGUI()
 		{
-			GUI.TextArea(new Rect(10, 75, 300, 20), "PostProcessFX controls (Toggle with F11)");
+			GUI.Label(new Rect(10, 75, 200, 20), "PostProcessFX ControlUI");
+			m_config.guiActive = GUI.Toggle(new Rect(210, 75, 210, 20), m_config.guiActive, "active");
 
-			GUI.TextArea(new Rect(10, 100, 200, 20), "bloomIntensity");
+			GUI.Label(new Rect(10, 100, 200, 20), "bloomIntensity");
 			m_config.bloomIntensity = GUI.HorizontalSlider(new Rect(210, 100, 100, 20), m_config.bloomIntensity, 0.0f, 2.0f);
 
-			GUI.TextArea(new Rect(10, 125, 200, 20), "bloomThreshhold");
+			GUI.Label(new Rect(10, 125, 200, 20), "bloomThreshhold");
 			m_config.bloomThreshhold = GUI.HorizontalSlider(new Rect(210, 125, 100, 20), m_config.bloomThreshhold, 0.0f, 6.0f);
 
-			GUI.TextArea(new Rect(10, 150, 200, 20), "flareRotation");
+			GUI.Label(new Rect(10, 150, 200, 20), "flareRotation");
 			m_config.flareRotation = GUI.HorizontalSlider(new Rect(210, 150, 100, 20), m_config.flareRotation, 0.0f, 3.14f);
 
-			GUI.TextArea(new Rect(10, 175, 200, 20), "hollyStretchWidth");
+			GUI.Label(new Rect(10, 175, 200, 20), "hollyStretchWidth");
 			m_config.hollyStretchWidth = GUI.HorizontalSlider(new Rect(210, 175, 100, 20), m_config.hollyStretchWidth, 0.0f, 5.0f);
 
-			GUI.TextArea(new Rect(10, 200, 200, 20), "hollywoodFlareBlurIterations");
+			GUI.Label(new Rect(10, 200, 200, 20), "hollywoodFlareBlurIterations");
 			m_config.hollywoodFlareBlurIterations = (int)GUI.HorizontalSlider(new Rect(210, 200, 100, 20), m_config.hollywoodFlareBlurIterations, 0.0f, 5.0f);
 
-			GUI.TextArea(new Rect(10, 225, 200, 20), "lensflareIntensity");
+			GUI.Label(new Rect(10, 225, 200, 20), "lensflareIntensity");
 			m_config.lensflareIntensity = GUI.HorizontalSlider(new Rect(210, 225, 100, 20), m_config.lensflareIntensity, 0.0f, 2.0f);
 
-			GUI.TextArea(new Rect(10, 250, 200, 20), "lensflareThreshhold");
+			GUI.Label(new Rect(10, 250, 200, 20), "lensflareThreshhold");
 			m_config.lensflareThreshhold = GUI.HorizontalSlider(new Rect(210, 250, 100, 20), m_config.lensflareThreshhold, 0.0f, 10.0f);
 
-			GUI.TextArea(new Rect(10, 275, 200, 20), "sepBlurSpread");
+			GUI.Label(new Rect(10, 275, 200, 20), "sepBlurSpread");
 			m_config.sepBlurSpread = GUI.HorizontalSlider(new Rect(210, 275, 100, 20), m_config.sepBlurSpread, 0.0f, 10.0f);
 
-			GUI.TextArea(new Rect(10, 300, 200, 20), "Anti Aliasing Mode");
-			GUI.TextArea(new Rect(320, 300, 120, 20), getAntiAliasingType(m_config.antiAliasingMode));
+			GUI.Label(new Rect(10, 300, 200, 20), "Anti Aliasing Mode");
+			GUI.Label(new Rect(320, 300, 120, 20), getAntiAliasingType(m_config.antiAliasingMode));
 			m_config.antiAliasingMode = (int)GUI.HorizontalSlider(new Rect(210, 300, 100, 20), m_config.antiAliasingMode, 0.0f, 7.1f);
 
-			GUI.TextArea(new Rect(10, 325, 200, 20), "Motionblur Mode");
-			GUI.TextArea(new Rect(320, 325, 120, 20), getMotionBlurType(m_config.motionBlurMode));
+			GUI.Label(new Rect(10, 325, 200, 20), "Motionblur Mode");
+			GUI.Label(new Rect(320, 325, 120, 20), getMotionBlurType(m_config.motionBlurMode));
 			m_config.motionBlurMode = (int)GUI.HorizontalSlider(new Rect(210, 325, 100, 20), m_config.motionBlurMode, 0.0f, 5.1f);
 
-			GUI.TextArea(new Rect(10, 350, 200, 20), "Motionblur Scale");
+			GUI.Label(new Rect(10, 350, 200, 20), "Motionblur Scale");
 			m_config.motionblurVelocityScale = GUI.HorizontalSlider(new Rect(210, 350, 100, 20), m_config.motionblurVelocityScale, 0.0f, 1.0f);
 
+			GUI.Label(new Rect(10, 375, 200, 20), "ToggleUI");
+			m_toggleUIString = GUI.TextArea(new Rect(210, 375, 200, 20), m_toggleUIString);
+
+			m_config.ctrlKey = GUI.Toggle(new Rect(10, 400, 50, 20), m_config.ctrlKey, "ctrl");
+			m_config.shiftKey = GUI.Toggle(new Rect(70, 400, 50, 20), m_config.shiftKey, "shift");
+			m_config.altKey = GUI.Toggle(new Rect(130, 400, 50, 20), m_config.altKey, "alt");
+			
 			apply();
 		}
 
@@ -244,14 +261,48 @@ namespace PostProcessFX
 				m_bloom.bloomComponent.lensFlareSaturation = m_config.lensFlareSaturation;
 				m_bloom.bloomComponent.lensflareThreshhold = m_config.lensflareThreshhold;
 				m_bloom.bloomComponent.sepBlurSpread = m_config.sepBlurSpread;
-			}			
+			}
+
+			try
+			{
+				m_config.toggleUIKey = (int)Enum.Parse(typeof(KeyCode), m_toggleUIString);
+			} 
+			catch(Exception ex) 
+			{
+				m_config.toggleUIKey = (int)KeyCode.F9;
+				m_toggleUIString = "F9";
+			}
+
+			//Camera.main.fieldOfView = m_config.fieldOfView;
 		}
 
 		public void Update()
 		{
 			if (m_config == null) { return; }
 
-			if (Input.GetKeyDown(KeyCode.F11))
+			bool ctrlMod = false;
+			bool altMod = false;
+			bool shiftMod = false;
+
+			if (m_config.ctrlKey && (Input.GetKey(KeyCode.RightControl) || Input.GetKey(KeyCode.LeftControl)))
+			{
+				ctrlMod = true;
+			}
+
+			if (m_config.altKey && (Input.GetKey(KeyCode.RightAlt) || Input.GetKey(KeyCode.LeftAlt)))
+			{
+				altMod = true;
+			}
+
+			if (m_config.shiftKey && (Input.GetKey(KeyCode.RightShift) || Input.GetKey(KeyCode.LeftShift)))
+			{
+				shiftMod = true;
+			}
+
+			if (Input.GetKeyDown((KeyCode)m_config.toggleUIKey) &&
+				m_config.ctrlKey == ctrlMod &&
+				m_config.altKey == altMod &&
+				m_config.shiftKey == shiftMod) 
 			{
 				if (!m_toggle)
 				{
@@ -259,8 +310,8 @@ namespace PostProcessFX
 				}
 				m_toggle = true;
 			}
-
-			if (Input.GetKeyUp(KeyCode.F11))
+			
+			if (Input.GetKeyUp((KeyCode)m_config.toggleUIKey))
 			{
 				m_toggle = false;
 			}
