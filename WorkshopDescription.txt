@@ -1,0 +1,21 @@
+Enable additional post processing effects.
+
+[h1] Bloom and lensflare [/h1]
+Fully customizable in the ingame UI. 
+
+[h1] Anti Aliasing [/h1]
+Supports FXAA2, FXAA3, NFAA, SSAA, DLAA. 
+Not as effective as the DynamicResolution mod by nlight, but cheaper and can be combined if desired. 
+
+[h1] Motion Blur [/h1]
+Supports CameraMotion, LocalBlur, Reconstruction, ReconstructionDX11 and ReconstructionDisk. 
+
+[h1] Additional Information [/h1]
+All effects can be disabled to not have any performance impact. Ingame UI is provided to change 
+and tweak the options and can be toggled with F11. 
+
+[h1] Recommended and Compactible Mods [/h1]
+
+- [url=http://steamcommunity.com/sharedfiles/filedetails/?id=410329674]SSAO[/url] by Ulysius.
+- [url=http://steamcommunity.com/sharedfiles/filedetails/?id=410805639]Sun Shafts[/url] by Ulysius.
+- [url=http://steamcommunity.com/sharedfiles/filedetails/?id=406629464]Dynamic Resolution[/url] by nlight.
