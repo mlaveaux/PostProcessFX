@@ -23,10 +23,8 @@ namespace PostProcessFX
 				Material dx11MotionBlurMaterial = new Material(dx11MotionBlurShaderText);
 				Material motionBlurMaterial = new Material(motionBlurShaderText);
 				
-				motionBlur.enabled = true;
 				motionBlur.dx11MotionBlurShader = dx11MotionBlurMaterial.shader;
 				motionBlur.shader = motionBlurMaterial.shader;
-				motionBlur.filterType = CameraMotionBlur.MotionBlurFilter.ReconstructionDX11;
 			}
 		}
 
