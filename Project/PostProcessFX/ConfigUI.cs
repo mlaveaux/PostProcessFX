@@ -19,21 +19,29 @@ namespace PostProcessFX
 		public float bloomIntensity = 0.0f;
 		public int bloomBlurIterations = 3;
 
-		public float bloomThreshhold = 4.0f;
+		public float bloomThreshhold = 3.5f;
 		public float blurWidth = 1.0f;
 
 		public float flareRotation = 0.0f;
-		public float hollyStretchWidth = 0.75f;
+		public float hollyStretchWidth = 0.5f;
 		public int hollywoodFlareBlurIterations = 1;
 
+		public bool sunLensflare = false;
 		public float lensflareIntensity = 0.0f;
-		public float lensFlareSaturation = 0.5f;
-		public float lensflareThreshhold = 5.0f;
+		public float lensFlareSaturation = 0.6f;
+		public float lensflareThreshhold = 1.4f;
 
-		public float sepBlurSpread = 0.3f;
+		public float sepBlurSpread = 0.1f;
 
 		// Anti aliasing options.
 		public int antiAliasingMode = 0;
+
+		public float FXAA3minThreshhold = 0.1f;
+		public float FXAA3maxThreshhold = 0.4f;
+		public float FXAA3sharpness = 8;
+		public float NFAAoffset = 0.2f;
+		public float NFAAblurRadius = 18.0f;
+		public bool DLAAsharp = true;
 
 		// Motion blur options.
 		public int motionBlurMode = 0;
@@ -44,10 +52,24 @@ namespace PostProcessFX
 		// SSAO options
 		public bool ssaoEnabled = false;
 		public float ssaoBlurFilterDistance = 1.25f;
-		public float ssaoIntensity = 0.5f;
-		public float ssaoRadius = 0.2f;
-		public int ssaoBlurFilterIterations = 2;
+		public float ssaoIntensity = 1.5f;
+		public float ssaoRadius = 2.0f;
+		public int ssaoBlurFilterIterations = 1;
 		public int ssaoDownsample = 0;
+
+		// Reflection options
+		public bool reflectionEnabled = false;
+
+		public int reflectionIterations = 32;
+		public int reflectionBinarySearchIterations = 16;
+		public float reflectionScreenEdgeFadeStart = 0.8f;
+		public float reflectionEyeFadeStart = 0.0f;
+		public float reflectionEyeFadeEnd = 1.0f;
+		public int reflectionPixelStride = 32;
+		public float reflectionMaxDistance = 20.0f;
+
+		// Depth of field options.
+		public bool dofEnabled = false;
 
 		// Global options.
 		public int toggleUIKey = (int)KeyCode.F9;
@@ -56,7 +78,7 @@ namespace PostProcessFX
 		public bool ctrlKey = false;
 		public bool shiftKey = false;
 		public bool altKey = false;
-
+		
 		public static void Serialize(String filename, object instance)
 		{
 			TextWriter writer = null;
@@ -109,7 +131,9 @@ namespace PostProcessFX
 		Bloom,
 		AntiAliasing,
 		Motionblur,
-		SSAO
+		SSAO,
+		Reflection,
+		DepthOfField
 	}
 
 	class ConfigUI : MonoBehaviour
@@ -120,13 +144,12 @@ namespace PostProcessFX
 		private BloomEffect m_bloom;
 		private MotionblurEffect m_motionblur;
 		private AntiAliasingEffect m_antiAliasing;
-		private SunLensflare m_sunLensflare;
+		private SunLensflareEffect m_sunLensflare;
 		private SSAOEffect m_ssaoEffect;
+		private ScreenSpaceReflectionEffect m_screenReflection;
+		private DepthOfFieldEffect m_dofEffect;
 
 		private bool m_toggle = false;
-		private bool m_antiAliasingDisabled = false;
-		private bool m_motionblurDisabled = false;
-		private bool m_bloomDisabled = false;
 		
 		private EffectConfig m_config = null;
 		private MonoBehaviour m_parent;
@@ -143,9 +166,11 @@ namespace PostProcessFX
 
 			m_bloom = new BloomEffect();
 			m_antiAliasing = new AntiAliasingEffect();
-			m_sunLensflare = new SunLensflare();
+			m_sunLensflare = new SunLensflareEffect();
 			m_motionblur = new MotionblurEffect();
 			m_ssaoEffect = new SSAOEffect();
+			m_screenReflection = new ScreenSpaceReflectionEffect();
+			m_dofEffect = new DepthOfFieldEffect();
 
 			m_toggleUIString = Enum.GetName(typeof(KeyCode), m_config.toggleUIKey);
 			
@@ -206,10 +231,22 @@ namespace PostProcessFX
 				m_activeMenu = MenuType.Motionblur;
 			}
 
-			if (GUI.Button(new Rect(325, 100, 75, 20), "SSAO"))
+			/*if (GUI.Button(new Rect(325, 100, 75, 20), "SSAO"))
 			{
 				m_activeMenu = MenuType.SSAO;
 			}
+
+			if (GUI.Button(new Rect(400, 100, 75, 20), "Reflection"))
+			{
+				m_activeMenu = MenuType.Reflection;
+			}
+
+			if (GUI.Button(new Rect(475, 100, 90, 20), "DepthOfField"))
+			{
+				m_activeMenu = MenuType.DepthOfField;
+			}*/
+
+			GUI.Box(new Rect(5, 120, 580, 340), "");
 
 			switch (m_activeMenu)
 			{
@@ -226,6 +263,34 @@ namespace PostProcessFX
 					GUI.Label(new Rect(10, 125, 200, 20), "Anti Aliasing Mode: ");
 					GUI.Label(new Rect(210, 125, 120, 20), getAntiAliasingType(m_config.antiAliasingMode));
 					m_config.antiAliasingMode = (int)GUI.HorizontalSlider(new Rect(10, 150, 100, 20), m_config.antiAliasingMode, 0.0f, 7.1f);
+
+					if (m_config.antiAliasingMode != 0)
+					{						switch ((AAMode)(m_config.antiAliasingMode - 1))
+						{
+							case AAMode.FXAA3Console:
+								GUI.Label(new Rect(210, 175, 120, 20), "min edge threshhold");
+								m_config.FXAA3minThreshhold = GUI.HorizontalSlider(new Rect(10, 175, 100, 20), m_config.FXAA3minThreshhold, 0.0f, 1.0f);
+
+								GUI.Label(new Rect(210, 200, 120, 20), "max edge threshhold");
+								m_config.FXAA3maxThreshhold = GUI.HorizontalSlider(new Rect(10, 200, 100, 20), m_config.FXAA3maxThreshhold, 0.0f, 1.0f);
+
+								GUI.Label(new Rect(210, 225, 120, 20), "sharpness");
+								m_config.FXAA3sharpness = GUI.HorizontalSlider(new Rect(10, 225, 100, 20), m_config.FXAA3sharpness, 5.0f, 20.0f);
+								break;
+
+							case AAMode.NFAA:
+								GUI.Label(new Rect(210, 175, 120, 20), "edge offset");
+								m_config.NFAAoffset = GUI.HorizontalSlider(new Rect(10, 175, 100, 20), m_config.NFAAoffset, 0.0f, 1.0f);
+
+								GUI.Label(new Rect(210, 200, 120, 20), "blur radius");
+								m_config.NFAAblurRadius = GUI.HorizontalSlider(new Rect(10, 200, 100, 20), m_config.NFAAblurRadius, 0.0f, 7.1f);
+								break;
+
+							case AAMode.DLAA:
+								m_config.DLAAsharp = GUI.Toggle(new Rect(10, 175, 100, 20), m_config.DLAAsharp, "sharp");
+								break;
+						}
+					}					
 					break;
 
 				case MenuType.Bloom: 
@@ -235,23 +300,27 @@ namespace PostProcessFX
 					GUI.Label(new Rect(10, 150, 200, 20), "bloomThreshhold");
 					m_config.bloomThreshhold = GUI.HorizontalSlider(new Rect(210, 150, 100, 20), m_config.bloomThreshhold, 0.0f, 6.0f);
 
-					GUI.Label(new Rect(10, 175, 200, 20), "flareRotation");
-					m_config.flareRotation = GUI.HorizontalSlider(new Rect(210, 175, 100, 20), m_config.flareRotation, 0.0f, 3.14f);
+					GUI.Label(new Rect(10, 175, 200, 20), "bloomBlur");
+					m_config.sepBlurSpread = GUI.HorizontalSlider(new Rect(210, 175, 100, 20), m_config.sepBlurSpread, 0.0f, 10.0f);
+					
+					GUI.Label(new Rect(10, 200, 200, 20), "lensflareIntensity");
+					m_config.lensflareIntensity = GUI.HorizontalSlider(new Rect(210, 200, 100, 20), m_config.lensflareIntensity, 0.0f, 2.0f);
 
-					GUI.Label(new Rect(10, 200, 200, 20), "hollyStretchWidth");
-					m_config.hollyStretchWidth = GUI.HorizontalSlider(new Rect(210, 200, 100, 20), m_config.hollyStretchWidth, 0.0f, 5.0f);
+					GUI.Label(new Rect(10, 225, 200, 20), "lensflareThreshhold");
+					m_config.lensflareThreshhold = GUI.HorizontalSlider(new Rect(210, 225, 100, 20), m_config.lensflareThreshhold, 0.0f, 10.0f);
 
-					GUI.Label(new Rect(10, 225, 200, 20), "hollywoodFlareBlurIterations");
-					m_config.hollywoodFlareBlurIterations = (int)GUI.HorizontalSlider(new Rect(210, 225, 100, 20), m_config.hollywoodFlareBlurIterations, 0.0f, 5.0f);
+					GUI.Label(new Rect(10, 250, 200, 20), "lensflareSaturation");
+					m_config.lensFlareSaturation = GUI.HorizontalSlider(new Rect(210, 250, 100, 20), m_config.lensFlareSaturation, 0.0f, 10.0f);
 
-					GUI.Label(new Rect(10, 250, 200, 20), "lensflareIntensity");
-					m_config.lensflareIntensity = GUI.HorizontalSlider(new Rect(210, 250, 100, 20), m_config.lensflareIntensity, 0.0f, 2.0f);
+					GUI.Label(new Rect(10, 275, 200, 20), "lensflareRotation");
+					m_config.flareRotation = GUI.HorizontalSlider(new Rect(210, 275, 100, 20), m_config.flareRotation, 0.0f, 3.14f);
 
-					GUI.Label(new Rect(10, 275, 200, 20), "lensflareThreshhold");
-					m_config.lensflareThreshhold = GUI.HorizontalSlider(new Rect(210, 275, 100, 20), m_config.lensflareThreshhold, 0.0f, 10.0f);
+					GUI.Label(new Rect(10, 300, 200, 20), "lensflareWidth");
+					m_config.hollyStretchWidth = GUI.HorizontalSlider(new Rect(210, 300, 100, 20), m_config.hollyStretchWidth, 0.0f, 5.0f);
+					
+					GUI.Label(new Rect(10, 325, 200, 20), "lensflareBlurIterations");
+					m_config.hollywoodFlareBlurIterations = (int)GUI.HorizontalSlider(new Rect(210, 325, 100, 20), m_config.hollywoodFlareBlurIterations, 0.0f, 5.0f);
 
-					GUI.Label(new Rect(10, 300, 200, 20), "sepBlurSpread");
-					m_config.sepBlurSpread = GUI.HorizontalSlider(new Rect(210, 300, 100, 20), m_config.sepBlurSpread, 0.0f, 10.0f);
 					break;
 
 				case MenuType.Motionblur:
@@ -281,6 +350,35 @@ namespace PostProcessFX
 					GUI.Label(new Rect(10, 250, 200, 20), "ssaoDownsample");
 					m_config.ssaoDownsample = (int)GUI.HorizontalSlider(new Rect(210, 250, 100, 20), m_config.ssaoDownsample, 0.0f, 1.1f);
 					break;
+
+				case MenuType.Reflection:
+					m_config.reflectionEnabled = GUI.Toggle(new Rect(10, 125, 200, 20), m_config.reflectionEnabled, "enabled");
+					
+					GUI.Label(new Rect(10, 150, 200, 20), "iterations");
+					m_config.reflectionIterations = (int)GUI.HorizontalSlider(new Rect(210, 150, 100, 20), m_config.reflectionIterations, 1.0f, 64.1f);
+
+					GUI.Label(new Rect(10, 175, 200, 20), "binarySearchIterations");
+					m_config.reflectionBinarySearchIterations = (int)GUI.HorizontalSlider(new Rect(210, 175, 100, 20), m_config.reflectionBinarySearchIterations, 0.0f, 32.1f);
+					
+					GUI.Label(new Rect(10, 200, 200, 20), "distance");
+					m_config.reflectionMaxDistance = GUI.HorizontalSlider(new Rect(210, 200, 100, 20), m_config.reflectionMaxDistance, 0.0f, 1000.0f);
+					
+					GUI.Label(new Rect(10, 225, 200, 20), "pixelStride");
+					m_config.reflectionPixelStride = (int)GUI.HorizontalSlider(new Rect(210, 225, 100, 20), m_config.reflectionPixelStride, 0.0f, 32.1f);
+
+					GUI.Label(new Rect(10, 250, 200, 20), "eyeFadeStart");
+					m_config.reflectionEyeFadeStart = GUI.HorizontalSlider(new Rect(210, 250, 100, 20), m_config.reflectionEyeFadeStart, 0.0f, 1.0f);
+
+					GUI.Label(new Rect(10, 275, 200, 20), "eyeFadeEnd");
+					m_config.reflectionEyeFadeEnd = GUI.HorizontalSlider(new Rect(210, 275, 100, 20), m_config.reflectionEyeFadeEnd, 0.0f, 1.0f);
+					
+					GUI.Label(new Rect(10, 300, 200, 20), "edgeFadeStart");
+					m_config.reflectionScreenEdgeFadeStart = GUI.HorizontalSlider(new Rect(210, 300, 100, 20), m_config.reflectionScreenEdgeFadeStart, 0.0f, 1.0f);
+					break;
+
+				case MenuType.DepthOfField:
+					m_config.dofEnabled = GUI.Toggle(new Rect(10, 125, 200, 20), m_config.dofEnabled, "enabled");
+					break;
 			}
 						
 			apply();
@@ -288,53 +386,48 @@ namespace PostProcessFX
 
 		public void apply() 
 		{
-			if (m_antiAliasing.AAComponent != null)
+			if (m_config.antiAliasingMode == 0)
 			{
-				if (m_config.antiAliasingMode == 0)
-				{
-					m_antiAliasing.AAComponent.enabled = false;
-					m_antiAliasingDisabled = true;
-				}
-				else if (m_config.antiAliasingMode == 8)
-				{
-					m_antiAliasing.AAComponent.enabled = false;
-					m_antiAliasingDisabled = true;
-				}
-				else
-				{
-					if (m_antiAliasingDisabled)
-					{
-						m_antiAliasing.AAComponent.enabled = true;
-						m_antiAliasingDisabled = false;
-					}
-					m_antiAliasing.AAComponent.mode = (AAMode)m_config.antiAliasingMode - 1;
-				}
+				m_antiAliasing.Disable();
+			}
+			else if (m_config.antiAliasingMode == 8)
+			{
+				m_antiAliasing.Disable();
+			}
+			else
+			{
+				m_antiAliasing.Enable();
+				m_antiAliasing.AAComponent.mode = (AAMode)m_config.antiAliasingMode - 1;
+				m_antiAliasing.AAComponent.blurRadius = m_config.NFAAblurRadius;
+				m_antiAliasing.AAComponent.dlaaSharp = m_config.DLAAsharp;
+
+				m_antiAliasing.AAComponent.edgeSharpness = m_config.FXAA3sharpness;
+				m_antiAliasing.AAComponent.edgeThreshold = m_config.FXAA3maxThreshhold;
+				m_antiAliasing.AAComponent.edgeThresholdMin = m_config.FXAA3minThreshhold;
 			}
 
-			if (m_motionblur.motionBlur != null)
+			if (m_config.motionBlurMode == 0)
 			{
-				if (m_config.motionBlurMode == 0)
-				{
-					m_motionblur.motionBlur.enabled = false;
-					m_motionblurDisabled = true;
-				}
-				else
-				{
-					if (m_motionblurDisabled)
-					{
-						m_motionblur.motionBlur.enabled = true;
-						m_motionblurDisabled = false;
-					}
+				m_motionblur.Disable();
+			}
+			else
+			{
+				m_motionblur.Enable();
 
-					m_motionblur.motionBlur.filterType = (CameraMotionBlur.MotionBlurFilter)m_config.motionBlurMode - 1;
-					m_motionblur.motionBlur.velocityScale = m_config.motionblurVelocityScale;
-					m_motionblur.motionBlur.minVelocity = m_config.motionblurMinVelocity;
-					m_motionblur.motionBlur.maxVelocity = m_config.motionblurMaxVelocity;
-				}
+				m_motionblur.motionblurComponent.filterType = (CameraMotionBlur.MotionBlurFilter)m_config.motionBlurMode - 1;
+				m_motionblur.motionblurComponent.velocityScale = m_config.motionblurVelocityScale;
+				m_motionblur.motionblurComponent.minVelocity = m_config.motionblurMinVelocity;
+				m_motionblur.motionblurComponent.maxVelocity = m_config.motionblurMaxVelocity;
 			}
 
-			if (m_bloom.bloomComponent != null)
+			if (m_bloom.bloomComponent.bloomIntensity < 0.02f)
 			{
+				m_bloom.Disable();
+			}
+			else
+			{
+				m_bloom.Enable();
+
 				m_bloom.bloomComponent.bloomIntensity = m_config.bloomIntensity;
 				m_bloom.bloomComponent.bloomBlurIterations = m_config.bloomBlurIterations;
 				m_bloom.bloomComponent.bloomThreshhold = m_config.bloomThreshhold;
@@ -346,30 +439,47 @@ namespace PostProcessFX
 				m_bloom.bloomComponent.lensFlareSaturation = m_config.lensFlareSaturation;
 				m_bloom.bloomComponent.lensflareThreshhold = m_config.lensflareThreshhold;
 				m_bloom.bloomComponent.sepBlurSpread = m_config.sepBlurSpread;
-
-				if (m_bloom.bloomComponent.bloomIntensity < 0.02f)
-				{
-					m_bloom.bloomComponent.enabled = false;
-					m_bloomDisabled = true;
-				}
-				else
-				{
-					if (m_bloomDisabled)
-					{
-						m_bloom.bloomComponent.enabled = true;
-
-					}
-				}
 			}
 
-			if (m_ssaoEffect.ssaoComponent != null)
+			if (m_config.ssaoEnabled)
 			{
-				m_ssaoEffect.ssaoComponent.enabled = m_config.ssaoEnabled;
+				m_ssaoEffect.Enable();
+
 				m_ssaoEffect.ssaoComponent.blurIterations = m_config.ssaoBlurFilterIterations;
 				m_ssaoEffect.ssaoComponent.blurFilterDistance = m_config.ssaoBlurFilterDistance;
 				m_ssaoEffect.ssaoComponent.intensity = m_config.ssaoIntensity;
 				m_ssaoEffect.ssaoComponent.radius = m_config.ssaoRadius;
 				m_ssaoEffect.ssaoComponent.downsample = m_config.ssaoDownsample;
+			}
+			else
+			{
+				m_ssaoEffect.Disable();
+			}
+
+			if (m_config.reflectionEnabled)
+			{
+				m_screenReflection.Enable();
+
+				m_screenReflection.reflectionComponent.binarySearchIterations = m_config.reflectionBinarySearchIterations;
+				m_screenReflection.reflectionComponent.eyeFadeEnd = m_config.reflectionEyeFadeEnd;
+				m_screenReflection.reflectionComponent.eyeFadeStart = m_config.reflectionEyeFadeStart;
+				m_screenReflection.reflectionComponent.iterations = m_config.reflectionIterations;
+				m_screenReflection.reflectionComponent.screenEdgeFadeStart = m_config.reflectionScreenEdgeFadeStart;
+				m_screenReflection.reflectionComponent.pixelStride = m_config.reflectionPixelStride;
+				m_screenReflection.reflectionComponent.maxRayDistance = m_config.reflectionMaxDistance;
+			}
+			else
+			{
+				m_screenReflection.Disable();
+			}
+
+			if (m_config.dofEnabled)
+			{
+				m_dofEffect.Enable();
+			}
+			else
+			{
+				m_dofEffect.Disable();
 			}
 
 			try
@@ -381,8 +491,6 @@ namespace PostProcessFX
 				m_config.toggleUIKey = (int)KeyCode.F9;
 				m_toggleUIString = "F9";
 			}
-
-			//Camera.main.fieldOfView = m_config.fieldOfView;
 		}
 
 		public void Update()
@@ -429,6 +537,12 @@ namespace PostProcessFX
 		public void OnDestroy()
 		{
 			EffectConfig.Serialize(configFilename, m_config);
+
+			m_ssaoEffect.Cleanup();
+			m_screenReflection.Cleanup();
+			m_motionblur.Cleanup();
+			m_bloom.Cleanup();
+			m_antiAliasing.Cleanup();
 		}
 
 		private String getMotionBlurType(int filter) {

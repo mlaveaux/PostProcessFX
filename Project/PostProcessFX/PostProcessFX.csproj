@@ -58,13 +58,18 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AntiAliasingEffect.cs" />
+    <Compile Include="AreaTexture.cs" />
     <Compile Include="BloomEffect.cs" />
+    <Compile Include="ScreenSpaceReflection.cs" />
     <Compile Include="ConfigUI.cs" />
     <Compile Include="DepthOfFieldEffect.cs" />
+    <Compile Include="ScreenSpaceReflectionEffect.cs" />
     <Compile Include="ModLoader.cs" />
     <Compile Include="MotionblurEffect.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ScreenSpaceAmbientObscurance.cs" />
+    <Compile Include="SearchTexture.cs" />
+    <Compile Include="SMAAEffect.cs" />
     <Compile Include="SSAOEffect.cs" />
     <Compile Include="SunLensflare.cs" />
   </ItemGroup>

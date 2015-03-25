@@ -8,23 +8,35 @@ using ColossalFramework;
 
 namespace PostProcessFX
 {
-	class SunLensflare
+	class SunLensflareEffect
 	{
-		private Flare m_sunflare;
+		private Flare m_sunflare = null;
 
-		public SunLensflare()
+		public SunLensflareEffect()
 		{
-			Light[] lights = GameObject.FindObjectsOfType<Light>();
+		}
 
-			foreach (Light light in lights)
+		public void Enable()
+		{
+			if (m_sunflare == null)
 			{
-				if (light.type == LightType.Directional)
+				Light[] lights = GameObject.FindObjectsOfType<Light>();
+
+				foreach (Light light in lights)
 				{
-					m_sunflare = new Flare();
-					
-					light.flare = m_sunflare;
+					if (light.type == LightType.Directional)
+					{
+						m_sunflare = new Flare();
+
+						light.flare = m_sunflare;
+					}
 				}
 			}
+		}
+
+		public void Disable()
+		{
+
 		}
 	}
 }
