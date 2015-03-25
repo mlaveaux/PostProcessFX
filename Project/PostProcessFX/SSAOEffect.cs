@@ -10,24 +10,57 @@ namespace PostProcessFX
 {
 	class SSAOEffect
 	{
-		public ScreenSpaceAmbientObscurance ssaoComponent;
+		public ScreenSpaceAmbientObscurance ssaoComponent = null;
+
+		private bool lastState = false;
 
 		public SSAOEffect()
 		{
-			ssaoComponent = Camera.main.gameObject.AddComponent<ScreenSpaceAmbientObscurance>();
+			ssaoComponent = Camera.main.gameObject.GetComponent<ScreenSpaceAmbientObscurance>();
+		}
+
+		public void Enable()
+		{
 			if (ssaoComponent == null)
 			{
-				Debug.LogError("MotionblurEffect: Could not add component CameraMotionBlur to Camera.");
-			}
-			else
-			{
-				Material ssaoMaterial = new Material(ssaoShaderText);
-				Texture2D randTexture = new Texture2D(64, 64);
-				randTexture.LoadImage(ssaoRandomTexture);
-				//randTexture.
+				ssaoComponent = Camera.main.gameObject.AddComponent<ScreenSpaceAmbientObscurance>();
+				if (ssaoComponent == null)
+				{
+					Debug.LogError("MotionblurEffect: Could not add component CameraMotionBlur to Camera.");
+				}
+				else
+				{
+					Material ssaoMaterial = new Material(ssaoShaderText);
+					Texture2D randTexture = new Texture2D(64, 64);
+					randTexture.LoadImage(ssaoRandomTexture);
 
-				ssaoComponent.aoShader = ssaoMaterial.shader;
-				ssaoComponent.rand = randTexture;
+					ssaoComponent.aoShader = ssaoMaterial.shader;
+					ssaoComponent.rand = randTexture;
+				}
+			}
+
+			if (!lastState)
+			{
+				lastState = true;
+				ssaoComponent.enabled = true;
+			}
+		}
+
+		public void Disable()
+		{
+			if (lastState)
+			{
+				lastState = false;
+				ssaoComponent.enabled = false;
+			}
+		}
+
+		public void Cleanup()
+		{
+			if (ssaoComponent != null) 
+			{
+				MonoBehaviour.Destroy(ssaoComponent);
+				ssaoComponent = null;
 			}
 		}
 

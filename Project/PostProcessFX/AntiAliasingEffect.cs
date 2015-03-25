@@ -7,36 +7,87 @@ using UnityEngine;
 
 namespace PostProcessFX
 {
-	class AntiAliasingEffect : MonoBehaviour
+	class AntiAliasingEffect
 	{
-		public AntialiasingAsPostEffect AAComponent;
+		public AntialiasingAsPostEffect AAComponent = null;
+		public SMAAEffect smaaComponent = null;
+
+		private bool lastState = false;
 		
 		public AntiAliasingEffect()
 		{
-			AAComponent = Camera.main.gameObject.AddComponent<AntialiasingAsPostEffect>();
+			AAComponent = Camera.main.GetComponent<AntialiasingAsPostEffect>();
+			smaaComponent = Camera.main.GetComponent<SMAAEffect>();
+		}
+
+		public void Enable()
+		{
 			if (AAComponent == null)
 			{
-				Debug.LogError("AntiAliasingEffect: Could not add AntialiasingAsPostEffect to Camera.");
-			}
-			else
-			{
-				Material dlaaMaterial = new Material(dlaaShaderText);
-				Material nfaaMaterial = new Material(nfaaShaderText);
-				Material fxaa2Material = new Material(fxaa2ShaderText);
-				Material fxaa3ConsoleMaterial = new Material(fxaa3ConsoleShaderText);
-				Material fxaaPreset2Material = new Material(fxaaPreset2ShaderText);
-				Material fxaaPreset3Material = new Material(fxaaPreset3ShaderText);
-				Material ssaaMaterial = new Material(ssaaShaderText);
+				AAComponent = Camera.main.gameObject.AddComponent<AntialiasingAsPostEffect>();
+				if (AAComponent == null)
+				{
+					Debug.LogError("AntiAliasingEffect: Could not add AntialiasingAsPostEffect to Camera.");
+				}
+				else
+				{
+					AAComponent.enabled = false;
 
-				AAComponent.mode = AAMode.NFAA;
-				AAComponent.nfaaShader = nfaaMaterial.shader;
-				AAComponent.dlaaShader = dlaaMaterial.shader;
-				AAComponent.shaderFXAAII = fxaa2Material.shader;
-				AAComponent.shaderFXAAIII = fxaa3ConsoleMaterial.shader;
-				AAComponent.shaderFXAAPreset2 = fxaaPreset2Material.shader;
-				AAComponent.shaderFXAAPreset3 = fxaaPreset3Material.shader;
-				AAComponent.ssaaShader = ssaaMaterial.shader;
+					Material dlaaMaterial = new Material(dlaaShaderText);
+					Material nfaaMaterial = new Material(nfaaShaderText);
+					Material fxaa2Material = new Material(fxaa2ShaderText);
+					Material fxaa3ConsoleMaterial = new Material(fxaa3ConsoleShaderText);
+					Material fxaaPreset2Material = new Material(fxaaPreset2ShaderText);
+					Material fxaaPreset3Material = new Material(fxaaPreset3ShaderText);
+					Material ssaaMaterial = new Material(ssaaShaderText);
+
+					AAComponent.nfaaShader = nfaaMaterial.shader;
+					AAComponent.dlaaShader = dlaaMaterial.shader;
+					AAComponent.shaderFXAAII = fxaa2Material.shader;
+					AAComponent.shaderFXAAIII = fxaa3ConsoleMaterial.shader;
+					AAComponent.shaderFXAAPreset2 = fxaaPreset2Material.shader;
+					AAComponent.shaderFXAAPreset3 = fxaaPreset3Material.shader;
+					AAComponent.ssaaShader = ssaaMaterial.shader;
+				}
+			}
+
+			if (smaaComponent == null)
+			{
+				smaaComponent = Camera.main.gameObject.AddComponent<SMAAEffect>();
+				if (smaaComponent == null)
+				{
+					Debug.LogError("AntiAliasingEffect: Could not add SMAAEffect to Camera.");
+				}
+				else
+				{
+					smaaComponent.enabled = false;
+				}
+			}
+
+			if (!lastState)
+			{
 				AAComponent.enabled = true;
+				lastState = true;
+			}
+		}
+
+		public void Disable()
+		{
+			if (lastState)
+			{
+				AAComponent.enabled = false;
+				lastState = false;
+			}
+		}
+
+		public void Cleanup()
+		{
+			if (AAComponent != null)
+			{
+				Disable();
+
+				MonoBehaviour.Destroy(AAComponent);
+				AAComponent = null;
 			}
 		}
 

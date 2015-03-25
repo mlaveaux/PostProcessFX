@@ -9,18 +9,40 @@ namespace PostProcessFX
 {
 	class BloomEffect
 	{
-		public Bloom bloomComponent;
+		public Bloom bloomComponent = null;
+
+		private bool lastState = false;
 
 		public BloomEffect()
-		{
-			Camera camera = Camera.main;
-			
-			bloomComponent = camera.GetComponent<Bloom>();
+		{			
+			bloomComponent = Camera.main.GetComponent<Bloom>();
 			if (bloomComponent == null)
 			{
 				Debug.LogError("BloomEffect: The main camera has no component named Bloom.");
-				return;
 			}
+		}
+
+		public void Enable()
+		{
+			if (!lastState)
+			{
+				bloomComponent.enabled = true;
+				lastState = true;
+			}
+		}
+
+		public void Disable()
+		{
+			if (lastState)
+			{
+				bloomComponent.enabled = false;
+				lastState = false;
+			}
+		}
+
+		public void Cleanup()
+		{
+
 		}
 	}
 }
