@@ -169,12 +169,23 @@ namespace PostProcessFX
 			}
 
 			m_bloom = new BloomEffect();
-			m_antiAliasing = new AntiAliasingEffect();
-			m_motionblur = new MotionblurEffect();
-			m_ssaoEffect = new SSAOEffect();
-			m_screenReflection = new ScreenSpaceReflectionEffect();
-			m_dofEffect = new DepthOfFieldEffect();
+			m_bloom.applyConfig(m_config);
 
+			m_antiAliasing = new AntiAliasingEffect();
+			m_antiAliasing.applyConfig(m_config);
+
+			m_motionblur = new MotionblurEffect();
+			m_motionblur.applyConfig(m_config);
+
+			m_ssaoEffect = new SSAOEffect();
+			m_ssaoEffect.applyConfig(m_config);
+
+			m_screenReflection = new ScreenSpaceReflectionEffect();
+			m_screenReflection.applyConfig(m_config);
+
+			m_dofEffect = new DepthOfFieldEffect();
+			m_dofEffect.applyConfig(m_config);
+			
 			m_toggleUIString = Enum.GetName(typeof(KeyCode), m_config.toggleUIKey);
 		}
 
@@ -208,7 +219,7 @@ namespace PostProcessFX
 			float x = m_config.menuPositionX;
 			float y = m_config.menuPositionY;
 
-			GUI.Box(new Rect(x, y, 580, 340), "");
+			GUI.Box(new Rect(x, y, 320, 340), "");
 			x += 10;
 			y += 10;
 
@@ -240,7 +251,12 @@ namespace PostProcessFX
 				m_activeMenu = MenuType.Motionblur;
 			}
 
-			if (GUI.Button(new Rect(x + 285, y, 75, 20), "SSAO"))
+			/*if (GUI.Button(new Rect(x + 285, y, 90, 20), "DepthOfField"))
+			{
+				m_activeMenu = MenuType.DepthOfField;
+			}*/
+
+			/*if (GUI.Button(new Rect(x + 285, y, 75, 20), "SSAO"))
 			{
 				m_activeMenu = MenuType.SSAO;
 			}
@@ -248,12 +264,8 @@ namespace PostProcessFX
 			if (GUI.Button(new Rect(x + 360, y, 75, 20), "Reflection"))
 			{
 				m_activeMenu = MenuType.Reflection;
-			}
+			}*/
 
-			if (GUI.Button(new Rect(x + 435, y, 90, 20), "DepthOfField"))
-			{
-				m_activeMenu = MenuType.DepthOfField;
-			}
 
 			y += 25;
 			switch (m_activeMenu)
@@ -307,6 +319,7 @@ namespace PostProcessFX
 
 				case MenuType.DepthOfField:
 					m_dofEffect.drawGUI(m_config, x, y);
+					m_dofEffect.applyConfig(m_config);
 					break;
 			}
 		}
@@ -365,13 +378,17 @@ namespace PostProcessFX
 
 		public void OnMouseClick()
 		{
-			//m_lastMouseX = Input.mousePosition.x;
-			//m_lastMouseY = Input.mousePosition.y;
+			m_lastMouseX = Input.mousePosition.x;
+			m_lastMouseY = Input.mousePosition.y;
 		}
 
 		public void OnMouseDrag()
 		{
+			float moveX = m_lastMouseX - Input.mousePosition.x;
+			float moveY = m_lastMouseY - Input.mousePosition.y;
 
+			m_config.menuPositionX += moveX;
+			m_config.menuPositionY += moveY;
 		}
 	}
 }
