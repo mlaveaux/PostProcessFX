@@ -86,7 +86,8 @@ namespace PostProcessFX
 
 		public void Start()
 		{
-			Camera.main.depthTextureMode |= DepthTextureMode.Depth;
+			Camera.main.depthTextureMode = DepthTextureMode.DepthNormals;
+			//Camera.main.renderingPath = RenderingPath.Forward;
 			CreateMaterialsIfNeeded();
 		}
 
