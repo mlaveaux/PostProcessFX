@@ -89,8 +89,8 @@ namespace PostProcessFX
 		{
 			if (lastState)
 			{
-				motionblurComponent.enabled = false;
 				lastState = false;
+				Cleanup();
 			}
 		}
 

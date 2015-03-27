@@ -21,16 +21,13 @@ namespace PostProcessFX
 			get { return "PostProcessFX"; }
 		}
 	}
-	
-	public class ModLoader : IThreadingExtension
+
+	public class ModLoader : ILoadingExtension
 	{
-		private bool initialized = false;
 		private ConfigUI m_configUI;
 
-		private void init()
+		public void OnLevelLoaded(LoadMode mode)
 		{
-			if (initialized) { return; }
-
 			try
 			{
 				UIView view = GameObject.FindObjectOfType<UIView>();
@@ -45,35 +42,16 @@ namespace PostProcessFX
 			}
 			catch (Exception ex)
 			{
-				Debug.LogError("EnableFX: failed to initialize " + ex.Message);
-			}
-			finally
-			{
-				initialized = true;
+				Debug.LogError("PostProcessFX: failed to initialize " + ex.Message);
 			}
 		}
 
-		public void OnAfterSimulationFrame()
+		public void OnLevelUnloading()
 		{
 
 		}
 
-		public void OnAfterSimulationTick()
-		{
-
-		}
-
-		public void OnBeforeSimulationFrame()
-		{
-
-		}
-
-		public void OnBeforeSimulationTick()
-		{
-
-		}
-
-		public void OnCreated(IThreading threading)
+		public void OnCreated(ILoading loading)
 		{
 
 		}
@@ -81,11 +59,6 @@ namespace PostProcessFX
 		public void OnReleased()
 		{
 			m_configUI.OnDestroy();
-		}
-
-		public void OnUpdate(float realTimeDelta, float simulationTimeDelta)
-		{
-			init();
 		}
 	}
 }

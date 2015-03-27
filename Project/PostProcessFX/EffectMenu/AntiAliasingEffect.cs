@@ -88,11 +88,11 @@ namespace PostProcessFX
 			{
 				Disable();
 
-				MonoBehaviour.Destroy(AAComponent);
+				MonoBehaviour.DestroyImmediate(AAComponent);
 				AAComponent = null;
 			}
 		}
-
+		
 		private void Enable()
 		{
 			if (AAComponent == null)
@@ -135,8 +135,8 @@ namespace PostProcessFX
 		{
 			if (lastState)
 			{
-				AAComponent.enabled = false;
 				lastState = false;
+				Cleanup();
 			}
 		}
 		

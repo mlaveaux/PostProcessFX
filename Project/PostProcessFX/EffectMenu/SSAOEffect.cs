@@ -98,7 +98,7 @@ namespace PostProcessFX
 			if (lastState)
 			{
 				lastState = false;
-				ssaoComponent.enabled = false;
+				Cleanup();
 			}
 		}
 
