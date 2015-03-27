@@ -9,8 +9,7 @@ namespace PostProcessFX
 {
 	class DepthOfFieldEffect
 	{
-		public DepthOfFieldScatter dofComponent = null;
-
+		private DepthOfFieldScatter dofComponent = null;
 		private bool lastState = false;
 
 		public DepthOfFieldEffect()
@@ -50,6 +49,23 @@ namespace PostProcessFX
 			{
 				lastState = false;
 				dofComponent.enabled = false;
+			}
+		}
+
+		public void drawGUI(EffectConfig config, float x, float y)
+		{
+			config.dofEnabled = GUI.Toggle(new Rect(x, y, 200, 20), config.dofEnabled, "enabled");
+		}
+
+		public void applyConfig(EffectConfig config)
+		{
+			if (config.dofEnabled)
+			{
+				Enable();
+			}
+			else
+			{
+				Disable();
 			}
 		}
 

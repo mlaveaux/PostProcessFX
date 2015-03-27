@@ -10,12 +10,58 @@ namespace PostProcessFX
 {
 	class ScreenSpaceReflectionEffect
 	{
-		public ScreenSpaceReflection reflectionComponent = null;
-
+		private ScreenSpaceReflection reflectionComponent = null;
 		private bool lastState = false;
 
 		public ScreenSpaceReflectionEffect() {
 			reflectionComponent = Camera.main.GetComponent<ScreenSpaceReflection>();			
+		}
+
+		public void drawGUI(EffectConfig config, float x, float y)
+		{
+			config.reflectionEnabled = GUI.Toggle(new Rect(x, y, 200, 20), config.reflectionEnabled, "enabled");
+			y += 25;
+
+			config.reflectionIterations = DrawGUI.drawIntSliderWithLabel(x, y, 1, 300, "iterations", config.reflectionIterations);
+			y += 25;
+
+			config.reflectionBinarySearchIterations = DrawGUI.drawIntSliderWithLabel(x, y, 1, 32, "binarySearchIterations", config.reflectionBinarySearchIterations);
+			y += 25;
+
+			config.reflectionMaxDistance = DrawGUI.drawSliderWithLabel(x, y, 1.0f, 1000.0f, "distance", config.reflectionMaxDistance);
+			y += 25;
+
+			config.reflectionPixelStride = DrawGUI.drawIntSliderWithLabel(x, y, 1, 32, "pixelStride", config.reflectionPixelStride);
+			y += 25;
+
+			config.reflectionEyeFadeStart = DrawGUI.drawSliderWithLabel(x, y, 0.0f, 1.0f, "eyeFadeStart", config.reflectionEyeFadeStart);
+			y += 25;
+
+			config.reflectionEyeFadeEnd = DrawGUI.drawSliderWithLabel(x, y, 0.0f, 1.0f, "eyeFadeEnd", config.reflectionEyeFadeEnd);
+			y += 25;
+
+			config.reflectionScreenEdgeFadeStart = DrawGUI.drawSliderWithLabel(x, y, 0.0f, 1.0f, "edgeFadeStart", config.reflectionScreenEdgeFadeStart);
+			y += 25;
+		}
+
+		public void applyConfig(EffectConfig config)
+		{
+			if (config.reflectionEnabled)
+			{
+				Enable();
+
+				reflectionComponent.binarySearchIterations = config.reflectionBinarySearchIterations;
+				reflectionComponent.eyeFadeEnd = config.reflectionEyeFadeEnd;
+				reflectionComponent.eyeFadeStart = config.reflectionEyeFadeStart;
+				reflectionComponent.iterations = config.reflectionIterations;
+				reflectionComponent.screenEdgeFadeStart = config.reflectionScreenEdgeFadeStart;
+				reflectionComponent.pixelStride = config.reflectionPixelStride;
+				reflectionComponent.maxRayDistance = config.reflectionMaxDistance;
+			}
+			else
+			{
+				Disable();
+			}
 		}
 
 		public void Enable()
@@ -41,7 +87,7 @@ namespace PostProcessFX
 
 					reflectionComponent.Start();
 
-					Camera.main.renderingPath = RenderingPath.DeferredShading;
+					//Camera.main.renderingPath = RenderingPath.DeferredShading;
 				}
 			}
 
@@ -950,7 +996,7 @@ adaaaaaaaaaaaaaaapaaaaaafdfgfpfegbhcghgfheaaklkl""
 }
 }";
 
-		private const String screenSpaceReflectionShaderText = @"// Compiled shader for PC, Mac & Linux Standalone, uncompressed size: 29.5KB
+		private const String screenSpaceReflectionShaderText = @"// Compiled shader for PC, Mac & Linux Standalone, uncompressed size: 29.6KB
 
 // Skipping shader variants that would not be included into build of current scene.
 
@@ -964,19 +1010,19 @@ SubShader {
  // Stats for Vertex shader:
  //       d3d11 : 10 math
  //        d3d9 : 12 math
- //      opengl : 171 math, 8 texture, 15 branch
+ //      opengl : 174 math, 8 texture, 15 branch
  // Stats for Fragment shader:
- //       d3d11 : 141 math, 4 texture, 3 branch
- //        d3d9 : 178 math, 12 texture, 11 branch
+ //       d3d11 : 142 math, 4 texture, 3 branch
+ //        d3d9 : 180 math, 12 texture, 11 branch
  Pass {
   Tags { ""RenderType""=""Opaque"" }
   ZTest False
   ZWrite Off
   Cull Off
-  GpuProgramID 53631
+  GpuProgramID 25699
 Program ""vp"" {
 SubProgram ""opengl "" {
-// Stats: 171 math, 8 textures, 15 branches
+// Stats: 174 math, 8 textures, 15 branches
 ""!!GLSL
 #ifdef VERTEX
 
@@ -1005,7 +1051,7 @@ uniform sampler2D _MainTex;
 uniform sampler2D _CameraDepthTexture;
 uniform sampler2D _BackFaceDepthTex;
 uniform sampler2D _CameraGBufferTexture1;
-uniform sampler2D _CameraGBufferTexture2;
+uniform sampler2D _CameraDepthNormalsTexture;
 uniform mat4 _CameraProjectionMatrix;
 uniform float _Iterations;
 uniform float _BinarySearchIterations;
@@ -1016,7 +1062,6 @@ uniform float _MaxRayDistance;
 uniform float _ScreenEdgeFadeStart;
 uniform float _EyeFadeStart;
 uniform float _EyeFadeEnd;
-uniform mat4 _NormalMatrix;
 uniform vec2 _RenderBufferSize;
 uniform vec2 _OneDividedByRenderBufferSize;
 varying vec2 xlv_TEXCOORD0;
@@ -1025,272 +1070,273 @@ void main ()
 {
   vec4 tmpvar_1;
   tmpvar_1 = texture2D (_CameraGBufferTexture1, xlv_TEXCOORD0);
-  vec3 tmpvar_2;
-  tmpvar_2 = vec3(max (max (tmpvar_1.x, tmpvar_1.y), tmpvar_1.z));
+  float tmpvar_2;
+  tmpvar_2 = max (max (tmpvar_1.x, tmpvar_1.y), tmpvar_1.z);
   vec3 tmpvar_3;
   tmpvar_3 = (xlv_TEXCOORD2 * (1.0/((
     (_ZBufferParams.x * texture2D (_CameraDepthTexture, xlv_TEXCOORD0).x)
    + _ZBufferParams.y))));
-  mat3 tmpvar_4;
-  tmpvar_4[0] = _NormalMatrix[0].xyz;
-  tmpvar_4[1] = _NormalMatrix[1].xyz;
-  tmpvar_4[2] = _NormalMatrix[2].xyz;
+  vec3 n_4;
   vec3 tmpvar_5;
-  tmpvar_5 = normalize(tmpvar_3);
-  vec3 tmpvar_6;
-  tmpvar_6 = normalize((tmpvar_4 * (
-    (texture2D (_CameraGBufferTexture2, xlv_TEXCOORD0).xyz * 2.0)
-   - 1.0)));
+  tmpvar_5 = ((texture2D (_CameraDepthNormalsTexture, xlv_TEXCOORD0).xyz * vec3(3.5554, 3.5554, 0.0)) + vec3(-1.7777, -1.7777, 1.0));
+  float tmpvar_6;
+  tmpvar_6 = (2.0 / dot (tmpvar_5, tmpvar_5));
+  n_4.xy = (tmpvar_6 * tmpvar_5.xy);
+  n_4.z = (tmpvar_6 - 1.0);
   vec3 tmpvar_7;
-  tmpvar_7 = normalize((tmpvar_5 - (2.0 * 
-    (dot (tmpvar_6, tmpvar_5) * tmpvar_6)
+  tmpvar_7 = normalize(tmpvar_3);
+  vec3 tmpvar_8;
+  tmpvar_8 = normalize(n_4);
+  vec3 tmpvar_9;
+  tmpvar_9 = normalize((tmpvar_7 - (2.0 * 
+    (dot (tmpvar_8, tmpvar_7) * tmpvar_8)
   )));
-  vec2 tmpvar_8;
-  tmpvar_8 = (xlv_TEXCOORD0 * _RenderBufferSize);
-  float tmpvar_9;
-  tmpvar_9 = ((tmpvar_8.x + tmpvar_8.y) * 0.25);
-  float tmpvar_10;
-  tmpvar_10 = fract(abs(tmpvar_9));
+  vec2 tmpvar_10;
+  tmpvar_10 = (xlv_TEXCOORD0 * _RenderBufferSize);
   float tmpvar_11;
-  if ((tmpvar_9 >= 0.0)) {
-    tmpvar_11 = tmpvar_10;
+  tmpvar_11 = ((tmpvar_10.x + tmpvar_10.y) * 0.25);
+  float tmpvar_12;
+  tmpvar_12 = fract(abs(tmpvar_11));
+  float tmpvar_13;
+  if ((tmpvar_11 >= 0.0)) {
+    tmpvar_13 = tmpvar_12;
   } else {
-    tmpvar_11 = -(tmpvar_10);
+    tmpvar_13 = -(tmpvar_12);
   };
-  vec2 hitPixel_12;
-  bool intersect_13;
-  vec4 dPQK_14;
-  vec4 pqk_15;
-  float zB_16;
-  float zA_17;
-  float i_18;
-  bool permute_19;
-  vec2 delta_20;
-  vec2 P0_21;
-  vec3 Q0_22;
-  float tmpvar_23;
-  if (((tmpvar_3.z + (tmpvar_7.z * _MaxRayDistance)) > -(_ProjectionParams.y))) {
-    tmpvar_23 = ((-(_ProjectionParams.y) - tmpvar_3.z) / tmpvar_7.z);
+  vec2 hitPixel_14;
+  bool intersect_15;
+  vec4 dPQK_16;
+  vec4 pqk_17;
+  float zB_18;
+  float zA_19;
+  float i_20;
+  bool permute_21;
+  vec2 delta_22;
+  vec2 P0_23;
+  vec3 Q0_24;
+  float tmpvar_25;
+  if (((tmpvar_3.z + (tmpvar_9.z * _MaxRayDistance)) > -(_ProjectionParams.y))) {
+    tmpvar_25 = ((-(_ProjectionParams.y) - tmpvar_3.z) / tmpvar_9.z);
   } else {
-    tmpvar_23 = _MaxRayDistance;
+    tmpvar_25 = _MaxRayDistance;
   };
-  vec3 tmpvar_24;
-  tmpvar_24 = (tmpvar_3 + (tmpvar_7 * tmpvar_23));
-  vec4 tmpvar_25;
-  tmpvar_25.w = 1.0;
-  tmpvar_25.xyz = tmpvar_3;
-  vec4 tmpvar_26;
-  tmpvar_26 = (_CameraProjectionMatrix * tmpvar_25);
+  vec3 tmpvar_26;
+  tmpvar_26 = (tmpvar_3 + (tmpvar_9 * tmpvar_25));
   vec4 tmpvar_27;
   tmpvar_27.w = 1.0;
-  tmpvar_27.xyz = tmpvar_24;
+  tmpvar_27.xyz = tmpvar_3;
   vec4 tmpvar_28;
   tmpvar_28 = (_CameraProjectionMatrix * tmpvar_27);
-  float tmpvar_29;
-  tmpvar_29 = (1.0/(tmpvar_26.w));
-  float tmpvar_30;
-  tmpvar_30 = (1.0/(tmpvar_28.w));
-  vec3 tmpvar_31;
-  tmpvar_31 = (tmpvar_3 * tmpvar_29);
-  Q0_22 = tmpvar_31;
-  vec3 tmpvar_32;
-  tmpvar_32 = (tmpvar_24 * tmpvar_30);
-  vec2 tmpvar_33;
-  tmpvar_33 = (tmpvar_26.xy * tmpvar_29);
-  P0_21 = tmpvar_33;
-  vec2 tmpvar_34;
-  tmpvar_34 = (tmpvar_28.xy * tmpvar_30);
+  vec4 tmpvar_29;
+  tmpvar_29.w = 1.0;
+  tmpvar_29.xyz = tmpvar_26;
+  vec4 tmpvar_30;
+  tmpvar_30 = (_CameraProjectionMatrix * tmpvar_29);
+  float tmpvar_31;
+  tmpvar_31 = (1.0/(tmpvar_28.w));
+  float tmpvar_32;
+  tmpvar_32 = (1.0/(tmpvar_30.w));
+  vec3 tmpvar_33;
+  tmpvar_33 = (tmpvar_3 * tmpvar_31);
+  Q0_24 = tmpvar_33;
+  vec3 tmpvar_34;
+  tmpvar_34 = (tmpvar_26 * tmpvar_32);
   vec2 tmpvar_35;
-  tmpvar_35 = (tmpvar_33 - tmpvar_34);
-  float tmpvar_36;
-  tmpvar_36 = dot (tmpvar_35, tmpvar_35);
-  float tmpvar_37;
-  if ((tmpvar_36 < 0.0001)) {
-    tmpvar_37 = 0.01;
-  } else {
-    tmpvar_37 = 0.0;
-  };
-  vec2 tmpvar_38;
-  tmpvar_38 = ((tmpvar_34 + tmpvar_37) - tmpvar_33);
-  delta_20 = tmpvar_38;
-  permute_19 = bool(0);
+  tmpvar_35 = (tmpvar_28.xy * tmpvar_31);
+  P0_23 = tmpvar_35;
+  vec2 tmpvar_36;
+  tmpvar_36 = (tmpvar_30.xy * tmpvar_32);
+  vec2 tmpvar_37;
+  tmpvar_37 = (tmpvar_35 - tmpvar_36);
+  float tmpvar_38;
+  tmpvar_38 = dot (tmpvar_37, tmpvar_37);
   float tmpvar_39;
-  tmpvar_39 = abs(tmpvar_38.x);
-  float tmpvar_40;
-  tmpvar_40 = abs(tmpvar_38.y);
-  if ((tmpvar_39 < tmpvar_40)) {
-    permute_19 = bool(1);
-    delta_20 = tmpvar_38.yx;
-    P0_21 = tmpvar_33.yx;
+  if ((tmpvar_38 < 0.0001)) {
+    tmpvar_39 = 0.01;
+  } else {
+    tmpvar_39 = 0.0;
   };
+  vec2 tmpvar_40;
+  tmpvar_40 = ((tmpvar_36 + tmpvar_39) - tmpvar_35);
+  delta_22 = tmpvar_40;
+  permute_21 = bool(0);
   float tmpvar_41;
-  tmpvar_41 = sign(delta_20.x);
+  tmpvar_41 = abs(tmpvar_40.x);
   float tmpvar_42;
-  tmpvar_42 = (tmpvar_41 / delta_20.x);
-  vec2 tmpvar_43;
-  tmpvar_43.x = tmpvar_41;
-  tmpvar_43.y = (delta_20.y * tmpvar_42);
+  tmpvar_42 = abs(tmpvar_40.y);
+  if ((tmpvar_41 < tmpvar_42)) {
+    permute_21 = bool(1);
+    delta_22 = tmpvar_40.yx;
+    P0_23 = tmpvar_35.yx;
+  };
+  float tmpvar_43;
+  tmpvar_43 = sign(delta_22.x);
   float tmpvar_44;
-  tmpvar_44 = (1.0 + ((1.0 - 
+  tmpvar_44 = (tmpvar_43 / delta_22.x);
+  vec2 tmpvar_45;
+  tmpvar_45.x = tmpvar_43;
+  tmpvar_45.y = (delta_22.y * tmpvar_44);
+  float tmpvar_46;
+  tmpvar_46 = (1.0 + ((1.0 - 
     min (1.0, (-(tmpvar_3.z) / _PixelStrideZCuttoff))
   ) * _PixelStride));
-  vec2 tmpvar_45;
-  tmpvar_45 = (tmpvar_43 * tmpvar_44);
-  vec3 tmpvar_46;
-  tmpvar_46 = (((tmpvar_32 - tmpvar_31) * tmpvar_42) * tmpvar_44);
-  float tmpvar_47;
-  tmpvar_47 = (((tmpvar_30 - tmpvar_29) * tmpvar_42) * tmpvar_44);
-  vec2 tmpvar_48;
-  tmpvar_48 = (P0_21 + (tmpvar_45 * tmpvar_11));
-  P0_21 = tmpvar_48;
-  vec3 tmpvar_49;
-  tmpvar_49 = (tmpvar_31 + (tmpvar_46 * tmpvar_11));
-  Q0_22 = tmpvar_49;
-  zA_17 = 0.0;
-  zB_16 = 0.0;
-  vec4 tmpvar_50;
-  tmpvar_50.xy = tmpvar_48;
-  tmpvar_50.z = tmpvar_49.z;
-  tmpvar_50.w = (tmpvar_29 + (tmpvar_47 * tmpvar_11));
-  pqk_15 = tmpvar_50;
-  vec4 tmpvar_51;
-  tmpvar_51.xy = tmpvar_45;
-  tmpvar_51.z = tmpvar_46.z;
-  tmpvar_51.w = tmpvar_47;
-  dPQK_14 = tmpvar_51;
-  intersect_13 = bool(0);
-  i_18 = 0.0;
-  for (; ((i_18 < _Iterations) && (intersect_13 == bool(0))); i_18 += 1.0) {
-    vec4 tmpvar_52;
-    tmpvar_52 = (pqk_15 + dPQK_14);
-    pqk_15 = tmpvar_52;
-    zA_17 = zB_16;
-    float tmpvar_53;
-    tmpvar_53 = (((dPQK_14.z * 0.5) + tmpvar_52.z) / ((dPQK_14.w * 0.5) + tmpvar_52.w));
-    zB_16 = tmpvar_53;
-    float aa_54;
-    aa_54 = tmpvar_53;
-    float bb_55;
-    bb_55 = zA_17;
-    if ((tmpvar_53 > zA_17)) {
-      aa_54 = zA_17;
-      bb_55 = tmpvar_53;
+  vec2 tmpvar_47;
+  tmpvar_47 = (tmpvar_45 * tmpvar_46);
+  vec3 tmpvar_48;
+  tmpvar_48 = (((tmpvar_34 - tmpvar_33) * tmpvar_44) * tmpvar_46);
+  float tmpvar_49;
+  tmpvar_49 = (((tmpvar_32 - tmpvar_31) * tmpvar_44) * tmpvar_46);
+  vec2 tmpvar_50;
+  tmpvar_50 = (P0_23 + (tmpvar_47 * tmpvar_13));
+  P0_23 = tmpvar_50;
+  vec3 tmpvar_51;
+  tmpvar_51 = (tmpvar_33 + (tmpvar_48 * tmpvar_13));
+  Q0_24 = tmpvar_51;
+  zA_19 = 0.0;
+  zB_18 = 0.0;
+  vec4 tmpvar_52;
+  tmpvar_52.xy = tmpvar_50;
+  tmpvar_52.z = tmpvar_51.z;
+  tmpvar_52.w = (tmpvar_31 + (tmpvar_49 * tmpvar_13));
+  pqk_17 = tmpvar_52;
+  vec4 tmpvar_53;
+  tmpvar_53.xy = tmpvar_47;
+  tmpvar_53.z = tmpvar_48.z;
+  tmpvar_53.w = tmpvar_49;
+  dPQK_16 = tmpvar_53;
+  intersect_15 = bool(0);
+  i_20 = 0.0;
+  for (; ((i_20 < _Iterations) && (intersect_15 == bool(0))); i_20 += 1.0) {
+    vec4 tmpvar_54;
+    tmpvar_54 = (pqk_17 + dPQK_16);
+    pqk_17 = tmpvar_54;
+    zA_19 = zB_18;
+    float tmpvar_55;
+    tmpvar_55 = (((dPQK_16.z * 0.5) + tmpvar_54.z) / ((dPQK_16.w * 0.5) + tmpvar_54.w));
+    zB_18 = tmpvar_55;
+    float aa_56;
+    aa_56 = tmpvar_55;
+    float bb_57;
+    bb_57 = zA_19;
+    if ((tmpvar_55 > zA_19)) {
+      aa_56 = zA_19;
+      bb_57 = tmpvar_55;
     };
-    zB_16 = aa_54;
-    zA_17 = bb_55;
-    vec2 tmpvar_56;
-    if (permute_19) {
-      tmpvar_56 = tmpvar_52.yx;
+    zB_18 = aa_56;
+    zA_19 = bb_57;
+    vec2 tmpvar_58;
+    if (permute_21) {
+      tmpvar_58 = tmpvar_54.yx;
     } else {
-      tmpvar_56 = tmpvar_52.xy;
+      tmpvar_58 = tmpvar_54.xy;
     };
-    vec2 tmpvar_57;
-    tmpvar_57 = (tmpvar_56 * _OneDividedByRenderBufferSize);
-    hitPixel_12 = tmpvar_57;
-    float cse_58;
-    cse_58 = -(_ProjectionParams.z);
-    intersect_13 = ((aa_54 <= (
-      (1.0/(((_ZBufferParams.x * texture2DLod (_CameraDepthTexture, tmpvar_57, 0.0).x) + _ZBufferParams.y)))
-     * cse_58)) && (bb_55 >= (
-      (texture2DLod (_BackFaceDepthTex, tmpvar_57, 0.0).x * cse_58)
+    vec2 tmpvar_59;
+    tmpvar_59 = (tmpvar_58 * _OneDividedByRenderBufferSize);
+    hitPixel_14 = tmpvar_59;
+    float cse_60;
+    cse_60 = -(_ProjectionParams.z);
+    intersect_15 = ((aa_56 <= (
+      (1.0/(((_ZBufferParams.x * texture2DLod (_CameraDepthTexture, tmpvar_59, 0.0).x) + _ZBufferParams.y)))
+     * cse_60)) && (bb_57 >= (
+      (texture2DLod (_BackFaceDepthTex, tmpvar_59, 0.0).x * cse_60)
      - _PixelZSize)));
   };
-  if (((tmpvar_44 > 1.0) && intersect_13)) {
-    float stride_60;
-    float originalStride_61;
-    vec4 tmpvar_62;
-    tmpvar_62 = (pqk_15 - tmpvar_51);
-    pqk_15 = tmpvar_62;
-    dPQK_14 = (tmpvar_51 / tmpvar_44);
-    float tmpvar_63;
-    tmpvar_63 = (tmpvar_44 * 0.5);
-    originalStride_61 = tmpvar_63;
-    stride_60 = tmpvar_63;
-    float tmpvar_64;
-    tmpvar_64 = (tmpvar_62.z / tmpvar_62.w);
-    zA_17 = tmpvar_64;
-    zB_16 = tmpvar_64;
-    for (float j_59; j_59 < _BinarySearchIterations; j_59 += 1.0) {
-      vec4 tmpvar_65;
-      tmpvar_65 = (pqk_15 + (dPQK_14 * stride_60));
-      pqk_15 = tmpvar_65;
-      zA_17 = zB_16;
-      float tmpvar_66;
-      tmpvar_66 = (((dPQK_14.z * -0.5) + tmpvar_65.z) / ((dPQK_14.w * -0.5) + tmpvar_65.w));
-      zB_16 = tmpvar_66;
-      float aa_67;
-      aa_67 = tmpvar_66;
-      float bb_68;
-      bb_68 = zA_17;
-      if ((tmpvar_66 > zA_17)) {
-        aa_67 = zA_17;
-        bb_68 = tmpvar_66;
+  if (((tmpvar_46 > 1.0) && intersect_15)) {
+    float stride_62;
+    float originalStride_63;
+    vec4 tmpvar_64;
+    tmpvar_64 = (pqk_17 - tmpvar_53);
+    pqk_17 = tmpvar_64;
+    dPQK_16 = (tmpvar_53 / tmpvar_46);
+    float tmpvar_65;
+    tmpvar_65 = (tmpvar_46 * 0.5);
+    originalStride_63 = tmpvar_65;
+    stride_62 = tmpvar_65;
+    float tmpvar_66;
+    tmpvar_66 = (tmpvar_64.z / tmpvar_64.w);
+    zA_19 = tmpvar_66;
+    zB_18 = tmpvar_66;
+    for (float j_61; j_61 < _BinarySearchIterations; j_61 += 1.0) {
+      vec4 tmpvar_67;
+      tmpvar_67 = (pqk_17 + (dPQK_16 * stride_62));
+      pqk_17 = tmpvar_67;
+      zA_19 = zB_18;
+      float tmpvar_68;
+      tmpvar_68 = (((dPQK_16.z * -0.5) + tmpvar_67.z) / ((dPQK_16.w * -0.5) + tmpvar_67.w));
+      zB_18 = tmpvar_68;
+      float aa_69;
+      aa_69 = tmpvar_68;
+      float bb_70;
+      bb_70 = zA_19;
+      if ((tmpvar_68 > zA_19)) {
+        aa_69 = zA_19;
+        bb_70 = tmpvar_68;
       };
-      zB_16 = aa_67;
-      zA_17 = bb_68;
-      vec2 tmpvar_69;
-      if (permute_19) {
-        tmpvar_69 = tmpvar_65.yx;
+      zB_18 = aa_69;
+      zA_19 = bb_70;
+      vec2 tmpvar_71;
+      if (permute_21) {
+        tmpvar_71 = tmpvar_67.yx;
       } else {
-        tmpvar_69 = tmpvar_65.xy;
+        tmpvar_71 = tmpvar_67.xy;
       };
-      vec2 tmpvar_70;
-      tmpvar_70 = (tmpvar_69 * _OneDividedByRenderBufferSize);
-      hitPixel_12 = tmpvar_70;
-      float tmpvar_71;
-      tmpvar_71 = (originalStride_61 * 0.5);
-      originalStride_61 = tmpvar_71;
-      float tmpvar_72;
-      if (((aa_67 <= (
-        (1.0/(((_ZBufferParams.x * texture2DLod (_CameraDepthTexture, tmpvar_70, 0.0).x) + _ZBufferParams.y)))
+      vec2 tmpvar_72;
+      tmpvar_72 = (tmpvar_71 * _OneDividedByRenderBufferSize);
+      hitPixel_14 = tmpvar_72;
+      float tmpvar_73;
+      tmpvar_73 = (originalStride_63 * 0.5);
+      originalStride_63 = tmpvar_73;
+      float tmpvar_74;
+      if (((aa_69 <= (
+        (1.0/(((_ZBufferParams.x * texture2DLod (_CameraDepthTexture, tmpvar_72, 0.0).x) + _ZBufferParams.y)))
        * 
         -(_ProjectionParams.z)
-      )) && (bb_68 >= (
-        (texture2DLod (_BackFaceDepthTex, tmpvar_70, 0.0).x * -(_ProjectionParams.z))
+      )) && (bb_70 >= (
+        (texture2DLod (_BackFaceDepthTex, tmpvar_72, 0.0).x * -(_ProjectionParams.z))
        - _PixelZSize)))) {
-        tmpvar_72 = -(tmpvar_71);
+        tmpvar_74 = -(tmpvar_73);
       } else {
-        tmpvar_72 = tmpvar_71;
+        tmpvar_74 = tmpvar_73;
       };
-      stride_60 = tmpvar_72;
+      stride_62 = tmpvar_74;
     };
   };
-  Q0_22.xy = (tmpvar_49.xy + (tmpvar_46.xy * i_18));
-  Q0_22.z = pqk_15.z;
-  vec3 tmpvar_73;
-  tmpvar_73 = (Q0_22 / pqk_15.w);
-  vec2 tmpvar_74;
-  tmpvar_74 = ((hitPixel_12 * 2.0) - 1.0);
-  float tmpvar_75;
-  tmpvar_75 = ((min (1.0, tmpvar_2.x) * (1.0 - 
-    (i_18 / _Iterations)
+  Q0_24.xy = (tmpvar_51.xy + (tmpvar_48.xy * i_20));
+  Q0_24.z = pqk_17.z;
+  vec3 tmpvar_75;
+  tmpvar_75 = (Q0_24 / pqk_17.w);
+  vec2 tmpvar_76;
+  tmpvar_76 = ((hitPixel_14 * 2.0) - 1.0);
+  float tmpvar_77;
+  tmpvar_77 = ((min (1.0, tmpvar_2) * (1.0 - 
+    (i_20 / _Iterations)
   )) * (1.0 - (
     max (0.0, (min (1.0, max (
-      abs(tmpvar_74.x)
+      abs(tmpvar_76.x)
     , 
-      abs(tmpvar_74.y)
+      abs(tmpvar_76.y)
     )) - _ScreenEdgeFadeStart))
    / 
     (1.0 - _ScreenEdgeFadeStart)
   )));
-  float aa_76;
-  aa_76 = _EyeFadeStart;
-  float bb_77;
-  bb_77 = _EyeFadeEnd;
+  float aa_78;
+  aa_78 = _EyeFadeStart;
+  float bb_79;
+  bb_79 = _EyeFadeEnd;
   if ((_EyeFadeStart > _EyeFadeEnd)) {
-    aa_76 = _EyeFadeEnd;
-    bb_77 = _EyeFadeStart;
+    aa_78 = _EyeFadeEnd;
+    bb_79 = _EyeFadeStart;
   };
-  vec3 tmpvar_78;
-  tmpvar_78 = (tmpvar_3 - tmpvar_73);
-  vec4 tmpvar_79;
-  tmpvar_79.xyz = texture2D (_MainTex, mix (xlv_TEXCOORD0, hitPixel_12, vec2(float(intersect_13)))).xyz;
-  tmpvar_79.w = (((tmpvar_75 * 
-    (1.0 - ((clamp (tmpvar_7.z, aa_76, bb_77) - aa_76) / (bb_77 - aa_76)))
+  vec3 tmpvar_80;
+  tmpvar_80 = (tmpvar_3 - tmpvar_75);
+  vec4 tmpvar_81;
+  tmpvar_81.xyz = texture2D (_MainTex, mix (xlv_TEXCOORD0, hitPixel_14, vec2(float(intersect_15)))).xyz;
+  tmpvar_81.w = (((tmpvar_77 * 
+    (1.0 - ((clamp (tmpvar_9.z, aa_78, bb_79) - aa_78) / (bb_79 - aa_78)))
   ) * (1.0 - 
-    clamp ((sqrt(dot (tmpvar_78, tmpvar_78)) / _MaxRayDistance), 0.0, 1.0)
-  )) * float(intersect_13));
-  gl_FragData[0] = tmpvar_79;
+    clamp ((sqrt(dot (tmpvar_80, tmpvar_80)) / _MaxRayDistance), 0.0, 1.0)
+  )) * float(intersect_15));
+  gl_FragData[0] = tmpvar_81;
 }
 
 
@@ -1367,31 +1413,30 @@ SubProgram ""opengl "" {
 ""!!GLSL""
 }
 SubProgram ""d3d9 "" {
-// Stats: 178 math, 12 textures, 11 branches
+// Stats: 180 math, 12 textures, 11 branches
 Matrix 0 [_CameraProjectionMatrix]
-Matrix 4 [_NormalMatrix] 3
-Float 10 [_BinarySearchIterations]
-Float 17 [_EyeFadeEnd]
-Float 16 [_EyeFadeStart]
-Float 9 [_Iterations]
-Float 14 [_MaxRayDistance]
-Vector 19 [_OneDividedByRenderBufferSize]
-Float 12 [_PixelStride]
-Float 13 [_PixelStrideZCuttoff]
-Float 11 [_PixelZSize]
-Vector 7 [_ProjectionParams]
-Vector 18 [_RenderBufferSize]
-Float 15 [_ScreenEdgeFadeStart]
-Vector 8 [_ZBufferParams]
+Float 7 [_BinarySearchIterations]
+Float 14 [_EyeFadeEnd]
+Float 13 [_EyeFadeStart]
+Float 6 [_Iterations]
+Float 11 [_MaxRayDistance]
+Vector 16 [_OneDividedByRenderBufferSize]
+Float 9 [_PixelStride]
+Float 10 [_PixelStrideZCuttoff]
+Float 8 [_PixelZSize]
+Vector 4 [_ProjectionParams]
+Vector 15 [_RenderBufferSize]
+Float 12 [_ScreenEdgeFadeStart]
+Vector 5 [_ZBufferParams]
 SetTexture 0 [_MainTex] 2D 0
 SetTexture 1 [_CameraDepthTexture] 2D 1
 SetTexture 2 [_BackFaceDepthTex] 2D 2
 SetTexture 3 [_CameraGBufferTexture1] 2D 3
-SetTexture 4 [_CameraGBufferTexture2] 2D 4
+SetTexture 4 [_CameraDepthNormalsTexture] 2D 4
 ""ps_3_0
-def c20, 2, -1, 0.25, 1
-def c21, -9.99999975e-005, 0, 0.00999999978, 1
-def c22, 0, 0.5, -0.5, 0
+def c17, 3.55539989, 0, -1.77769995, 1
+def c18, 2, -1, 0.25, -9.99999975e-005
+def c19, 0, 0.00999999978, 0, 0.5
 defi i0, 255, 0, 0, 0
 dcl_texcoord v0.xy
 dcl_texcoord2 v1.xyz
@@ -1404,37 +1449,39 @@ texld_pp r0, v0, s3
 max_pp r1.x, r0.x, r0.y
 max r2.x, r1.x, r0.z
 texld r0, v0, s1
-mad r0.x, c8.x, r0.x, c8.y
+mad r0.x, c5.x, r0.x, c5.y
 rcp r0.x, r0.x
 mul r1.xyz, r0.x, v1
 texld r3, v0, s4
-mad r0.yzw, r3.xxyz, c20.x, c20.y
-dp3 r3.x, c4, r0.yzww
-dp3 r3.y, c5, r0.yzww
-dp3 r3.z, c6, r0.yzww
+mad r0.yzw, r3.xxyz, c17.xxxy, c17.xzzw
+dp3 r0.w, r0.yzww, r0.yzww
+rcp r0.w, r0.w
+add r2.y, r0.w, r0.w
+mul r3.xy, r0.yzzw, r2.y
+mad r3.z, r0.w, c18.x, c18.y
 nrm r4.xyz, r1
 nrm r5.xyz, r3
 dp3 r0.y, r4, r5
 add r0.y, r0.y, r0.y
 mad r0.yzw, r5.xxyz, -r0.y, r4.xxyz
 nrm r3.xyz, r0.yzww
-mul r0.yz, c18.xxyw, v0.xxyw
+mul r0.yz, c15.xxyw, v0.xxyw
 add r0.y, r0.z, r0.y
-mul r0.z, r0.y, c20.z
+mul r0.z, r0.y, c18.z
 frc r0.z, r0_abs.z
 cmp r0.y, r0.y, r0.z, -r0.z
-mad r0.z, r3.z, c14.x, r1.z
-add r0.z, -r0.z, -c7.y
-mad r0.x, v1.z, -r0.x, -c7.y
+mad r0.z, r3.z, c11.x, r1.z
+add r0.z, -r0.z, -c4.y
+mad r0.x, v1.z, -r0.x, -c4.y
 rcp r0.w, r3.z
 mul r0.x, r0.w, r0.x
-cmp r0.x, r0.z, c14.x, r0.x
+cmp r0.x, r0.z, c11.x, r0.x
 mad r4.xyz, r3, r0.x, r1
-mov r1.w, c20.w
+mov r1.w, c17.w
 dp4 r3.x, c0, r1
 dp4 r3.y, c1, r1
 dp4 r0.x, c3, r1
-mov r4.w, c20.w
+mov r4.w, c17.w
 dp4 r0.z, c0, r4
 dp4 r0.w, c1, r4
 dp4 r1.w, c3, r4
@@ -1444,14 +1491,14 @@ mul r2.yzw, r0.x, r1.xxyz
 mul r5.xy, r0.x, r3
 mul r6.xy, r0.zwzw, r1.w
 mad r6.xy, r3, r0.x, -r6
-dp2add r3.w, r6, r6, c21.x
-cmp r3.w, r3.w, c21.y, c21.z
+dp2add r3.w, r6, r6, c18.w
+cmp r3.w, r3.w, c19.x, c19.y
 mad r0.zw, r0, r1.w, r3.w
 mad r5.zw, r3.xyxy, -r0.x, r0
 add r0.z, -r5_abs.w, r5_abs.z
 cmp r5, r0.z, r5, r5.yxwz
-cmp r0.w, -r5.z, c21.y, c21.w
-cmp r3.x, r5.z, -c21.y, -c21.w
+cmp r0.w, -r5.z, c17.y, c17.w
+cmp r3.x, r5.z, -c17.y, -c17.w
 add r3.x, r0.w, r3.x
 rcp r0.w, r5.z
 mul r0.w, r0.w, r3.x
@@ -1460,11 +1507,11 @@ mul r4.xyz, r0.w, r4
 add r1.w, -r0.x, r1.w
 mul r1.w, r0.w, r1.w
 mul r3.y, r0.w, r5.w
-rcp r0.w, c13.x
-mad r0.w, -r1.z, -r0.w, c20.w
-mov r3.w, c20.w
-mad r4.w, r0.w, c12.x, r3.w
-cmp r0.w, r0.w, r4.w, c20.w
+rcp r0.w, c10.x
+mad r0.w, -r1.z, -r0.w, c17.w
+mov r3.w, c17.w
+mad r4.w, r0.w, c9.x, r3.w
+cmp r0.w, r0.w, r4.w, c17.w
 mul r6.xy, r0.w, r3
 mul r4.xyz, r0.w, r4
 mul r6.w, r0.w, r1.w
@@ -1472,116 +1519,116 @@ mad r3.xy, r6, r0.y, r5
 mad r2.yzw, r4.xxyz, r0.y, r2
 mad r0.x, r6.w, r0.y, r0.x
 mov r6.z, r4.z
-mov r5.zw, c21.y
-mov r5.xy, c21.y
+mov r5.zw, c17.y
+mov r5.xy, c17.y
 mov r7.xy, r3
-mov r0.y, c21.y
-mov r8.y, c21.y
+mov r0.y, c17.y
+mov r8.y, c17.y
 mov r7.z, r2.w
 mov r7.w, r0.x
-mov r1.w, c21.y
+mov r1.w, c17.y
 rep i0
-add r4.z, r0.y, -c9.x
-cmp r4.w, -r1.w, -c21.w, -c21.y
-cmp r4.z, r4.z, c21.y, r4.w
-cmp r4.z, r4.z, c21.w, c21.y
+add r4.z, r0.y, -c6.x
+cmp r4.w, -r1.w, -c17.w, -c17.y
+cmp r4.z, r4.z, c17.y, r4.w
+cmp r4.z, r4.z, c17.w, c17.y
 break_ne r4.z, -r4.z
 add r7, r6, r7
-mad r4.z, r6.z, c22.y, r7.z
-mad r4.w, r6.w, c22.y, r7.w
+mad r4.z, r6.z, c19.w, r7.z
+mad r4.w, r6.w, c19.w, r7.w
 rcp r4.w, r4.w
 mul r8.x, r4.w, r4.z
 mad r4.z, r4.z, -r4.w, r8.y
 cmp r8.xy, r4.z, r8.yxzw, r8
 cmp r4.zw, r0.z, r7.xyxy, r7.xyyx
-mul r5.xy, r4.zwzw, c19
+mul r5.xy, r4.zwzw, c16
 texldl r9, r5.xyww, s1
-mad r4.z, c8.x, r9.x, c8.y
+mad r4.z, c5.x, r9.x, c5.y
 rcp r4.z, r4.z
 texldl r9, r5, s2
-mad r4.z, r4.z, -c7.z, -r8.y
-mov r8.z, c7.z
-mad r4.w, r9.x, -r8.z, -c11.x
+mad r4.z, r4.z, -c4.z, -r8.y
+mov r8.z, c4.z
+mad r4.w, r9.x, -r8.z, -c8.x
 add r4.w, -r4.w, r8.x
-cmp r4.w, r4.w, c21.w, c21.y
-cmp r1.w, r4.z, r4.w, c21.y
-add r0.y, r0.y, c20.w
+cmp r4.w, r4.w, c17.w, c17.y
+cmp r1.w, r4.z, r4.w, c17.y
+add r0.y, r0.y, c17.w
 endrep
-add r0.x, -r0.w, c20.w
-cmp r0.x, r0.x, c21.y, r1.w
+add r0.x, -r0.w, c17.w
+cmp r0.x, r0.x, c17.y, r1.w
 if_ne r0.x, -r0.x
 add r8, -r6, r7
 rcp r0.x, r0.w
 mul r6, r0.x, r6
-mul r0.x, r0.w, c22.y
+mul r0.x, r0.w, c19.w
 rcp r0.w, r8.w
 mul r0.w, r0.w, r8.z
-mov r9.zw, c21.y
+mov r9.zw, c17.y
 mov r9.xy, r5
 mov r3.y, r0.w
 mov r7, r8
 mov r2.w, r0.x
 mov r4.z, r0.x
-mov r4.w, c21.y
+mov r4.w, c17.y
 rep i0
-break_ge r4.w, c10.x
+break_ge r4.w, c7.x
 mad r7, r6, r4.z, r7
-mad r5.zw, r6, c22.z, r7
+mad r5.zw, r6, -c19.w, r7
 rcp r5.w, r5.w
 mul r3.x, r5.w, r5.z
 mad r5.z, r5.z, -r5.w, r3.y
 cmp r3.xy, r5.z, r3.yxzw, r3
 cmp r5.zw, r0.z, r7.xyxy, r7.xyyx
-mul r9.xy, r5.zwzw, c19
-mul r2.w, r2.w, c22.y
+mul r9.xy, r5.zwzw, c16
+mul r2.w, r2.w, c19.w
 texldl r10, r9.xyww, s1
-mad r5.z, c8.x, r10.x, c8.y
+mad r5.z, c5.x, r10.x, c5.y
 rcp r5.z, r5.z
 texldl r10, r9, s2
-mad r5.z, r5.z, -c7.z, -r3.y
-mov r10.z, c7.z
-mad r5.w, r10.x, -r10.z, -c11.x
+mad r5.z, r5.z, -c4.z, -r3.y
+mov r10.z, c4.z
+mad r5.w, r10.x, -r10.z, -c8.x
 add r3.x, r3.x, -r5.w
-cmp r3.x, r3.x, -c21.w, -c21.y
-cmp r3.x, r5.z, r3.x, c21.y
+cmp r3.x, r3.x, -c17.w, -c17.y
+cmp r3.x, r5.z, r3.x, c17.y
 cmp r4.z, r3.x, r2.w, -r2.w
-add r4.w, r4.w, c20.w
+add r4.w, r4.w, c17.w
 endrep
 mov r5.xy, r9
 endif
 mad r7.xy, r4, r0.y, r2.yzzw
 rcp r0.x, r7.w
-min r0.z, r2.x, c20.w
-rcp r0.w, c9.x
-mad r0.y, r0.y, -r0.w, c20.w
+min r0.z, r2.x, c17.w
+rcp r0.w, c6.x
+mad r0.y, r0.y, -r0.w, c17.w
 mul r0.y, r0.y, r0.z
-mad r0.zw, r5.xyxy, c20.x, c20.y
+mad r0.zw, r5.xyxy, c18.x, c18.y
 max r2.x, r0_abs.z, r0_abs.w
-min r0.z, r2.x, c20.w
-add r0.z, r0.z, -c15.x
-max r2.x, r0.z, c21.y
-add r0.z, r3.w, -c15.x
+min r0.z, r2.x, c17.w
+add r0.z, r0.z, -c12.x
+max r2.x, r0.z, c17.y
+add r0.z, r3.w, -c12.x
 rcp r0.z, r0.z
-mad r0.z, r2.x, -r0.z, c20.w
+mad r0.z, r2.x, -r0.z, c17.w
 mul r0.y, r0.z, r0.y
-mov r2.xy, c17.x
-add r0.z, r2.x, -c16.x
-mov r2.x, c16.x
+mov r2.xy, c14.x
+add r0.z, r2.x, -c13.x
+mov r2.x, c13.x
 cmp r0.zw, r0.z, r2.xyxy, r2.xyyx
 max r2.x, r3.z, r0.z
 min r3.x, r0.w, r2.x
 add r2.x, -r0.z, r3.x
 add r0.z, -r0.z, r0.w
 rcp r0.z, r0.z
-mad r0.z, r2.x, -r0.z, c20.w
+mad r0.z, r2.x, -r0.z, c17.w
 mul r0.y, r0.z, r0.y
 mad r0.xzw, r7.xyyz, -r0.x, r1.xyyz
 dp3 r0.x, r0.xzww, r0.xzww
 rsq r0.x, r0.x
 rcp r0.x, r0.x
-rcp r0.z, c14.x
+rcp r0.z, c11.x
 mul_sat r0.x, r0.z, r0.x
-add r0.x, -r0.x, c20.w
+add r0.x, -r0.x, c17.w
 mul r0.x, r0.x, r0.y
 mul_pp oC0.w, r1.w, r0.x
 cmp r0.xy, -r1.w, v0, r5
@@ -1591,15 +1638,14 @@ mov_pp oC0.xyz, r0
 ""
 }
 SubProgram ""d3d11 "" {
-// Stats: 141 math, 4 textures, 3 branches
+// Stats: 142 math, 4 textures, 3 branches
 SetTexture 0 [_CameraGBufferTexture1] 2D 3
 SetTexture 1 [_CameraDepthTexture] 2D 1
-SetTexture 2 [_CameraGBufferTexture2] 2D 4
+SetTexture 2 [_CameraDepthNormalsTexture] 2D 4
 SetTexture 3 [_BackFaceDepthTex] 2D 2
 SetTexture 4 [_MainTex] 2D 0
 ConstBuffer ""$Globals"" 352
 Matrix 96 [_CameraProjectionMatrix]
-Matrix 272 [_NormalMatrix]
 Float 224 [_Iterations]
 Float 228 [_BinarySearchIterations]
 Float 232 [_PixelZSize]
@@ -1617,7 +1663,7 @@ Vector 112 [_ZBufferParams]
 BindCB  ""$Globals"" 0
 BindCB  ""UnityPerCamera"" 1
 ""ps_4_0
-eefiecedngiopjgfladfomfcnnmkjjhcokfgklaaabaaaaaaoabhaaaaadaaaaaa
+eefiecedeccfakohdlneaabfgpahdiimdeojmlpaabaaaaaaoabhaaaaadaaaaaa
 cmaaaaaajmaaaaaanaaaaaaaejfdeheogiaaaaaaadaaaaaaaiaaaaaafaaaaaaa
 aaaaaaaaabaaaaaaadaaaaaaaaaaaaaaapaaaaaafmaaaaaaaaaaaaaaaaaaaaaa
 adaaaaaaabaaaaaaadadaaaafmaaaaaaacaaaaaaaaaaaaaaadaaaaaaacaaaaaa
@@ -1640,11 +1686,11 @@ ahaaaaaaaoaaaaakccaabaaaaaaaaaaaaceaaaaaaaaaiadpaaaaiadpaaaaiadp
 aaaaiadpbkaabaaaaaaaaaaadiaaaaahhcaabaaaabaaaaaafgafbaaaaaaaaaaa
 egbcbaaaacaaaaaaefaaaaajpcaabaaaacaaaaaaegbabaaaabaaaaaaeghobaaa
 acaaaaaaaagabaaaaeaaaaaadcaaaaaphcaabaaaacaaaaaaegacbaaaacaaaaaa
-aceaaaaaaaaaaaeaaaaaaaeaaaaaaaeaaaaaaaaaaceaaaaaaaaaialpaaaaialp
-aaaaialpaaaaaaaadiaaaaaihcaabaaaadaaaaaafgafbaaaacaaaaaaegiccaaa
-aaaaaaaabcaaaaaadcaaaaaklcaabaaaacaaaaaaegiicaaaaaaaaaaabbaaaaaa
-agaabaaaacaaaaaaegaibaaaadaaaaaadcaaaaakhcaabaaaacaaaaaaegiccaaa
-aaaaaaaabdaaaaaakgakbaaaacaaaaaaegadbaaaacaaaaaabaaaaaahecaabaaa
+aceaaaaakmilgdeakmilgdeaaaaaaaaaaaaaaaaaaceaaaaakmilodlpkmilodlp
+aaaaiadpaaaaaaaabaaaaaahecaabaaaaaaaaaaaegacbaaaacaaaaaaegacbaaa
+acaaaaaaaoaaaaahecaabaaaaaaaaaaaabeaaaaaaaaaaaeackaabaaaaaaaaaaa
+diaaaaahdcaabaaaacaaaaaaegaabaaaacaaaaaakgakbaaaaaaaaaaaaaaaaaah
+ecaabaaaacaaaaaackaabaaaaaaaaaaaabeaaaaaaaaaialpbaaaaaahecaabaaa
 aaaaaaaaegacbaaaabaaaaaaegacbaaaabaaaaaaeeaaaaafecaabaaaaaaaaaaa
 ckaabaaaaaaaaaaadiaaaaahhcaabaaaadaaaaaakgakbaaaaaaaaaaaegacbaaa
 abaaaaaabaaaaaahecaabaaaaaaaaaaaegacbaaaacaaaaaaegacbaaaacaaaaaa
