@@ -81,13 +81,14 @@ namespace PostProcessFX
 			{
 				DestroyImmediate(_backFaceCamera.gameObject);
 				_backFaceCamera = null;
+
+				Camera.main.renderingPath = RenderingPath.UsePlayerSettings;
 			}
 		}
 
 		public void Start()
 		{
-			Camera.main.depthTextureMode = DepthTextureMode.DepthNormals;
-			//Camera.main.renderingPath = RenderingPath.Forward;
+			Camera.main.renderingPath = RenderingPath.DeferredShading;
 			CreateMaterialsIfNeeded();
 		}
 
