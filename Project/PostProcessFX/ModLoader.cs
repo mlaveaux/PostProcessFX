@@ -30,7 +30,7 @@ namespace PostProcessFX
 		{
 			try
 			{
-				UIView view = GameObject.FindObjectOfType<UIView>();
+				UIView view = UIView.GetAView();				
 
 				m_configUI = view.gameObject.GetComponent<ConfigUI>();
 				if (m_configUI == null)

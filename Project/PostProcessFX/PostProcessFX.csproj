@@ -57,7 +57,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="EffectConfig.cs" />
     <Compile Include="EffectMenu\AntiAliasingEffect.cs" />
+    <Compile Include="EffectMenu\IEffectMenu.cs" />
     <Compile Include="SMAA\AreaTexture.cs" />
     <Compile Include="EffectMenu\BloomEffect.cs" />
     <Compile Include="DrawGUI.cs" />
@@ -72,7 +74,7 @@
     <Compile Include="SMAA\SearchTexture.cs" />
     <Compile Include="SMAA\SMAAEffect.cs" />
     <Compile Include="EffectMenu\SSAOEffect.cs" />
-    <Compile Include="SunLensflare.cs" />
+    <Compile Include="EffectMenu\SunLensflare.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
