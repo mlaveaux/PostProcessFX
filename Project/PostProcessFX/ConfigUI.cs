@@ -5,128 +5,13 @@ using System.Text;
 
 using UnityEngine;
 using UnityEngine.UI;
-using ColossalFramework;
-using System.Xml.Serialization;
-using System.IO;
+using ColossalFramework.UI;
 
 namespace PostProcessFX
 {
-	public class EffectConfig
-	{
-		public bool guiActive = true;
-
-		// Bloom options.
-		public float bloomIntensity = 0.0f;
-		public int bloomBlurIterations = 3;
-
-		public float bloomThreshhold = 3.5f;
-		public float blurWidth = 1.0f;
-
-		public float flareRotation = 0.0f;
-		public float hollyStretchWidth = 0.5f;
-		public int hollywoodFlareBlurIterations = 1;
-
-		public bool sunLensflare = false;
-		public float lensflareIntensity = 0.0f;
-		public float lensFlareSaturation = 0.6f;
-		public float lensflareThreshhold = 1.4f;
-
-		public float sepBlurSpread = 0.1f;
-
-		// Anti aliasing options.
-		public int antiAliasingMode = 0;
-
-		public float FXAA3minThreshhold = 0.1f;
-		public float FXAA3maxThreshhold = 0.4f;
-		public float FXAA3sharpness = 8;
-		public float NFAAoffset = 0.2f;
-		public float NFAAblurRadius = 18.0f;
-		public bool DLAAsharp = true;
-
-		// Motion blur options.
-		public int motionBlurMode = 0;
-		public float motionblurVelocityScale = 0.375f;
-		public float motionblurMinVelocity = 0.1f;
-		public float motionblurMaxVelocity = 8.0f;
-
-		// SSAO options
-		public bool ssaoEnabled = false;
-		public float ssaoBlurFilterDistance = 1.25f;
-		public float ssaoIntensity = 1.5f;
-		public float ssaoRadius = 2.0f;
-		public int ssaoBlurFilterIterations = 1;
-		public int ssaoDownsample = 0;
-
-		// Reflection options
-		public bool reflectionEnabled = false;
-
-		public int reflectionIterations = 32;
-		public int reflectionBinarySearchIterations = 16;
-		public float reflectionScreenEdgeFadeStart = 0.8f;
-		public float reflectionEyeFadeStart = 0.0f;
-		public float reflectionEyeFadeEnd = 1.0f;
-		public int reflectionPixelStride = 32;
-		public float reflectionMaxDistance = 20.0f;
-
-		// Depth of field options.
-		public bool dofEnabled = false;
-
-		// Global options.
-		public int toggleUIKey = (int)KeyCode.F9;
-		public float menuPositionX = 10.0f;
-		public float menuPositionY = 100.0f;
-
-		// Modifier keys for toggling the ui.
-		public bool ctrlKey = false;
-		public bool shiftKey = false;
-		public bool altKey = false;
-		
-		public static void Serialize(String filename, object instance)
-		{
-			TextWriter writer = null;
-			try
-			{	
-				writer = new StreamWriter(filename);
-				XmlSerializer xmlSerializer = new XmlSerializer(typeof(EffectConfig));
-				xmlSerializer.Serialize(writer, instance);
-			}
-			catch (Exception ex)
-			{
-				Debug.LogError("EffectConfig: Failed to save config " + ex.Message);
-			} 
-			finally 
-			{
-				if (writer != null) {
-					writer.Close();
-				}
-			}
-		}
-
-		public static EffectConfig Deserialize(String filename)
-		{
-			TextReader reader = null;
-			try 
-			{
-				reader = new StreamReader(filename);
-				XmlSerializer xmlSerializer = new XmlSerializer(typeof(EffectConfig));
-				return (EffectConfig)xmlSerializer.Deserialize(reader);
-			}
-			catch (Exception ex)
-			{
-				Debug.LogError("EffectConfig: " + ex.Message);
-			}			
-			finally
-			{
-				if (reader != null)
-				{
-					reader.Close();
-				}
-			}
-
-			return null;
-		}
-	}
-
+	/**
+	 * The menu that is currently active.
+	 */
 	enum MenuType
 	{
 		Global,
@@ -141,7 +26,8 @@ namespace PostProcessFX
 	class ConfigUI : MonoBehaviour
 	{
 		public const String configFilename = "PostProcessFXConfig.xml";
-		private String m_toggleUIString;
+
+		private String m_toggleKeyString;
 
 		private BloomEffect m_bloom;
 		private MotionblurEffect m_motionblur;
@@ -149,13 +35,13 @@ namespace PostProcessFX
 		private SSAOEffect m_ssaoEffect;
 		private ScreenSpaceReflectionEffect m_screenReflection;
 		private DepthOfFieldEffect m_dofEffect;
-
-		private bool m_toggle = false;
-		
+				
 		private EffectConfig m_config = null;
 		private MonoBehaviour m_parent;
 		private MenuType m_activeMenu;
 
+		private bool m_toggle = false;
+		private bool m_dragging = false;
 		private float m_lastMouseX;
 		private float m_lastMouseY;
 
@@ -168,25 +54,14 @@ namespace PostProcessFX
 				EffectConfig.Serialize(configFilename, m_config);
 			}
 
-			m_bloom = new BloomEffect();
-			m_bloom.applyConfig(m_config);
-
-			m_antiAliasing = new AntiAliasingEffect();
-			m_antiAliasing.applyConfig(m_config);
-
-			m_motionblur = new MotionblurEffect();
-			m_motionblur.applyConfig(m_config);
-
-			m_ssaoEffect = new SSAOEffect();
-			m_ssaoEffect.applyConfig(m_config);
-
-			m_screenReflection = new ScreenSpaceReflectionEffect();
-			m_screenReflection.applyConfig(m_config);
-
-			m_dofEffect = new DepthOfFieldEffect();
-			m_dofEffect.applyConfig(m_config);
+			m_bloom = new BloomEffect(m_config);
+			m_antiAliasing = new AntiAliasingEffect(m_config);
+			m_motionblur = new MotionblurEffect(m_config);
+			m_ssaoEffect = new SSAOEffect(m_config);
+			m_screenReflection = new ScreenSpaceReflectionEffect(m_config);
+			m_dofEffect = new DepthOfFieldEffect(m_config);
 			
-			m_toggleUIString = Enum.GetName(typeof(KeyCode), m_config.toggleUIKey);
+			m_toggleKeyString = Enum.GetName(typeof(KeyCode), m_config.toggleUIKey);
 		}
 
 		public void setParent(MonoBehaviour parent)
@@ -196,8 +71,6 @@ namespace PostProcessFX
 
 		public void OnGUI()
 		{
-			if (m_config == null) { return;	}
-
 			if (m_parent != null)
 			{
 				if (m_config.guiActive && m_parent.enabled)
@@ -220,16 +93,18 @@ namespace PostProcessFX
 			float y = m_config.menuPositionY;
 
 			GUI.Box(new Rect(x, y, 320, 340), "");
-			x += 10;
-			y += 10;
 
-			GUI.Label(new Rect(x, y, 200, 20), "PostProcessFX ControlUI");
+			if (GUI.Button(new Rect(x, y, 300, 20), "PostProcessFX ControlUI"))
+			{
+				m_dragging = true;
+			}
 
-			if (GUI.Button(new Rect(x + 200, y, 50, 20), "hide"))
+			if (GUI.Button(new Rect(x + 300, y, 20, 20), "X"))
 			{
 				m_config.guiActive = false;
 			}
 
+			x += 10;
 			y += 25;
 			if (GUI.Button(new Rect(x, y, 60, 20), "Global"))
 			{
@@ -246,7 +121,7 @@ namespace PostProcessFX
 				m_activeMenu = MenuType.AntiAliasing;
 			}
 
-			if (GUI.Button(new Rect(x + 210, y, 75, 20), "Motionblur"))
+			if (GUI.Button(new Rect(x + 210, y, 90, 20), "Motionblur"))
 			{
 				m_activeMenu = MenuType.Motionblur;
 			}
@@ -274,7 +149,7 @@ namespace PostProcessFX
 					GUI.Label(new Rect(x, y, 200, 20), "ToggleUI");
 					y += 25;
 
-					m_toggleUIString = GUI.TextArea(new Rect(x, y, 200, 20), m_toggleUIString);
+					m_toggleKeyString = GUI.TextArea(new Rect(x, y, 200, 20), m_toggleKeyString);
 					y += 25;
 
 					m_config.ctrlKey = GUI.Toggle(new Rect(x, y, 50, 20), m_config.ctrlKey, "ctrl");
@@ -283,51 +158,43 @@ namespace PostProcessFX
 
 					try
 					{
-						m_config.toggleUIKey = (int)Enum.Parse(typeof(KeyCode), m_toggleUIString);
+						m_config.toggleUIKey = (int)Enum.Parse(typeof(KeyCode), m_toggleKeyString);
 					}
 					catch (Exception ex)
 					{
 						m_config.toggleUIKey = (int)KeyCode.F9;
-						m_toggleUIString = "F9";
+						m_toggleKeyString = "F9";
 					}
 					break;
 
 				case MenuType.AntiAliasing:
 					m_antiAliasing.drawGUI(m_config, x, y);
-					m_antiAliasing.applyConfig(m_config);
 					break;
 
 				case MenuType.Bloom:
 					m_bloom.drawGUI(m_config, x, y);
-					m_bloom.applyConfig(m_config);
 					break;
 
 				case MenuType.Motionblur:
 					m_motionblur.drawGUI(m_config, x, y);
-					m_motionblur.applyConfig(m_config);
 					break;
 
 				case MenuType.SSAO:
 					m_ssaoEffect.drawGUI(m_config, x, y);
-					m_ssaoEffect.applyConfig(m_config);
 					break;
 
 				case MenuType.Reflection:
 					m_screenReflection.drawGUI(m_config, x, y);
-					m_screenReflection.applyConfig(m_config);
 					break;
 
 				case MenuType.DepthOfField:
 					m_dofEffect.drawGUI(m_config, x, y);
-					m_dofEffect.applyConfig(m_config);
 					break;
 			}
 		}
 
 		public void Update()
 		{
-			if (m_config == null) { return; }
-
 			bool ctrlMod = false;
 			bool altMod = false;
 			bool shiftMod = false;
@@ -361,34 +228,44 @@ namespace PostProcessFX
 			
 			if (Input.GetKeyUp((KeyCode)m_config.toggleUIKey))
 			{
-				m_toggle = false;
+				m_toggle = false;			
+			}
+
+			var resizeRect = new Rect(m_config.menuPositionX, m_config.menuPositionY, 320, 20);
+			var mouse = Input.mousePosition;
+			mouse.y = Screen.height - mouse.y;
+						
+			if (m_dragging)
+			{
+				if (!Input.GetMouseButton(0)) 
+				{
+					m_dragging = false;
+				} 
+				else 
+				{
+					m_config.menuPositionX = mouse.x - m_lastMouseX;
+					m_config.menuPositionY = mouse.y - m_lastMouseY;
+				}
+			}
+			else
+			{
+				if (Input.GetMouseButton(0) && resizeRect.Contains(mouse))
+				{
+					m_dragging = true;
+					m_lastMouseX = mouse.x - m_config.menuPositionX;
+					m_lastMouseY = mouse.y - m_config.menuPositionY;
+				}
 			}
 		}
 
 		public void OnDestroy()
 		{
 			EffectConfig.Serialize(configFilename, m_config);
-
-			m_ssaoEffect.Cleanup();
-			m_screenReflection.Cleanup();
-			m_motionblur.Cleanup();
-			m_bloom.Cleanup();
-			m_antiAliasing.Cleanup();
 		}
 
-		public void OnMouseClick()
+		public void OnMouseUp() 
 		{
-			m_lastMouseX = Input.mousePosition.x;
-			m_lastMouseY = Input.mousePosition.y;
-		}
-
-		public void OnMouseDrag()
-		{
-			float moveX = m_lastMouseX - Input.mousePosition.x;
-			float moveY = m_lastMouseY - Input.mousePosition.y;
-
-			m_config.menuPositionX += moveX;
-			m_config.menuPositionY += moveY;
+			m_dragging = false;
 		}
 	}
 }
