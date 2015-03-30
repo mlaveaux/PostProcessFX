@@ -1,20 +1,32 @@
-﻿using System;
+﻿using PostProcessFX.EffectMenu;
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 using UnityEngine;
 
 namespace PostProcessFX
 {
-	class ScreenSpaceReflectionEffect
+	/**
+	 * Add and configure screen space reflection effect.
+	 * 
+	 * @TODO: Only works in the north direction, because depth is not written when looking at the south.
+	 * @TODO: Fix deferred shading as imposters are drawn wrongly.
+	 */
+	class ScreenSpaceReflectionEffect : IEffectMenu
 	{
 		private ScreenSpaceReflection reflectionComponent = null;
-		private bool lastState = false;
 
-		public ScreenSpaceReflectionEffect() {
-			reflectionComponent = Camera.main.GetComponent<ScreenSpaceReflection>();			
+		public ScreenSpaceReflectionEffect(EffectConfig config) {
+			reflectionComponent = Camera.main.GetComponent<ScreenSpaceReflection>();
+			applyConfig(config);
+		}
+
+		~ScreenSpaceReflectionEffect()
+		{
+			Disable();
 		}
 
 		public void drawGUI(EffectConfig config, float x, float y)
@@ -42,9 +54,11 @@ namespace PostProcessFX
 
 			config.reflectionScreenEdgeFadeStart = DrawGUI.drawSliderWithLabel(x, y, 0.0f, 1.0f, "edgeFadeStart", config.reflectionScreenEdgeFadeStart);
 			y += 25;
+
+			applyConfig(config);
 		}
 
-		public void applyConfig(EffectConfig config)
+		private void applyConfig(EffectConfig config)
 		{
 			if (config.reflectionEnabled)
 			{
@@ -61,15 +75,6 @@ namespace PostProcessFX
 			else
 			{
 				Disable();
-			}
-		}
-
-		public void Cleanup()
-		{
-			if (reflectionComponent != null)
-			{
-				MonoBehaviour.Destroy(reflectionComponent);
-				reflectionComponent = null;
 			}
 		}
 
@@ -97,20 +102,16 @@ namespace PostProcessFX
 					reflectionComponent.Start();
 				}
 			}
-
-			if (!lastState)
-			{
-				lastState = true;
-				reflectionComponent.enabled = true;
-			}
+			
+			reflectionComponent.enabled = true;
 		}
 
 		private void Disable()
 		{
-			if (lastState)
+			if (reflectionComponent != null)
 			{
-				lastState = false;
-				Cleanup();
+				MonoBehaviour.DestroyImmediate(reflectionComponent);
+				reflectionComponent = null;
 			}
 		}
 

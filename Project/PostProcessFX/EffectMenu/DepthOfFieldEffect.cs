@@ -1,23 +1,47 @@
-﻿using System;
+﻿using PostProcessFX.EffectMenu;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-
 using UnityEngine;
 
 namespace PostProcessFX
 {
-	class DepthOfFieldEffect
+	class DepthOfFieldEffect : IEffectMenu
 	{
 		private DepthOfFieldScatter dofComponent = null;
-		private bool lastState = false;
 
-		public DepthOfFieldEffect()
+		public DepthOfFieldEffect(EffectConfig config)
 		{
 			dofComponent = Camera.main.GetComponent<DepthOfFieldScatter>();
+			applyConfig(config);
 		}
 
-		public void Enable()
+		~DepthOfFieldEffect()
+		{
+			Disable();
+		}
+
+		public void drawGUI(EffectConfig config, float x, float y)
+		{
+			config.dofEnabled = GUI.Toggle(new Rect(x, y, 200, 20), config.dofEnabled, "enabled");
+
+			applyConfig(config);
+		}
+
+		private void applyConfig(EffectConfig config)
+		{
+			if (config.dofEnabled)
+			{
+				Enable();
+			}
+			else
+			{
+				Disable();
+			}
+		}
+		
+		private void Enable()
 		{
 			if (dofComponent == null)
 			{
@@ -30,53 +54,24 @@ namespace PostProcessFX
 				{
 					Material bokehMaterial = new Material(dx11BokehShaderText);
 					Material hdrMaterial = new Material(dofHdrShaderText);
-					
+
 					dofComponent.dofHdrShader = bokehMaterial.shader;
 					dofComponent.dx11BokehShader = hdrMaterial.shader;
 				}
 			}
 
-			if (!lastState)
-			{
-				lastState = true;
-				dofComponent.enabled = true;
-			}
+			dofComponent.enabled = true;
 		}
 
-		public void Disable()
-		{
-			if (lastState)
-			{
-				lastState = false;
-				dofComponent.enabled = false;
-			}
-		}
-
-		public void drawGUI(EffectConfig config, float x, float y)
-		{
-			config.dofEnabled = GUI.Toggle(new Rect(x, y, 200, 20), config.dofEnabled, "enabled");
-		}
-
-		public void applyConfig(EffectConfig config)
-		{
-			if (config.dofEnabled)
-			{
-				Enable();
-			}
-			else
-			{
-				Disable();
-			}
-		}
-
-		public void Cleanup()
+		private void Disable()
 		{
 			if (dofComponent != null)
 			{
-				MonoBehaviour.Destroy(dofComponent);
+				MonoBehaviour.DestroyImmediate(dofComponent);
 				dofComponent = null;
 			}
 		}
+
 
 		private const String dofHdrShaderText = @"// Compiled shader for PC, Mac & Linux Standalone, uncompressed size: 196.6KB
 

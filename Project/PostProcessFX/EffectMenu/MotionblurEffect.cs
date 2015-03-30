@@ -1,4 +1,6 @@
-﻿using System;
+﻿using PostProcessFX.EffectMenu;
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -7,26 +9,21 @@ using UnityEngine;
 
 namespace PostProcessFX
 {
-	class MotionblurEffect
+	class MotionblurEffect : IEffectMenu
 	{
 		private CameraMotionBlur motionblurComponent = null;
-		private bool lastState = false;
 
-		public MotionblurEffect()
+		public MotionblurEffect(EffectConfig config)
 		{
 			motionblurComponent = Camera.main.GetComponent<CameraMotionBlur>();
+			applyConfig(config);
 		}
 
-		public void Cleanup()
+		~MotionblurEffect()
 		{
-			if (motionblurComponent != null)
-			{
-
-				MonoBehaviour.Destroy(motionblurComponent);
-				motionblurComponent = null;
-			}
+			Disable();
 		}
-
+		
 		public void drawGUI(EffectConfig config, float x, float y)
 		{
 			GUI.Label(new Rect(x, y, 200, 20), "Motionblur Mode: ");
@@ -36,10 +33,22 @@ namespace PostProcessFX
 			config.motionBlurMode = (int)GUI.HorizontalSlider(new Rect(x, y, 100, 20), config.motionBlurMode, 0.0f, 5.1f);
 			y += 25;
 
-			DrawGUI.drawSliderWithLabel(x, y, 200, 20, 0.0f, 1.0f, "Motionblur Scale", config.motionblurVelocityScale);
+			config.motionblurVelocityScale = DrawGUI.drawSliderWithLabel(x, y, 0.0f, 1.0f, "Velocity scale", config.motionblurVelocityScale);
+			y += 25;
+
+			config.motionblurMaxVelocity = DrawGUI.drawSliderWithLabel(x, y, 0.0f, 20.0f, "Velocity max", config.motionblurMaxVelocity);
+			y += 25;
+
+			config.motionblurMinVelocity = DrawGUI.drawSliderWithLabel(x, y, 0.0f, 20.0f, "Velocity min", config.motionblurMinVelocity);
+			y += 25;
+
+			config.motionblurJitter = DrawGUI.drawSliderWithLabel(x, y, 0.0f, 1.0f, "Jitter", config.motionblurJitter);
+			y += 25;
+
+			applyConfig(config);
 		}
 
-		public void applyConfig(EffectConfig config)
+		private void applyConfig(EffectConfig config)
 		{
 			if (config.motionBlurMode == 0)
 			{
@@ -53,6 +62,8 @@ namespace PostProcessFX
 				motionblurComponent.velocityScale = config.motionblurVelocityScale;
 				motionblurComponent.minVelocity = config.motionblurMinVelocity;
 				motionblurComponent.maxVelocity = config.motionblurMaxVelocity;
+
+				motionblurComponent.jitter = config.motionblurJitter;
 			}
 		}
 
@@ -77,20 +88,16 @@ namespace PostProcessFX
 					motionblurComponent.noiseTexture = motionblurJitter;
 				}
 			}
-
-			if (!lastState)
-			{
-				motionblurComponent.enabled = true;
-				lastState = true;
-			}
+			
+			motionblurComponent.enabled = true;
 		}
 
 		private void Disable()
 		{
-			if (lastState)
+			if (motionblurComponent != null)
 			{
-				lastState = false;
-				Cleanup();
+				MonoBehaviour.DestroyImmediate(motionblurComponent);
+				motionblurComponent = null;
 			}
 		}
 

@@ -1,24 +1,29 @@
-﻿using System;
+﻿using PostProcessFX.EffectMenu;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-
 using UnityEngine;
 
 namespace PostProcessFX
 {
-	class BloomEffect
+	/**
+	 * Enables and configures the bloom and lensflare effect using the
+	 * already added Bloom class of Main Camera.
+	 */
+	class BloomEffect : IEffectMenu
 	{
 		private Bloom bloomComponent = null;
-		private bool lastState = false;
 
-		public BloomEffect()
+		public BloomEffect(EffectConfig config)
 		{			
 			bloomComponent = Camera.main.GetComponent<Bloom>();
 			if (bloomComponent == null)
 			{
 				Debug.LogError("BloomEffect: The main camera has no component named Bloom.");
 			}
+
+			applyConfig(config);
 		}
 		
 		public void drawGUI(EffectConfig config, float x, float y)
@@ -35,6 +40,9 @@ namespace PostProcessFX
 			config.sepBlurSpread = DrawGUI.drawSliderWithLabel(x, currentY, 0.0f, 10.0f, "bloomBlur", config.sepBlurSpread);
 			currentY += 25;
 
+			config.bloomBlurIterations = DrawGUI.drawIntSliderWithLabel(x, currentY, 1, 5, "bloomBlurIterations", config.bloomBlurIterations);
+			currentY += 25;
+
 			config.lensflareIntensity = DrawGUI.drawSliderWithLabel(x, currentY, 0.0f, 2.0f, "lensflareIntensity", config.lensflareIntensity);
 			currentY += 25;
 
@@ -49,17 +57,16 @@ namespace PostProcessFX
 
 			config.hollyStretchWidth = DrawGUI.drawSliderWithLabel(x, currentY, 0.0f, 5.0f, "lensflareWidth", config.hollyStretchWidth);
 			currentY += 25;
-
-			config.bloomBlurIterations = DrawGUI.drawIntSliderWithLabel(x, currentY, 1, 5, "bloomBlurIterations", config.bloomBlurIterations);
+			
+			config.hollywoodFlareBlurIterations = DrawGUI.drawIntSliderWithLabel(x, currentY, 1, 5, "lensflareBlurIterations", config.hollywoodFlareBlurIterations);
 			currentY += 25;
 
-			config.hollywoodFlareBlurIterations = DrawGUI.drawIntSliderWithLabel(x, currentY, 1, 5, "lensflareBlurIterations", config.hollywoodFlareBlurIterations);
-			currentY += 25;			
+			applyConfig(config);	
 		}
 
-		public void applyConfig(EffectConfig config)
+		private void applyConfig(EffectConfig config)
 		{
-			if (bloomComponent.bloomIntensity < 0.02f)
+			if (config.bloomIntensity < 0.02f)
 			{
 				Disable();
 			}
@@ -80,29 +87,15 @@ namespace PostProcessFX
 				bloomComponent.sepBlurSpread = config.sepBlurSpread;
 			}
 		}
-
-		public void Cleanup()
-		{
-
-		}
-
+		
 		private void Enable()
 		{
-			if (!lastState)
-			{
-				bloomComponent.enabled = true;
-				lastState = true;
-			}
+			bloomComponent.enabled = true;
 		}
 
 		private void Disable()
 		{
-			if (lastState)
-			{
-				bloomComponent.enabled = false;
-				lastState = false;
-			}
+			bloomComponent.enabled = false;
 		}
-
 	}
 }

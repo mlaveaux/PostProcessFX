@@ -5,19 +5,31 @@ using System.Text;
 
 using UnityEngine;
 using ColossalFramework;
+using PostProcessFX.EffectMenu;
 
 namespace PostProcessFX
 {
-	class SSAOEffect
+	/**
+	 * Screen space ambient obscurance effect, upgrade from traditional SSAO.
+	 * 
+	 * @TODO: Very bad blur quality glitches the fullscreen noise.
+	 */
+	class SSAOEffect : IEffectMenu
 	{
 		private ScreenSpaceAmbientObscurance ssaoComponent = null;
-		private bool lastState = false;
 
-		public SSAOEffect()
+		public SSAOEffect(EffectConfig config)
 		{
 			ssaoComponent = Camera.main.gameObject.GetComponent<ScreenSpaceAmbientObscurance>();
+
+			applyConfig(config);
 		}
 
+		~SSAOEffect()
+		{
+			Disable();
+		}
+		
 		public void drawGUI(EffectConfig config, float x, float y)
 		{
 			config.ssaoEnabled = GUI.Toggle(new Rect(x, y, 200, 20), config.ssaoEnabled, "enabled");
@@ -37,9 +49,11 @@ namespace PostProcessFX
 
 			config.ssaoDownsample = DrawGUI.drawIntSliderWithLabel(x, y, 0, 1, "ssaoDownsample", config.ssaoDownsample);
 			y += 25;
+
+			applyConfig(config);
 		}
 
-		public void applyConfig(EffectConfig config)
+		private void applyConfig(EffectConfig config)
 		{
 			if (config.ssaoEnabled)
 			{
@@ -56,16 +70,7 @@ namespace PostProcessFX
 				Disable();
 			}
 		}
-
-		public void Cleanup()
-		{
-			if (ssaoComponent != null)
-			{
-				MonoBehaviour.Destroy(ssaoComponent);
-				ssaoComponent = null;
-			}
-		}
-
+		
 		private void Enable()
 		{
 			if (ssaoComponent == null)
@@ -85,20 +90,16 @@ namespace PostProcessFX
 					ssaoComponent.rand = randTexture;
 				}
 			}
-
-			if (!lastState)
-			{
-				lastState = true;
-				ssaoComponent.enabled = true;
-			}
+			
+			ssaoComponent.enabled = true;
 		}
 
 		private void Disable()
 		{
-			if (lastState)
+			if (ssaoComponent != null)
 			{
-				lastState = false;
-				Cleanup();
+				MonoBehaviour.Destroy(ssaoComponent);
+				ssaoComponent = null;
 			}
 		}
 

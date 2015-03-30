@@ -1,21 +1,30 @@
-﻿using System;
+﻿using PostProcessFX.EffectMenu;
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-
 using UnityEngine;
 
 namespace PostProcessFX
 {
-	class AntiAliasingEffect
+	/**
+	 * Enables and configures various anti aliasing post processing effects
+	 * by adding the required shaders and applying the config.
+	 */
+	class AntiAliasingEffect : IEffectMenu
 	{
 		public AntialiasingAsPostEffect AAComponent = null;
-
-		private bool lastState = false;
 		
-		public AntiAliasingEffect()
+		public AntiAliasingEffect(EffectConfig config)
 		{
 			AAComponent = Camera.main.GetComponent<AntialiasingAsPostEffect>();
+			applyConfig(config);
+		}
+
+		~AntiAliasingEffect()
+		{
+			Disable();
 		}
 
 		public void drawGUI(EffectConfig config, float x, float y)
@@ -26,14 +35,12 @@ namespace PostProcessFX
 			GUI.Label(new Rect(currentX, currentY, 200, 20), "Anti Aliasing Mode: ");
 			currentY += 25;
 
-			config.antiAliasingMode = DrawGUI.drawIntSliderWithLabel(currentX + 10, currentY, 120, 20, 0.0f, 7.1f,
+			config.antiAliasingMode = DrawGUI.drawIntSliderWithLabel(currentX, currentY, 0, 7,
 				getAntiAliasingType(config.antiAliasingMode), config.antiAliasingMode);
 			currentY += 25;
 
 			if (config.antiAliasingMode != 0)
 			{
-				currentX += 10;
-
 				switch ((AAMode)(config.antiAliasingMode - 1))
 				{
 					case AAMode.FXAA3Console:
@@ -61,9 +68,11 @@ namespace PostProcessFX
 						break;
 				}
 			}
+
+			applyConfig(config);
 		}
 
-		public void applyConfig(EffectConfig config)
+		private void applyConfig(EffectConfig config)
 		{
 			if (config.antiAliasingMode == 0)
 			{
@@ -72,6 +81,7 @@ namespace PostProcessFX
 			else
 			{
 				Enable();
+
 				AAComponent.mode = (AAMode)config.antiAliasingMode - 1;
 				AAComponent.blurRadius = config.NFAAblurRadius;
 				AAComponent.dlaaSharp = config.DLAAsharp;
@@ -81,18 +91,7 @@ namespace PostProcessFX
 				AAComponent.edgeThresholdMin = config.FXAA3minThreshhold;
 			}
 		}
-
-		public void Cleanup()
-		{
-			if (AAComponent != null)
-			{
-				Disable();
-
-				MonoBehaviour.DestroyImmediate(AAComponent);
-				AAComponent = null;
-			}
-		}
-		
+				
 		private void Enable()
 		{
 			if (AAComponent == null)
@@ -124,19 +123,15 @@ namespace PostProcessFX
 				}
 			}
 			
-			if (!lastState)
-			{
-				AAComponent.enabled = true;
-				lastState = true;
-			}
+			AAComponent.enabled = true;
 		}
 
 		private void Disable()
 		{
-			if (lastState)
+			if (AAComponent != null)
 			{
-				lastState = false;
-				Cleanup();
+				MonoBehaviour.DestroyImmediate(AAComponent);
+				AAComponent = null;
 			}
 		}
 		
