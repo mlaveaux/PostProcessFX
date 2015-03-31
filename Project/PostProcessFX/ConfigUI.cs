@@ -71,19 +71,9 @@ namespace PostProcessFX
 
 		public void OnGUI()
 		{
-			if (m_parent != null)
+			if (m_config.guiActive)
 			{
-				if (m_config.guiActive && m_parent.enabled)
-				{
-					drawGUI();
-				}
-			}
-			else
-			{
-				if (m_config.guiActive)
-				{
-					drawGUI();
-				}
+				drawGUI();
 			}
 		}
 
