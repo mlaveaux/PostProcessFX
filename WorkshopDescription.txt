@@ -39,13 +39,23 @@ Not as effective as the DynamicResolution mod by nlight, but cheaper and can be 
 
 Supports CameraMotion, LocalBlur, Reconstruction, ReconstructionDX11 and ReconstructionDisk. 
 
+	- Velocity Scale: Set the scaling between the min and max velocity.
+	- Min Velocity: Minimum velocity in pixels.
+	- Max Velocity: Maximum velocity in pixels.	
+	- All reconstruction types have jitter as extra option which controls the blurriness of the motion blur.
+	
 [h1] Additional Information [/h1]
 
-All effects can be disabled so they don't have any performance impact. An ingame UI is provided to change 
-and tweak the options and can be toggled with F9 (default), the toggle key can be changed in UI.
+All effects can be disabled so they don't have any performance impact. An ingame UI is provided to twae the options and can be toggled with F9 (default), the toggle key can be changed in UI.[url=http://pastebin.com/qe5BwdA2]Here[/url] is a list of possible keycodes, fill in the string and not the corresponding number.
+
+[h1] Changelog [/h1]
+
+	- Added draggable config ui.
+	- Options are split into tabs, added more options and renamed some options.
 
 [h1] Recommended and Compactible Mods [/h1]
 
 - [url=http://steamcommunity.com/sharedfiles/filedetails/?id=410329674]SSAO[/url] by Ulysius.
 - [url=http://steamcommunity.com/sharedfiles/filedetails/?id=410805639]Sun Shafts[/url] by Ulysius.
 - [url=http://steamcommunity.com/sharedfiles/filedetails/?id=406629464]Dynamic Resolution[/url] by nlight.
+- [url=http://steamcommunity.com/sharedfiles/filedetails/?id=406684124]Los Santos[/url] by Grockefeller.
