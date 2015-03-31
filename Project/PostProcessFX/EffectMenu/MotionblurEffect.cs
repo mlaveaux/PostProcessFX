@@ -42,8 +42,11 @@ namespace PostProcessFX
 			config.motionblurMinVelocity = DrawGUI.drawSliderWithLabel(x, y, 0.0f, 20.0f, "Velocity min", config.motionblurMinVelocity);
 			y += 25;
 
-			config.motionblurJitter = DrawGUI.drawSliderWithLabel(x, y, 0.0f, 1.0f, "Jitter", config.motionblurJitter);
-			y += 25;
+			if (config.motionBlurMode >= 3)
+			{
+				config.motionblurJitter = DrawGUI.drawSliderWithLabel(x, y, 0.0f, 1.0f, "Jitter", config.motionblurJitter);
+				y += 25;
+			}
 
 			applyConfig(config);
 		}
@@ -62,7 +65,6 @@ namespace PostProcessFX
 				motionblurComponent.velocityScale = config.motionblurVelocityScale;
 				motionblurComponent.minVelocity = config.motionblurMinVelocity;
 				motionblurComponent.maxVelocity = config.motionblurMaxVelocity;
-
 				motionblurComponent.jitter = config.motionblurJitter;
 			}
 		}
