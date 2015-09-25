@@ -23,7 +23,7 @@ namespace PostProcessFX
         private BloomConfig m_activeConfig; // The configuration that is being used.
         private BloomConfig m_savedConfig; // The configuration that was stored.
 
-        private static String configFilename = "PostProcessFX/bloom_config.xml";
+        private static String configFilename = "PostProcessFX_bloom_config.xml";
 
         /**
          * Create a new bloom effect menu with or without an existing config.
@@ -77,37 +77,37 @@ namespace PostProcessFX
             m_activeConfig.bloomEnabled = GUI.Toggle(new Rect(x, y, 200.0f, 20.0f), m_activeConfig.bloomEnabled, "enable bloom");
             y += 25;
 
-            m_activeConfig.intensity = Utility.drawSliderWithLabel(x, y, 0.0f, 2.0f, "bloomIntensity", m_activeConfig.intensity);
+            m_activeConfig.intensity = PPFXUtility.drawSliderWithLabel(x, y, 0.0f, 2.0f, "bloomIntensity", m_activeConfig.intensity);
             y += 25;
 
-            m_activeConfig.threshhold = Utility.drawSliderWithLabel(x, y, 0.0f, 6.0f, "bloomThreshhold", m_activeConfig.threshhold);
+            m_activeConfig.threshhold = PPFXUtility.drawSliderWithLabel(x, y, 0.0f, 6.0f, "bloomThreshhold", m_activeConfig.threshhold);
             y += 25;
 
-            m_activeConfig.blurSpread = Utility.drawSliderWithLabel(x, y, 0.0f, 10.0f, "bloomSpread", m_activeConfig.blurSpread);
+            m_activeConfig.blurSpread = PPFXUtility.drawSliderWithLabel(x, y, 0.0f, 10.0f, "bloomSpread", m_activeConfig.blurSpread);
             y += 25;
 
-            m_activeConfig.blurIterations = Utility.drawIntSliderWithLabel(x, y, 1, 5, "bloomBlurIterations", m_activeConfig.blurIterations);
+            m_activeConfig.blurIterations = PPFXUtility.drawIntSliderWithLabel(x, y, 1, 5, "bloomBlurIterations", m_activeConfig.blurIterations);
             y += 25;
 
             m_activeConfig.lensflareEnabled = GUI.Toggle(new Rect(x, y, 200.0f, 20.0f), m_activeConfig.lensflareEnabled, "enable lensflare.");
             y += 25;
 
-            m_activeConfig.lensflareIntensity = Utility.drawSliderWithLabel(x, y, 0.0f, 2.0f, "lensflareIntensity", m_activeConfig.lensflareIntensity);
+            m_activeConfig.lensflareIntensity = PPFXUtility.drawSliderWithLabel(x, y, 0.0f, 2.0f, "lensflareIntensity", m_activeConfig.lensflareIntensity);
             y += 25;
 
             /*m_activeConfig.lensflareThreshhold = Utility.drawSliderWithLabel(x, y, 0.0f, 10.0f, "lensflareThreshhold", m_activeConfig.lensflareThreshhold);
             y += 25;*/
 
-            m_activeConfig.lensflareSaturation = Utility.drawSliderWithLabel(x, y, 0.0f, 1.0f, "lensflareSaturation", m_activeConfig.lensflareSaturation);
+            m_activeConfig.lensflareSaturation = PPFXUtility.drawSliderWithLabel(x, y, 0.0f, 1.0f, "lensflareSaturation", m_activeConfig.lensflareSaturation);
             y += 25;
 
-            m_activeConfig.lensflareRotation = Utility.drawSliderWithLabel(x, y, 0.0f, 3.14f, "lensflareRotation", m_activeConfig.lensflareRotation);
+            m_activeConfig.lensflareRotation = PPFXUtility.drawSliderWithLabel(x, y, 0.0f, 3.14f, "lensflareRotation", m_activeConfig.lensflareRotation);
             y += 25;
 
-            m_activeConfig.lensflareStretchWidth = Utility.drawSliderWithLabel(x, y, 0.0f, 5.0f, "lensflareWidth", m_activeConfig.lensflareStretchWidth);
+            m_activeConfig.lensflareStretchWidth = PPFXUtility.drawSliderWithLabel(x, y, 0.0f, 5.0f, "lensflareWidth", m_activeConfig.lensflareStretchWidth);
             y += 25;
 
-            m_activeConfig.lensflareBlurIterations = Utility.drawIntSliderWithLabel(x, y, 1, 5, "lensflareBlurIterations", m_activeConfig.lensflareBlurIterations);
+            m_activeConfig.lensflareBlurIterations = PPFXUtility.drawIntSliderWithLabel(x, y, 1, 5, "lensflareBlurIterations", m_activeConfig.lensflareBlurIterations);
             y += 25;
 
             m_activeConfig.lensflareSun = GUI.Toggle(new Rect(x, y, 200.0f, 20.0f), m_activeConfig.lensflareSun, "Enable sun lensflare.");
@@ -157,7 +157,7 @@ namespace PostProcessFX
                 m_bloomComponent = Camera.main.gameObject.AddComponent<Bloom>();
                 if (m_bloomComponent == null)
                 {
-                    Utility.log("BloomEffect: Could not add component CameraMotionBlur to Camera.");
+                    PPFXUtility.log("BloomEffect: Could not add component CameraMotionBlur to Camera.");
                 }
                 else
                 {
@@ -187,7 +187,7 @@ namespace PostProcessFX
             m_activeConfig.bloomEnabled = false;
         }
 
-        private const String strLensFlareCreate = @"// Compiled shader for custom platforms, uncompressed size: 5.9KB
+        private const String strLensFlareCreate = @"// Compiled shader for custom platforms, uncompressed size: 5.7KB
 
 // Skipping shader variants that would not be included into build of current scene.
 
@@ -214,8 +214,7 @@ SubShader {
 Program ""vp"" {
 SubProgram ""opengl "" {
 // Stats: 7 math, 4 textures
-""!!GLSL#version 120
-
+""!!GLSL
 #ifdef VERTEX
 
 varying vec2 xlv_TEXCOORD0;
@@ -224,13 +223,13 @@ varying vec2 xlv_TEXCOORD0_2;
 varying vec2 xlv_TEXCOORD0_3;
 void main ()
 {
-  vec2 tmpvar_1;
-  tmpvar_1 = (gl_MultiTexCoord0.xy - 0.5);
+  vec2 cse_1;
+  cse_1 = (gl_MultiTexCoord0.xy - 0.5);
   gl_Position = (gl_ModelViewProjectionMatrix * gl_Vertex);
-  xlv_TEXCOORD0 = ((tmpvar_1 * -0.85) + 0.5);
-  xlv_TEXCOORD0_1 = ((tmpvar_1 * -1.45) + 0.5);
-  xlv_TEXCOORD0_2 = ((tmpvar_1 * -2.55) + 0.5);
-  xlv_TEXCOORD0_3 = ((tmpvar_1 * -4.15) + 0.5);
+  xlv_TEXCOORD0 = ((cse_1 * -0.85) + 0.5);
+  xlv_TEXCOORD0_1 = ((cse_1 * -1.45) + 0.5);
+  xlv_TEXCOORD0_2 = ((cse_1 * -2.55) + 0.5);
+  xlv_TEXCOORD0_3 = ((cse_1 * -4.15) + 0.5);
 }
 
 
@@ -247,12 +246,11 @@ varying vec2 xlv_TEXCOORD0_2;
 varying vec2 xlv_TEXCOORD0_3;
 void main ()
 {
-  vec4 color_1;
-  color_1 = (texture2D (_MainTex, xlv_TEXCOORD0) * colorA);
-  color_1 = (color_1 + (texture2D (_MainTex, xlv_TEXCOORD0_1) * colorB));
-  color_1 = (color_1 + (texture2D (_MainTex, xlv_TEXCOORD0_2) * colorC));
-  color_1 = (color_1 + (texture2D (_MainTex, xlv_TEXCOORD0_3) * colorD));
-  gl_FragData[0] = color_1;
+  gl_FragData[0] = (((
+    (texture2D (_MainTex, xlv_TEXCOORD0) * colorA)
+   + 
+    (texture2D (_MainTex, xlv_TEXCOORD0_1) * colorB)
+  ) + (texture2D (_MainTex, xlv_TEXCOORD0_2) * colorC)) + (texture2D (_MainTex, xlv_TEXCOORD0_3) * colorD));
 }
 
 
@@ -285,11 +283,10 @@ SubProgram ""d3d11 "" {
 // Stats: 9 math
 Bind ""vertex"" Vertex
 Bind ""texcoord"" TexCoord0
-ConstBuffer ""UnityPerDraw"" 352
+ConstBuffer ""UnityPerDraw"" 336
 Matrix 0 [glstate_matrix_mvp]
 BindCB  ""UnityPerDraw"" 0
 ""vs_4_0
-root12:aaabaaaa
 eefiecedigeagmaephhcpmnmbhmckppkdniilbblabaaaaaafeadaaaaadaaaaaa
 cmaaaaaaiaaaaaaacaabaaaaejfdeheoemaaaaaaacaaaaaaaiaaaaaadiaaaaaa
 aaaaaaaaaaaaaaaaadaaaaaaaaaaaaaaapapaaaaebaaaaaaaaaaaaaaaaaaaaaa
@@ -358,7 +355,6 @@ Vector 128 [colorC]
 Vector 144 [colorD]
 BindCB  ""$Globals"" 0
 ""ps_4_0
-root12:abababaa
 eefiecedhmihomiidekbjmihjfkfpgnackhkijgmabaaaaaakmacaaaaadaaaaaa
 cmaaaaaammaaaaaaaaabaaaaejfdeheojiaaaaaaafaaaaaaaiaaaaaaiaaaaaaa
 aaaaaaaaabaaaaaaadaaaaaaaaaaaaaaapaaaaaaimaaaaaaaaaaaaaaaaaaaaaa
@@ -388,7 +384,7 @@ egaobaaaaaaaaaaadoaaaaab""
 Fallback Off
 }";
 
-        private const String strBlendForBloom = @"// Compiled shader for custom platforms, uncompressed size: 48.8KB
+        private const String strBlendForBloom = @"// Compiled shader for custom platforms, uncompressed size: 48.1KB
 
 // Skipping shader variants that would not be included into build of current scene.
 
@@ -415,8 +411,7 @@ SubShader {
 Program ""vp"" {
 SubProgram ""opengl "" {
 // Stats: 5 math, 2 textures
-""!!GLSL#version 120
-
+""!!GLSL
 #ifdef VERTEX
 
 varying vec2 xlv_TEXCOORD0;
@@ -478,12 +473,11 @@ Bind ""vertex"" Vertex
 Bind ""texcoord"" TexCoord0
 ConstBuffer ""$Globals"" 144
 Vector 112 [_ColorBuffer_TexelSize]
-ConstBuffer ""UnityPerDraw"" 352
+ConstBuffer ""UnityPerDraw"" 336
 Matrix 0 [glstate_matrix_mvp]
 BindCB  ""$Globals"" 0
 BindCB  ""UnityPerDraw"" 1
 ""vs_4_0
-root12:aaacaaaa
 eefiecedbkelefboiinbdbcalmldmmfkkpjmbofcabaaaaaajaacaaaaadaaaaaa
 cmaaaaaaiaaaaaaapaaaaaaaejfdeheoemaaaaaaacaaaaaaaiaaaaaadiaaaaaa
 aaaaaaaaaaaaaaaaadaaaaaaaaaaaaaaapapaaaaebaaaaaaaaaaaaaaaaaaaaaa
@@ -540,7 +534,6 @@ ConstBuffer ""$Globals"" 144
 Float 96 [_Intensity]
 BindCB  ""$Globals"" 0
 ""ps_4_0
-root12:acabacaa
 eefiecedeofoonlfbnfjlifkmbecneecikekbjefabaaaaaadiacaaaaadaaaaaa
 cmaaaaaajmaaaaaanaaaaaaaejfdeheogiaaaaaaadaaaaaaaiaaaaaafaaaaaaa
 aaaaaaaaabaaaaaaadaaaaaaaaaaaaaaapaaaaaafmaaaaaaaaaaaaaaaaaaaaaa
@@ -579,8 +572,7 @@ aceaaaaaaaaaiadpaaaaiadpaaaaiadpaaaaiadpdoaaaaab""
 Program ""vp"" {
 SubProgram ""opengl "" {
 // Stats: 2 math, 2 textures
-""!!GLSL#version 120
-
+""!!GLSL
 #ifdef VERTEX
 
 varying vec2 xlv_TEXCOORD0;
@@ -640,12 +632,11 @@ Bind ""vertex"" Vertex
 Bind ""texcoord"" TexCoord0
 ConstBuffer ""$Globals"" 144
 Vector 112 [_ColorBuffer_TexelSize]
-ConstBuffer ""UnityPerDraw"" 352
+ConstBuffer ""UnityPerDraw"" 336
 Matrix 0 [glstate_matrix_mvp]
 BindCB  ""$Globals"" 0
 BindCB  ""UnityPerDraw"" 1
 ""vs_4_0
-root12:aaacaaaa
 eefiecedbkelefboiinbdbcalmldmmfkkpjmbofcabaaaaaajaacaaaaadaaaaaa
 cmaaaaaaiaaaaaaapaaaaaaaejfdeheoemaaaaaaacaaaaaaaiaaaaaadiaaaaaa
 aaaaaaaaaaaaaaaaadaaaaaaaaaaaaaaapapaaaaebaaaaaaaaaaaaaaaaaaaaaa
@@ -698,7 +689,6 @@ ConstBuffer ""$Globals"" 144
 Float 96 [_Intensity]
 BindCB  ""$Globals"" 0
 ""ps_4_0
-root12:acabacaa
 eefiecedakmkbejlmcigbbjcpohfdiefjpdgdbdmabaaaaaamiabaaaaadaaaaaa
 cmaaaaaajmaaaaaanaaaaaaaejfdeheogiaaaaaaadaaaaaaaiaaaaaafaaaaaaa
 aaaaaaaaabaaaaaaadaaaaaaaaaaaaaaapaaaaaafmaaaaaaaaaaaaaaaaaaaaaa
@@ -734,8 +724,7 @@ abaaaaaadoaaaaab""
 Program ""vp"" {
 SubProgram ""opengl "" {
 // Stats: 4 math, 5 textures
-""!!GLSL#version 120
-
+""!!GLSL
 #ifdef VERTEX
 
 uniform vec4 _MainTex_TexelSize;
@@ -746,15 +735,15 @@ varying vec2 xlv_TEXCOORD0_3;
 varying vec2 xlv_TEXCOORD0_4;
 void main ()
 {
-  vec2 tmpvar_1;
-  tmpvar_1 = (_MainTex_TexelSize.xy * 0.5);
-  vec2 tmpvar_2;
-  tmpvar_2 = (_MainTex_TexelSize.xy * vec2(1.0, -1.0));
+  vec2 cse_1;
+  cse_1 = (_MainTex_TexelSize.xy * 0.5);
+  vec2 cse_2;
+  cse_2 = (_MainTex_TexelSize.xy * vec2(1.0, -1.0));
   gl_Position = (gl_ModelViewProjectionMatrix * gl_Vertex);
-  xlv_TEXCOORD0 = (gl_MultiTexCoord0.xy + tmpvar_1);
-  xlv_TEXCOORD0_1 = (gl_MultiTexCoord0.xy - tmpvar_1);
-  xlv_TEXCOORD0_2 = (gl_MultiTexCoord0.xy - (tmpvar_2 * 0.5));
-  xlv_TEXCOORD0_3 = (gl_MultiTexCoord0.xy + (tmpvar_2 * 0.5));
+  xlv_TEXCOORD0 = (gl_MultiTexCoord0.xy + cse_1);
+  xlv_TEXCOORD0_1 = (gl_MultiTexCoord0.xy - cse_1);
+  xlv_TEXCOORD0_2 = (gl_MultiTexCoord0.xy - (cse_2 * 0.5));
+  xlv_TEXCOORD0_3 = (gl_MultiTexCoord0.xy + (cse_2 * 0.5));
   xlv_TEXCOORD0_4 = gl_MultiTexCoord0.xy;
 }
 
@@ -769,7 +758,9 @@ varying vec2 xlv_TEXCOORD0_3;
 varying vec2 xlv_TEXCOORD0_4;
 void main ()
 {
-  gl_FragData[0] = max (max (texture2D (_MainTex, xlv_TEXCOORD0_4), texture2D (_MainTex, xlv_TEXCOORD0)), max (max (texture2D (_MainTex, xlv_TEXCOORD0_1), texture2D (_MainTex, xlv_TEXCOORD0_2)), texture2D (_MainTex, xlv_TEXCOORD0_3)));
+  gl_FragData[0] = max (max (max (
+    max (texture2D (_MainTex, xlv_TEXCOORD0_4), texture2D (_MainTex, xlv_TEXCOORD0))
+  , texture2D (_MainTex, xlv_TEXCOORD0_1)), texture2D (_MainTex, xlv_TEXCOORD0_2)), texture2D (_MainTex, xlv_TEXCOORD0_3));
 }
 
 
@@ -805,12 +796,11 @@ Bind ""vertex"" Vertex
 Bind ""texcoord"" TexCoord0
 ConstBuffer ""$Globals"" 144
 Vector 128 [_MainTex_TexelSize]
-ConstBuffer ""UnityPerDraw"" 352
+ConstBuffer ""UnityPerDraw"" 336
 Matrix 0 [glstate_matrix_mvp]
 BindCB  ""$Globals"" 0
 BindCB  ""UnityPerDraw"" 1
 ""vs_4_0
-root12:aaacaaaa
 eefiecedfcocijekpmcclkndiialdcacicloeecgabaaaaaafmadaaaaadaaaaaa
 cmaaaaaaiaaaaaaadiabaaaaejfdeheoemaaaaaaacaaaaaaaiaaaaaadiaaaaaa
 aaaaaaaaaaaaaaaaadaaaaaaaaaaaaaaapapaaaaebaaaaaaaaaaaaaaaaaaaaaa
@@ -871,7 +861,6 @@ SubProgram ""d3d11 "" {
 // Stats: 4 math, 5 textures
 SetTexture 0 [_MainTex] 2D 0
 ""ps_4_0
-root12:abaaabaa
 eefiecedienngckhccmeaipjajkfhlnkfjnkgngeabaaaaaalmacaaaaadaaaaaa
 cmaaaaaaoeaaaaaabiabaaaaejfdeheolaaaaaaaagaaaaaaaiaaaaaajiaaaaaa
 aaaaaaaaabaaaaaaadaaaaaaaaaaaaaaapaaaaaakeaaaaaaaaaaaaaaaaaaaaaa
@@ -914,8 +903,7 @@ pccabaaaaaaaaaaaegaobaaaaaaaaaaaegaobaaaabaaaaaadoaaaaab""
 Program ""vp"" {
 SubProgram ""opengl "" {
 // Stats: 1 math, 2 textures
-""!!GLSL#version 120
-
+""!!GLSL
 #ifdef VERTEX
 
 varying vec2 xlv_TEXCOORD0;
@@ -973,12 +961,11 @@ Bind ""vertex"" Vertex
 Bind ""texcoord"" TexCoord0
 ConstBuffer ""$Globals"" 144
 Vector 112 [_ColorBuffer_TexelSize]
-ConstBuffer ""UnityPerDraw"" 352
+ConstBuffer ""UnityPerDraw"" 336
 Matrix 0 [glstate_matrix_mvp]
 BindCB  ""$Globals"" 0
 BindCB  ""UnityPerDraw"" 1
 ""vs_4_0
-root12:aaacaaaa
 eefiecedbkelefboiinbdbcalmldmmfkkpjmbofcabaaaaaajaacaaaaadaaaaaa
 cmaaaaaaiaaaaaaapaaaaaaaejfdeheoemaaaaaaacaaaaaaaiaaaaaadiaaaaaa
 aaaaaaaaaaaaaaaaadaaaaaaaaaaaaaaapapaaaaebaaaaaaaaaaaaaaaaaaaaaa
@@ -1026,7 +1013,6 @@ SubProgram ""d3d11 "" {
 SetTexture 0 [_MainTex] 2D 1
 SetTexture 1 [_ColorBuffer] 2D 0
 ""ps_4_0
-root12:acaaacaa
 eefiecedjciifcnpddgfkikonaggbffgchijoadgabaaaaaakaabaaaaadaaaaaa
 cmaaaaaajmaaaaaanaaaaaaaejfdeheogiaaaaaaadaaaaaaaiaaaaaafaaaaaaa
 aaaaaaaaabaaaaaaadaaaaaaaaaaaaaaapaaaaaafmaaaaaaaaaaaaaaaaaaaaaa
@@ -1061,8 +1047,7 @@ diaaaaahpccabaaaaaaaaaaaegaobaaaaaaaaaaaegaobaaaabaaaaaadoaaaaab
 Program ""vp"" {
 SubProgram ""opengl "" {
 // Stats: 5 math, 2 textures
-""!!GLSL#version 120
-
+""!!GLSL
 #ifdef VERTEX
 
 varying vec2 xlv_TEXCOORD0;
@@ -1124,12 +1109,11 @@ Bind ""vertex"" Vertex
 Bind ""texcoord"" TexCoord0
 ConstBuffer ""$Globals"" 144
 Vector 112 [_ColorBuffer_TexelSize]
-ConstBuffer ""UnityPerDraw"" 352
+ConstBuffer ""UnityPerDraw"" 336
 Matrix 0 [glstate_matrix_mvp]
 BindCB  ""$Globals"" 0
 BindCB  ""UnityPerDraw"" 1
 ""vs_4_0
-root12:aaacaaaa
 eefiecedbkelefboiinbdbcalmldmmfkkpjmbofcabaaaaaajaacaaaaadaaaaaa
 cmaaaaaaiaaaaaaapaaaaaaaejfdeheoemaaaaaaacaaaaaaaiaaaaaadiaaaaaa
 aaaaaaaaaaaaaaaaadaaaaaaaaaaaaaaapapaaaaebaaaaaaaaaaaaaaaaaaaaaa
@@ -1186,7 +1170,6 @@ ConstBuffer ""$Globals"" 144
 Float 96 [_Intensity]
 BindCB  ""$Globals"" 0
 ""ps_4_0
-root12:acabacaa
 eefiecedeofoonlfbnfjlifkmbecneecikekbjefabaaaaaadiacaaaaadaaaaaa
 cmaaaaaajmaaaaaanaaaaaaaejfdeheogiaaaaaaadaaaaaaaiaaaaaafaaaaaaa
 aaaaaaaaabaaaaaaadaaaaaaaaaaaaaaapaaaaaafmaaaaaaaaaaaaaaaaaaaaaa
@@ -1225,8 +1208,7 @@ aceaaaaaaaaaiadpaaaaiadpaaaaiadpaaaaiadpdoaaaaab""
 Program ""vp"" {
 SubProgram ""opengl "" {
 // Stats: 2 math, 2 textures
-""!!GLSL#version 120
-
+""!!GLSL
 #ifdef VERTEX
 
 varying vec2 xlv_TEXCOORD0;
@@ -1286,12 +1268,11 @@ Bind ""vertex"" Vertex
 Bind ""texcoord"" TexCoord0
 ConstBuffer ""$Globals"" 144
 Vector 112 [_ColorBuffer_TexelSize]
-ConstBuffer ""UnityPerDraw"" 352
+ConstBuffer ""UnityPerDraw"" 336
 Matrix 0 [glstate_matrix_mvp]
 BindCB  ""$Globals"" 0
 BindCB  ""UnityPerDraw"" 1
 ""vs_4_0
-root12:aaacaaaa
 eefiecedbkelefboiinbdbcalmldmmfkkpjmbofcabaaaaaajaacaaaaadaaaaaa
 cmaaaaaaiaaaaaaapaaaaaaaejfdeheoemaaaaaaacaaaaaaaiaaaaaadiaaaaaa
 aaaaaaaaaaaaaaaaadaaaaaaaaaaaaaaapapaaaaebaaaaaaaaaaaaaaaaaaaaaa
@@ -1344,7 +1325,6 @@ ConstBuffer ""$Globals"" 144
 Float 96 [_Intensity]
 BindCB  ""$Globals"" 0
 ""ps_4_0
-root12:acabacaa
 eefiecedakmkbejlmcigbbjcpohfdiefjpdgdbdmabaaaaaamiabaaaaadaaaaaa
 cmaaaaaajmaaaaaanaaaaaaaejfdeheogiaaaaaaadaaaaaaaiaaaaaafaaaaaaa
 aaaaaaaaabaaaaaaadaaaaaaaaaaaaaaapaaaaaafmaaaaaaaaaaaaaaaaaaaaaa
@@ -1380,8 +1360,7 @@ abaaaaaadoaaaaab""
 Program ""vp"" {
 SubProgram ""opengl "" {
 // Stats: 4 math, 4 textures
-""!!GLSL#version 120
-
+""!!GLSL
 #ifdef VERTEX
 
 uniform vec4 _MainTex_TexelSize;
@@ -1392,15 +1371,15 @@ varying vec2 xlv_TEXCOORD0_3;
 varying vec2 xlv_TEXCOORD0_4;
 void main ()
 {
-  vec2 tmpvar_1;
-  tmpvar_1 = (_MainTex_TexelSize.xy * 0.5);
-  vec2 tmpvar_2;
-  tmpvar_2 = (_MainTex_TexelSize.xy * vec2(1.0, -1.0));
+  vec2 cse_1;
+  cse_1 = (_MainTex_TexelSize.xy * 0.5);
+  vec2 cse_2;
+  cse_2 = (_MainTex_TexelSize.xy * vec2(1.0, -1.0));
   gl_Position = (gl_ModelViewProjectionMatrix * gl_Vertex);
-  xlv_TEXCOORD0 = (gl_MultiTexCoord0.xy + tmpvar_1);
-  xlv_TEXCOORD0_1 = (gl_MultiTexCoord0.xy - tmpvar_1);
-  xlv_TEXCOORD0_2 = (gl_MultiTexCoord0.xy - (tmpvar_2 * 0.5));
-  xlv_TEXCOORD0_3 = (gl_MultiTexCoord0.xy + (tmpvar_2 * 0.5));
+  xlv_TEXCOORD0 = (gl_MultiTexCoord0.xy + cse_1);
+  xlv_TEXCOORD0_1 = (gl_MultiTexCoord0.xy - cse_1);
+  xlv_TEXCOORD0_2 = (gl_MultiTexCoord0.xy - (cse_2 * 0.5));
+  xlv_TEXCOORD0_3 = (gl_MultiTexCoord0.xy + (cse_2 * 0.5));
   xlv_TEXCOORD0_4 = gl_MultiTexCoord0.xy;
 }
 
@@ -1414,12 +1393,9 @@ varying vec2 xlv_TEXCOORD0_2;
 varying vec2 xlv_TEXCOORD0_3;
 void main ()
 {
-  vec4 outColor_1;
-  outColor_1 = texture2D (_MainTex, xlv_TEXCOORD0);
-  outColor_1 = (outColor_1 + texture2D (_MainTex, xlv_TEXCOORD0_1));
-  outColor_1 = (outColor_1 + texture2D (_MainTex, xlv_TEXCOORD0_2));
-  outColor_1 = (outColor_1 + texture2D (_MainTex, xlv_TEXCOORD0_3));
-  gl_FragData[0] = (outColor_1 / 4.0);
+  gl_FragData[0] = (((
+    (texture2D (_MainTex, xlv_TEXCOORD0) + texture2D (_MainTex, xlv_TEXCOORD0_1))
+   + texture2D (_MainTex, xlv_TEXCOORD0_2)) + texture2D (_MainTex, xlv_TEXCOORD0_3)) / 4.0);
 }
 
 
@@ -1455,12 +1431,11 @@ Bind ""vertex"" Vertex
 Bind ""texcoord"" TexCoord0
 ConstBuffer ""$Globals"" 144
 Vector 128 [_MainTex_TexelSize]
-ConstBuffer ""UnityPerDraw"" 352
+ConstBuffer ""UnityPerDraw"" 336
 Matrix 0 [glstate_matrix_mvp]
 BindCB  ""$Globals"" 0
 BindCB  ""UnityPerDraw"" 1
 ""vs_4_0
-root12:aaacaaaa
 eefiecedfcocijekpmcclkndiialdcacicloeecgabaaaaaafmadaaaaadaaaaaa
 cmaaaaaaiaaaaaaadiabaaaaejfdeheoemaaaaaaacaaaaaaaiaaaaaadiaaaaaa
 aaaaaaaaaaaaaaaaadaaaaaaaaaaaaaaapapaaaaebaaaaaaaaaaaaaaaaaaaaaa
@@ -1520,7 +1495,6 @@ SubProgram ""d3d11 "" {
 // Stats: 4 math, 4 textures
 SetTexture 0 [_MainTex] 2D 0
 ""ps_4_0
-root12:abaaabaa
 eefiecedopphidddlojmdgiamdoggknhdfcedmmoabaaaaaajiacaaaaadaaaaaa
 cmaaaaaaoeaaaaaabiabaaaaejfdeheolaaaaaaaagaaaaaaaiaaaaaajiaaaaaa
 aaaaaaaaabaaaaaaadaaaaaaaaaaaaaaapaaaaaakeaaaaaaaaaaaaaaaaaaaaaa
@@ -1563,8 +1537,7 @@ aceaaaaaaaaaiadoaaaaiadoaaaaiadoaaaaiadodoaaaaab""
 Program ""vp"" {
 SubProgram ""opengl "" {
 // Stats: 1 math, 1 textures
-""!!GLSL#version 120
-
+""!!GLSL
 #ifdef VERTEX
 
 varying vec2 xlv_TEXCOORD0;
@@ -1624,12 +1597,11 @@ Bind ""vertex"" Vertex
 Bind ""texcoord"" TexCoord0
 ConstBuffer ""$Globals"" 144
 Vector 112 [_ColorBuffer_TexelSize]
-ConstBuffer ""UnityPerDraw"" 352
+ConstBuffer ""UnityPerDraw"" 336
 Matrix 0 [glstate_matrix_mvp]
 BindCB  ""$Globals"" 0
 BindCB  ""UnityPerDraw"" 1
 ""vs_4_0
-root12:aaacaaaa
 eefiecedbkelefboiinbdbcalmldmmfkkpjmbofcabaaaaaajaacaaaaadaaaaaa
 cmaaaaaaiaaaaaaapaaaaaaaejfdeheoemaaaaaaacaaaaaaaiaaaaaadiaaaaaa
 aaaaaaaaaaaaaaaaadaaaaaaaaaaaaaaapapaaaaebaaaaaaaaaaaaaaaaaaaaaa
@@ -1675,7 +1647,6 @@ SubProgram ""d3d11 "" {
 // Stats: 0 math, 1 textures
 SetTexture 0 [_ColorBuffer] 2D 0
 ""ps_4_0
-root12:abaaabaa
 eefiecedafdhamafecnhiolhijiimkigflllafebabaaaaaahiabaaaaadaaaaaa
 cmaaaaaajmaaaaaanaaaaaaaejfdeheogiaaaaaaadaaaaaaaiaaaaaafaaaaaaa
 aaaaaaaaabaaaaaaadaaaaaaaaaaaaaaapaaaaaafmaaaaaaaaaaaaaaaaaaaaaa
@@ -1707,8 +1678,7 @@ aceaaaaaaaaaiadpaaaaiadpaaaaiadpaaaaaaaadoaaaaab""
 Program ""vp"" {
 SubProgram ""opengl "" {
 // Stats: 1 math
-""!!GLSL#version 120
-
+""!!GLSL
 #ifdef VERTEX
 
 varying vec2 xlv_TEXCOORD0;
@@ -1763,12 +1733,11 @@ Bind ""vertex"" Vertex
 Bind ""texcoord"" TexCoord0
 ConstBuffer ""$Globals"" 144
 Vector 112 [_ColorBuffer_TexelSize]
-ConstBuffer ""UnityPerDraw"" 352
+ConstBuffer ""UnityPerDraw"" 336
 Matrix 0 [glstate_matrix_mvp]
 BindCB  ""$Globals"" 0
 BindCB  ""UnityPerDraw"" 1
 ""vs_4_0
-root12:aaacaaaa
 eefiecedbkelefboiinbdbcalmldmmfkkpjmbofcabaaaaaajaacaaaaadaaaaaa
 cmaaaaaaiaaaaaaapaaaaaaaejfdeheoemaaaaaaacaaaaaaaiaaaaaadiaaaaaa
 aaaaaaaaaaaaaaaaadaaaaaaaaaaaaaaapapaaaaebaaaaaaaaaaaaaaaaaaaaaa
@@ -1807,7 +1776,6 @@ mov_pp oC0, r0
 }
 SubProgram ""d3d11 "" {
 ""ps_4_0
-root12:aaaaaaaa
 eefiecedffnadndlblnlpchmplaanbncdlbjfmmlabaaaaaabaabaaaaadaaaaaa
 cmaaaaaajmaaaaaanaaaaaaaejfdeheogiaaaaaaadaaaaaaaiaaaaaafaaaaaaa
 aaaaaaaaabaaaaaaadaaaaaaaaaaaaaaapaaaaaafmaaaaaaaaaaaaaaaaaaaaaa
@@ -1838,8 +1806,7 @@ aaaaaaaaaaaaaaaaaaaaaaaadoaaaaab""
 Program ""vp"" {
 SubProgram ""opengl "" {
 // Stats: 1 math, 1 textures
-""!!GLSL#version 120
-
+""!!GLSL
 #ifdef VERTEX
 
 varying vec2 xlv_TEXCOORD0;
@@ -1897,12 +1864,11 @@ Bind ""vertex"" Vertex
 Bind ""texcoord"" TexCoord0
 ConstBuffer ""$Globals"" 144
 Vector 112 [_ColorBuffer_TexelSize]
-ConstBuffer ""UnityPerDraw"" 352
+ConstBuffer ""UnityPerDraw"" 336
 Matrix 0 [glstate_matrix_mvp]
 BindCB  ""$Globals"" 0
 BindCB  ""UnityPerDraw"" 1
 ""vs_4_0
-root12:aaacaaaa
 eefiecedbkelefboiinbdbcalmldmmfkkpjmbofcabaaaaaajaacaaaaadaaaaaa
 cmaaaaaaiaaaaaaapaaaaaaaejfdeheoemaaaaaaacaaaaaaaiaaaaaadiaaaaaa
 aaaaaaaaaaaaaaaaadaaaaaaaaaaaaaaapapaaaaebaaaaaaaaaaaaaaaaaaaaaa
@@ -1950,7 +1916,6 @@ ConstBuffer ""$Globals"" 144
 Float 96 [_Intensity]
 BindCB  ""$Globals"" 0
 ""ps_4_0
-root12:abababaa
 eefiecedcgfbjobdhjkcjohahbjjaglohjhomjmbabaaaaaaheabaaaaadaaaaaa
 cmaaaaaajmaaaaaanaaaaaaaejfdeheogiaaaaaaadaaaaaaaiaaaaaafaaaaaaa
 aaaaaaaaabaaaaaaadaaaaaaaaaaaaaaapaaaaaafmaaaaaaaaaaaaaaaaaaaaaa
@@ -1985,8 +1950,7 @@ aaaaaaaaagiacaaaaaaaaaaaagaaaaaadoaaaaab""
 Program ""vp"" {
 SubProgram ""opengl "" {
 // Stats: 0 math, 1 textures
-""!!GLSL#version 120
-
+""!!GLSL
 #ifdef VERTEX
 
 varying vec2 xlv_TEXCOORD0;
@@ -2043,12 +2007,11 @@ Bind ""vertex"" Vertex
 Bind ""texcoord"" TexCoord0
 ConstBuffer ""$Globals"" 144
 Vector 112 [_ColorBuffer_TexelSize]
-ConstBuffer ""UnityPerDraw"" 352
+ConstBuffer ""UnityPerDraw"" 336
 Matrix 0 [glstate_matrix_mvp]
 BindCB  ""$Globals"" 0
 BindCB  ""UnityPerDraw"" 1
 ""vs_4_0
-root12:aaacaaaa
 eefiecedbkelefboiinbdbcalmldmmfkkpjmbofcabaaaaaajaacaaaaadaaaaaa
 cmaaaaaaiaaaaaaapaaaaaaaejfdeheoemaaaaaaacaaaaaaaiaaaaaadiaaaaaa
 aaaaaaaaaaaaaaaaadaaaaaaaaaaaaaaapapaaaaebaaaaaaaaaaaaaaaaaaaaaa
@@ -2091,7 +2054,6 @@ SubProgram ""d3d11 "" {
 // Stats: 0 math, 1 textures
 SetTexture 0 [_MainTex] 2D 0
 ""ps_4_0
-root12:abaaabaa
 eefiecedlggkdcacocldgjlekgibdpfooohmeepcabaaaaaadmabaaaaadaaaaaa
 cmaaaaaajmaaaaaanaaaaaaaejfdeheogiaaaaaaadaaaaaaaiaaaaaafaaaaaaa
 aaaaaaaaabaaaaaaadaaaaaaaaaaaaaaapaaaaaafmaaaaaaaaaaaaaaaaaaaaaa
@@ -2109,7 +2071,7 @@ egbabaaaabaaaaaaeghobaaaaaaaaaaaaagabaaaaaaaaaaadoaaaaab""
 Fallback Off
 }";
 
-        private const String strBrightPassFilter2 = @"// Compiled shader for custom platforms, uncompressed size: 7.2KB
+        private const String strBrightPassFilter2 = @"// Compiled shader for custom platforms, uncompressed size: 7.1KB
 
 // Skipping shader variants that would not be included into build of current scene.
 
@@ -2135,8 +2097,7 @@ SubShader {
 Program ""vp"" {
 SubProgram ""opengl "" {
 // Stats: 2 math, 1 textures
-""!!GLSL#version 120
-
+""!!GLSL
 #ifdef VERTEX
 
 varying vec2 xlv_TEXCOORD0;
@@ -2186,11 +2147,10 @@ SubProgram ""d3d11 "" {
 // Stats: 4 math
 Bind ""vertex"" Vertex
 Bind ""texcoord"" TexCoord0
-ConstBuffer ""UnityPerDraw"" 352
+ConstBuffer ""UnityPerDraw"" 336
 Matrix 0 [glstate_matrix_mvp]
 BindCB  ""UnityPerDraw"" 0
 ""vs_4_0
-root12:aaabaaaa
 eefiecedaffpdldohodkdgpagjklpapmmnbhcfmlabaaaaaaoeabaaaaadaaaaaa
 cmaaaaaaiaaaaaaaniaaaaaaejfdeheoemaaaaaaacaaaaaaaiaaaaaadiaaaaaa
 aaaaaaaaaaaaaaaaadaaaaaaaaaaaaaaapapaaaaebaaaaaaaaaaaaaaaaaaaaaa
@@ -2235,7 +2195,6 @@ ConstBuffer ""$Globals"" 112
 Vector 96 [_Threshhold]
 BindCB  ""$Globals"" 0
 ""ps_4_0
-root12:abababaa
 eefiecedfmflllhkapnejdgmhdofcboihhembingabaaaaaajmabaaaaadaaaaaa
 cmaaaaaaieaaaaaaliaaaaaaejfdeheofaaaaaaaacaaaaaaaiaaaaaadiaaaaaa
 aaaaaaaaabaaaaaaadaaaaaaaaaaaaaaapaaaaaaeeaaaaaaaaaaaaaaaaaaaaaa
@@ -2269,8 +2228,7 @@ aaaaaaaaaceaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaadoaaaaab""
 Program ""vp"" {
 SubProgram ""opengl "" {
 // Stats: 2 math, 1 textures
-""!!GLSL#version 120
-
+""!!GLSL
 #ifdef VERTEX
 
 varying vec2 xlv_TEXCOORD0;
@@ -2320,11 +2278,10 @@ SubProgram ""d3d11 "" {
 // Stats: 4 math
 Bind ""vertex"" Vertex
 Bind ""texcoord"" TexCoord0
-ConstBuffer ""UnityPerDraw"" 352
+ConstBuffer ""UnityPerDraw"" 336
 Matrix 0 [glstate_matrix_mvp]
 BindCB  ""UnityPerDraw"" 0
 ""vs_4_0
-root12:aaabaaaa
 eefiecedaffpdldohodkdgpagjklpapmmnbhcfmlabaaaaaaoeabaaaaadaaaaaa
 cmaaaaaaiaaaaaaaniaaaaaaejfdeheoemaaaaaaacaaaaaaaiaaaaaadiaaaaaa
 aaaaaaaaaaaaaaaaadaaaaaaaaaaaaaaapapaaaaebaaaaaaaaaaaaaaaaaaaaaa
@@ -2369,7 +2326,6 @@ ConstBuffer ""$Globals"" 112
 Vector 96 [_Threshhold]
 BindCB  ""$Globals"" 0
 ""ps_4_0
-root12:abababaa
 eefiecedcphkpagdjbkkkmhfmjhajdlcjaddhnfkabaaaaaajmabaaaaadaaaaaa
 cmaaaaaaieaaaaaaliaaaaaaejfdeheofaaaaaaaacaaaaaaaiaaaaaadiaaaaaa
 aaaaaaaaabaaaaaaadaaaaaaaaaaaaaaapaaaaaaeeaaaaaaaaaaaaaaaaaaaaaa
@@ -2390,7 +2346,7 @@ aaaaaaaaaceaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaadoaaaaab""
 Fallback Off
 }";
 
-        private const String strBlurAndFlares = @"// Compiled shader for custom platforms, uncompressed size: 36.9KB
+        private const String strBlurAndFlares = @"// Compiled shader for custom platforms, uncompressed size: 36.4KB
 
 // Skipping shader variants that would not be included into build of current scene.
 
@@ -2417,8 +2373,7 @@ SubShader {
 Program ""vp"" {
 SubProgram ""opengl "" {
 // Stats: 11 math, 1 textures
-""!!GLSL#version 120
-
+""!!GLSL
 #ifdef VERTEX
 
 varying vec2 xlv_TEXCOORD0;
@@ -2438,13 +2393,13 @@ void main ()
 {
   vec4 tmpvar_1;
   tmpvar_1 = texture2D (_MainTex, xlv_TEXCOORD0);
-  vec3 c_2;
-  c_2 = (tmpvar_1.xyz * unity_ColorSpaceLuminance.xyz);
+  vec3 tmpvar_2;
+  tmpvar_2 = (tmpvar_1.xyz * unity_ColorSpaceLuminance.xyz);
   gl_FragData[0] = (tmpvar_1 / (1.5 + (
-    ((c_2.x + c_2.y) + c_2.z)
+    ((tmpvar_2.x + tmpvar_2.y) + tmpvar_2.z)
    + 
-    ((2.0 * sqrt((c_2.y * 
-      (c_2.x + c_2.z)
+    ((2.0 * sqrt((tmpvar_2.y * 
+      (tmpvar_2.x + tmpvar_2.z)
     ))) * unity_ColorSpaceLuminance.w)
   )));
 }
@@ -2473,11 +2428,10 @@ SubProgram ""d3d11 "" {
 // Stats: 4 math
 Bind ""vertex"" Vertex
 Bind ""texcoord"" TexCoord0
-ConstBuffer ""UnityPerDraw"" 352
+ConstBuffer ""UnityPerDraw"" 336
 Matrix 0 [glstate_matrix_mvp]
 BindCB  ""UnityPerDraw"" 0
 ""vs_4_0
-root12:aaabaaaa
 eefiecedaffpdldohodkdgpagjklpapmmnbhcfmlabaaaaaaoeabaaaaadaaaaaa
 cmaaaaaaiaaaaaaaniaaaaaaejfdeheoemaaaaaaacaaaaaaaiaaaaaadiaaaaaa
 aaaaaaaaaaaaaaaaadaaaaaaaaaaaaaaapapaaaaebaaaaaaaaaaaaaaaaaaaaaa
@@ -2532,7 +2486,6 @@ ConstBuffer ""$Globals"" 160
 Vector 48 [unity_ColorSpaceLuminance]
 BindCB  ""$Globals"" 0
 ""ps_4_0
-root12:abababaa
 eefiecedcjgkmbicbjhgbnckghgfmafccbaaiopaabaaaaaaeeacaaaaadaaaaaa
 cmaaaaaaieaaaaaaliaaaaaaejfdeheofaaaaaaaacaaaaaaaiaaaaaadiaaaaaa
 aaaaaaaaabaaaaaaadaaaaaaaaaaaaaaapaaaaaaeeaaaaaaaaaaaaaaaaaaaaaa
@@ -2572,8 +2525,7 @@ doaaaaab""
 Program ""vp"" {
 SubProgram ""opengl "" {
 // Stats: 6 math, 7 textures
-""!!GLSL#version 120
-
+""!!GLSL
 #ifdef VERTEX
 
 uniform vec4 _Offsets;
@@ -2587,20 +2539,20 @@ varying vec2 xlv_TEXCOORD0_5;
 varying vec2 xlv_TEXCOORD0_6;
 void main ()
 {
-  float tmpvar_1;
-  tmpvar_1 = (_StretchWidth * 2.0);
-  float tmpvar_2;
-  tmpvar_2 = (_StretchWidth * 4.0);
-  float tmpvar_3;
-  tmpvar_3 = (_StretchWidth * 6.0);
+  float cse_1;
+  cse_1 = (_StretchWidth * 2.0);
+  float cse_2;
+  cse_2 = (_StretchWidth * 4.0);
+  float cse_3;
+  cse_3 = (_StretchWidth * 6.0);
   gl_Position = (gl_ModelViewProjectionMatrix * gl_Vertex);
   xlv_TEXCOORD0 = gl_MultiTexCoord0.xy;
-  xlv_TEXCOORD0_1 = (gl_MultiTexCoord0.xy + (tmpvar_1 * _Offsets.xy));
-  xlv_TEXCOORD0_2 = (gl_MultiTexCoord0.xy - (tmpvar_1 * _Offsets.xy));
-  xlv_TEXCOORD0_3 = (gl_MultiTexCoord0.xy + (tmpvar_2 * _Offsets.xy));
-  xlv_TEXCOORD0_4 = (gl_MultiTexCoord0.xy - (tmpvar_2 * _Offsets.xy));
-  xlv_TEXCOORD0_5 = (gl_MultiTexCoord0.xy + (tmpvar_3 * _Offsets.xy));
-  xlv_TEXCOORD0_6 = (gl_MultiTexCoord0.xy - (tmpvar_3 * _Offsets.xy));
+  xlv_TEXCOORD0_1 = (gl_MultiTexCoord0.xy + (cse_1 * _Offsets.xy));
+  xlv_TEXCOORD0_2 = (gl_MultiTexCoord0.xy - (cse_1 * _Offsets.xy));
+  xlv_TEXCOORD0_3 = (gl_MultiTexCoord0.xy + (cse_2 * _Offsets.xy));
+  xlv_TEXCOORD0_4 = (gl_MultiTexCoord0.xy - (cse_2 * _Offsets.xy));
+  xlv_TEXCOORD0_5 = (gl_MultiTexCoord0.xy + (cse_3 * _Offsets.xy));
+  xlv_TEXCOORD0_6 = (gl_MultiTexCoord0.xy - (cse_3 * _Offsets.xy));
 }
 
 
@@ -2616,7 +2568,9 @@ varying vec2 xlv_TEXCOORD0_5;
 varying vec2 xlv_TEXCOORD0_6;
 void main ()
 {
-  gl_FragData[0] = max (max (max (texture2D (_MainTex, xlv_TEXCOORD0), texture2D (_MainTex, xlv_TEXCOORD0_1)), max (texture2D (_MainTex, xlv_TEXCOORD0_2), texture2D (_MainTex, xlv_TEXCOORD0_3))), max (max (texture2D (_MainTex, xlv_TEXCOORD0_4), texture2D (_MainTex, xlv_TEXCOORD0_5)), texture2D (_MainTex, xlv_TEXCOORD0_6)));
+  gl_FragData[0] = max (max (max (
+    max (max (max (texture2D (_MainTex, xlv_TEXCOORD0), texture2D (_MainTex, xlv_TEXCOORD0_1)), texture2D (_MainTex, xlv_TEXCOORD0_2)), texture2D (_MainTex, xlv_TEXCOORD0_3))
+  , texture2D (_MainTex, xlv_TEXCOORD0_4)), texture2D (_MainTex, xlv_TEXCOORD0_5)), texture2D (_MainTex, xlv_TEXCOORD0_6));
 }
 
 
@@ -2658,12 +2612,11 @@ Bind ""texcoord"" TexCoord0
 ConstBuffer ""$Globals"" 160
 Vector 96 [_Offsets]
 Float 128 [_StretchWidth]
-ConstBuffer ""UnityPerDraw"" 352
+ConstBuffer ""UnityPerDraw"" 336
 Matrix 0 [glstate_matrix_mvp]
 BindCB  ""$Globals"" 0
 BindCB  ""UnityPerDraw"" 1
 ""vs_4_0
-root12:aaacaaaa
 eefiecedojcempkglghjchdhdinfkmldkkajoincabaaaaaabiaeaaaaadaaaaaa
 cmaaaaaaiaaaaaaagiabaaaaejfdeheoemaaaaaaacaaaaaaaiaaaaaadiaaaaaa
 aaaaaaaaaaaaaaaaadaaaaaaaaaaaaaaapapaaaaebaaaaaaaaaaaaaaaaaaaaaa
@@ -2736,7 +2689,6 @@ SubProgram ""d3d11 "" {
 // Stats: 6 math, 7 textures
 SetTexture 0 [_MainTex] 2D 0
 ""ps_4_0
-root12:abaaabaa
 eefiecedofkpmcojhfehfiopackahfoecfjjhdgpabaaaaaaieadaaaaadaaaaaa
 cmaaaaaabeabaaaaeiabaaaaejfdeheooaaaaaaaaiaaaaaaaiaaaaaamiaaaaaa
 aaaaaaaaabaaaaaaadaaaaaaaaaaaaaaapaaaaaaneaaaaaaaaaaaaaaaaaaaaaa
@@ -2786,8 +2738,7 @@ doaaaaab""
 Program ""vp"" {
 SubProgram ""opengl "" {
 // Stats: 20 math, 7 textures
-""!!GLSL#version 120
-
+""!!GLSL
 #ifdef VERTEX
 
 uniform vec4 _Offsets;
@@ -2801,20 +2752,20 @@ varying vec2 xlv_TEXCOORD0_5;
 varying vec2 xlv_TEXCOORD0_6;
 void main ()
 {
-  vec2 tmpvar_1;
-  tmpvar_1 = (0.5 * _MainTex_TexelSize.xy);
-  vec2 tmpvar_2;
-  tmpvar_2 = (1.5 * _MainTex_TexelSize.xy);
-  vec2 tmpvar_3;
-  tmpvar_3 = (2.5 * _MainTex_TexelSize.xy);
+  vec2 cse_1;
+  cse_1 = (0.5 * _MainTex_TexelSize.xy);
+  vec2 cse_2;
+  cse_2 = (1.5 * _MainTex_TexelSize.xy);
+  vec2 cse_3;
+  cse_3 = (2.5 * _MainTex_TexelSize.xy);
   gl_Position = (gl_ModelViewProjectionMatrix * gl_Vertex);
   xlv_TEXCOORD0 = gl_MultiTexCoord0.xy;
-  xlv_TEXCOORD0_1 = (gl_MultiTexCoord0.xy + (tmpvar_1 * _Offsets.xy));
-  xlv_TEXCOORD0_2 = (gl_MultiTexCoord0.xy - (tmpvar_1 * _Offsets.xy));
-  xlv_TEXCOORD0_3 = (gl_MultiTexCoord0.xy + (tmpvar_2 * _Offsets.xy));
-  xlv_TEXCOORD0_4 = (gl_MultiTexCoord0.xy - (tmpvar_2 * _Offsets.xy));
-  xlv_TEXCOORD0_5 = (gl_MultiTexCoord0.xy + (tmpvar_3 * _Offsets.xy));
-  xlv_TEXCOORD0_6 = (gl_MultiTexCoord0.xy - (tmpvar_3 * _Offsets.xy));
+  xlv_TEXCOORD0_1 = (gl_MultiTexCoord0.xy + (cse_1 * _Offsets.xy));
+  xlv_TEXCOORD0_2 = (gl_MultiTexCoord0.xy - (cse_1 * _Offsets.xy));
+  xlv_TEXCOORD0_3 = (gl_MultiTexCoord0.xy + (cse_2 * _Offsets.xy));
+  xlv_TEXCOORD0_4 = (gl_MultiTexCoord0.xy - (cse_2 * _Offsets.xy));
+  xlv_TEXCOORD0_5 = (gl_MultiTexCoord0.xy + (cse_3 * _Offsets.xy));
+  xlv_TEXCOORD0_6 = (gl_MultiTexCoord0.xy - (cse_3 * _Offsets.xy));
 }
 
 
@@ -2835,22 +2786,20 @@ varying vec2 xlv_TEXCOORD0_6;
 void main ()
 {
   vec4 color_1;
-  color_1 = (texture2D (_MainTex, xlv_TEXCOORD0) + texture2D (_MainTex, xlv_TEXCOORD0_1));
-  color_1 = (color_1 + texture2D (_MainTex, xlv_TEXCOORD0_2));
-  color_1 = (color_1 + texture2D (_MainTex, xlv_TEXCOORD0_3));
-  color_1 = (color_1 + texture2D (_MainTex, xlv_TEXCOORD0_4));
-  color_1 = (color_1 + texture2D (_MainTex, xlv_TEXCOORD0_5));
-  color_1 = (color_1 + texture2D (_MainTex, xlv_TEXCOORD0_6));
   vec4 tmpvar_2;
-  tmpvar_2 = max (((color_1 / 7.0) - _Threshhold.xxxx), vec4(0.0, 0.0, 0.0, 0.0));
+  tmpvar_2 = max (((
+    ((((
+      ((texture2D (_MainTex, xlv_TEXCOORD0) + texture2D (_MainTex, xlv_TEXCOORD0_1)) + texture2D (_MainTex, xlv_TEXCOORD0_2))
+     + texture2D (_MainTex, xlv_TEXCOORD0_3)) + texture2D (_MainTex, xlv_TEXCOORD0_4)) + texture2D (_MainTex, xlv_TEXCOORD0_5)) + texture2D (_MainTex, xlv_TEXCOORD0_6))
+   / 7.0) - _Threshhold.xxxx), vec4(0.0, 0.0, 0.0, 0.0));
   color_1.w = tmpvar_2.w;
-  vec3 c_3;
-  c_3 = (tmpvar_2.xyz * unity_ColorSpaceLuminance.xyz);
+  vec3 tmpvar_3;
+  tmpvar_3 = (tmpvar_2.xyz * unity_ColorSpaceLuminance.xyz);
   color_1.xyz = (mix (vec3((
-    ((c_3.x + c_3.y) + c_3.z)
+    ((tmpvar_3.x + tmpvar_3.y) + tmpvar_3.z)
    + 
-    ((2.0 * sqrt((c_3.y * 
-      (c_3.x + c_3.z)
+    ((2.0 * sqrt((tmpvar_3.y * 
+      (tmpvar_3.x + tmpvar_3.z)
     ))) * unity_ColorSpaceLuminance.w)
   )), tmpvar_2.xyz, vec3(_Saturation)) * _TintColor.xyz);
   gl_FragData[0] = color_1;
@@ -2894,12 +2843,11 @@ Bind ""texcoord"" TexCoord0
 ConstBuffer ""$Globals"" 160
 Vector 96 [_Offsets]
 Vector 144 [_MainTex_TexelSize]
-ConstBuffer ""UnityPerDraw"" 352
+ConstBuffer ""UnityPerDraw"" 336
 Matrix 0 [glstate_matrix_mvp]
 BindCB  ""$Globals"" 0
 BindCB  ""UnityPerDraw"" 1
 ""vs_4_0
-root12:aaacaaaa
 eefiecednmfoedijbcffahcaaajnkhggoddeifnlabaaaaaabmaeaaaaadaaaaaa
 cmaaaaaaiaaaaaaagiabaaaaejfdeheoemaaaaaaacaaaaaaaiaaaaaadiaaaaaa
 aaaaaaaaaaaaaaaaadaaaaaaaaaaaaaaapapaaaaebaaaaaaaaaaaaaaaaaaaaaa
@@ -2997,7 +2945,6 @@ Vector 132 [_Threshhold] 2
 Float 140 [_Saturation]
 BindCB  ""$Globals"" 0
 ""ps_4_0
-root12:abababaa
 eefieceddajcjfcoedcclcjbolpaihnedeifocdoabaaaaaaeaafaaaaadaaaaaa
 cmaaaaaabeabaaaaeiabaaaaejfdeheooaaaaaaaaiaaaaaaaiaaaaaamiaaaaaa
 aaaaaaaaabaaaaaaadaaaaaaaaaaaaaaapaaaaaaneaaaaaaaaaaaaaaaaaaaaaa
@@ -3061,8 +3008,7 @@ aaaaaaaaahaaaaaadgaaaaaficcabaaaaaaaaaaadkaabaaaaaaaaaaadoaaaaab
 Program ""vp"" {
 SubProgram ""opengl "" {
 // Stats: 17 math, 7 textures
-""!!GLSL#version 120
-
+""!!GLSL
 #ifdef VERTEX
 
 uniform vec4 _Offsets;
@@ -3076,20 +3022,20 @@ varying vec2 xlv_TEXCOORD0_5;
 varying vec2 xlv_TEXCOORD0_6;
 void main ()
 {
-  vec2 tmpvar_1;
-  tmpvar_1 = (0.5 * _MainTex_TexelSize.xy);
-  vec2 tmpvar_2;
-  tmpvar_2 = (1.5 * _MainTex_TexelSize.xy);
-  vec2 tmpvar_3;
-  tmpvar_3 = (2.5 * _MainTex_TexelSize.xy);
+  vec2 cse_1;
+  cse_1 = (0.5 * _MainTex_TexelSize.xy);
+  vec2 cse_2;
+  cse_2 = (1.5 * _MainTex_TexelSize.xy);
+  vec2 cse_3;
+  cse_3 = (2.5 * _MainTex_TexelSize.xy);
   gl_Position = (gl_ModelViewProjectionMatrix * gl_Vertex);
   xlv_TEXCOORD0 = gl_MultiTexCoord0.xy;
-  xlv_TEXCOORD0_1 = (gl_MultiTexCoord0.xy + (tmpvar_1 * _Offsets.xy));
-  xlv_TEXCOORD0_2 = (gl_MultiTexCoord0.xy - (tmpvar_1 * _Offsets.xy));
-  xlv_TEXCOORD0_3 = (gl_MultiTexCoord0.xy + (tmpvar_2 * _Offsets.xy));
-  xlv_TEXCOORD0_4 = (gl_MultiTexCoord0.xy - (tmpvar_2 * _Offsets.xy));
-  xlv_TEXCOORD0_5 = (gl_MultiTexCoord0.xy + (tmpvar_3 * _Offsets.xy));
-  xlv_TEXCOORD0_6 = (gl_MultiTexCoord0.xy - (tmpvar_3 * _Offsets.xy));
+  xlv_TEXCOORD0_1 = (gl_MultiTexCoord0.xy + (cse_1 * _Offsets.xy));
+  xlv_TEXCOORD0_2 = (gl_MultiTexCoord0.xy - (cse_1 * _Offsets.xy));
+  xlv_TEXCOORD0_3 = (gl_MultiTexCoord0.xy + (cse_2 * _Offsets.xy));
+  xlv_TEXCOORD0_4 = (gl_MultiTexCoord0.xy - (cse_2 * _Offsets.xy));
+  xlv_TEXCOORD0_5 = (gl_MultiTexCoord0.xy + (cse_3 * _Offsets.xy));
+  xlv_TEXCOORD0_6 = (gl_MultiTexCoord0.xy - (cse_3 * _Offsets.xy));
 }
 
 
@@ -3106,20 +3052,17 @@ varying vec2 xlv_TEXCOORD0_5;
 varying vec2 xlv_TEXCOORD0_6;
 void main ()
 {
-  vec4 color_1;
-  color_1 = (texture2D (_MainTex, xlv_TEXCOORD0) + texture2D (_MainTex, xlv_TEXCOORD0_1));
-  color_1 = (color_1 + texture2D (_MainTex, xlv_TEXCOORD0_2));
-  color_1 = (color_1 + texture2D (_MainTex, xlv_TEXCOORD0_3));
-  color_1 = (color_1 + texture2D (_MainTex, xlv_TEXCOORD0_4));
-  color_1 = (color_1 + texture2D (_MainTex, xlv_TEXCOORD0_5));
-  color_1 = (color_1 + texture2D (_MainTex, xlv_TEXCOORD0_6));
-  vec3 c_2;
-  c_2 = (color_1.xyz * unity_ColorSpaceLuminance.xyz);
-  gl_FragData[0] = (color_1 / (7.5 + (
-    ((c_2.x + c_2.y) + c_2.z)
+  vec4 tmpvar_1;
+  tmpvar_1 = (((
+    (((texture2D (_MainTex, xlv_TEXCOORD0) + texture2D (_MainTex, xlv_TEXCOORD0_1)) + texture2D (_MainTex, xlv_TEXCOORD0_2)) + texture2D (_MainTex, xlv_TEXCOORD0_3))
+   + texture2D (_MainTex, xlv_TEXCOORD0_4)) + texture2D (_MainTex, xlv_TEXCOORD0_5)) + texture2D (_MainTex, xlv_TEXCOORD0_6));
+  vec3 tmpvar_2;
+  tmpvar_2 = (tmpvar_1.xyz * unity_ColorSpaceLuminance.xyz);
+  gl_FragData[0] = (tmpvar_1 / (7.5 + (
+    ((tmpvar_2.x + tmpvar_2.y) + tmpvar_2.z)
    + 
-    ((2.0 * sqrt((c_2.y * 
-      (c_2.x + c_2.z)
+    ((2.0 * sqrt((tmpvar_2.y * 
+      (tmpvar_2.x + tmpvar_2.z)
     ))) * unity_ColorSpaceLuminance.w)
   )));
 }
@@ -3162,12 +3105,11 @@ Bind ""texcoord"" TexCoord0
 ConstBuffer ""$Globals"" 160
 Vector 96 [_Offsets]
 Vector 144 [_MainTex_TexelSize]
-ConstBuffer ""UnityPerDraw"" 352
+ConstBuffer ""UnityPerDraw"" 336
 Matrix 0 [glstate_matrix_mvp]
 BindCB  ""$Globals"" 0
 BindCB  ""UnityPerDraw"" 1
 ""vs_4_0
-root12:aaacaaaa
 eefiecednmfoedijbcffahcaaajnkhggoddeifnlabaaaaaabmaeaaaaadaaaaaa
 cmaaaaaaiaaaaaaagiabaaaaejfdeheoemaaaaaaacaaaaaaaiaaaaaadiaaaaaa
 aaaaaaaaaaaaaaaaadaaaaaaaaaaaaaaapapaaaaebaaaaaaaaaaaaaaaaaaaaaa
@@ -3257,7 +3199,6 @@ ConstBuffer ""$Globals"" 160
 Vector 48 [unity_ColorSpaceLuminance]
 BindCB  ""$Globals"" 0
 ""ps_4_0
-root12:abababaa
 eefiecedhliefohhlnkdpflkbokkgefepfpgdiiaabaaaaaajmaeaaaaadaaaaaa
 cmaaaaaabeabaaaaeiabaaaaejfdeheooaaaaaaaaiaaaaaaaiaaaaaamiaaaaaa
 aaaaaaaaabaaaaaaadaaaaaaaaaaaaaaapaaaaaaneaaaaaaaaaaaaaaaaaaaaaa
@@ -3315,8 +3256,7 @@ pccabaaaaaaaaaaaegaobaaaaaaaaaaaagaabaaaabaaaaaadoaaaaab""
 Program ""vp"" {
 SubProgram ""opengl "" {
 // Stats: 17 math, 9 textures
-""!!GLSL#version 120
-
+""!!GLSL
 #ifdef VERTEX
 
 uniform vec4 _Offsets;
@@ -3327,14 +3267,14 @@ varying vec4 xlv_TEXCOORD3;
 varying vec4 xlv_TEXCOORD4;
 void main ()
 {
+  vec4 cse_1;
+  cse_1 = (_Offsets.xyxy * vec4(1.0, 1.0, -1.0, -1.0));
   gl_Position = (gl_ModelViewProjectionMatrix * gl_Vertex);
   xlv_TEXCOORD0 = gl_MultiTexCoord0.xy;
-  vec4 tmpvar_1;
-  tmpvar_1 = (_Offsets.xyxy * vec4(1.0, 1.0, -1.0, -1.0));
-  xlv_TEXCOORD1 = (gl_MultiTexCoord0.xyxy + tmpvar_1);
-  xlv_TEXCOORD2 = (gl_MultiTexCoord0.xyxy + (tmpvar_1 * 2.0));
-  xlv_TEXCOORD3 = (gl_MultiTexCoord0.xyxy + (tmpvar_1 * 3.0));
-  xlv_TEXCOORD4 = (gl_MultiTexCoord0.xyxy + (tmpvar_1 * 5.0));
+  xlv_TEXCOORD1 = (gl_MultiTexCoord0.xyxy + cse_1);
+  xlv_TEXCOORD2 = (gl_MultiTexCoord0.xyxy + (cse_1 * 2.0));
+  xlv_TEXCOORD3 = (gl_MultiTexCoord0.xyxy + (cse_1 * 3.0));
+  xlv_TEXCOORD4 = (gl_MultiTexCoord0.xyxy + (cse_1 * 5.0));
 }
 
 
@@ -3348,17 +3288,15 @@ varying vec4 xlv_TEXCOORD3;
 varying vec4 xlv_TEXCOORD4;
 void main ()
 {
-  vec4 color_1;
-  color_1 = (0.225 * texture2D (_MainTex, xlv_TEXCOORD0));
-  color_1 = (color_1 + (0.15 * texture2D (_MainTex, xlv_TEXCOORD1.xy)));
-  color_1 = (color_1 + (0.15 * texture2D (_MainTex, xlv_TEXCOORD1.zw)));
-  color_1 = (color_1 + (0.11 * texture2D (_MainTex, xlv_TEXCOORD2.xy)));
-  color_1 = (color_1 + (0.11 * texture2D (_MainTex, xlv_TEXCOORD2.zw)));
-  color_1 = (color_1 + (0.075 * texture2D (_MainTex, xlv_TEXCOORD3.xy)));
-  color_1 = (color_1 + (0.075 * texture2D (_MainTex, xlv_TEXCOORD3.zw)));
-  color_1 = (color_1 + (0.0525 * texture2D (_MainTex, xlv_TEXCOORD4.xy)));
-  color_1 = (color_1 + (0.0525 * texture2D (_MainTex, xlv_TEXCOORD4.zw)));
-  gl_FragData[0] = color_1;
+  gl_FragData[0] = (((
+    ((((
+      ((0.225 * texture2D (_MainTex, xlv_TEXCOORD0)) + (0.15 * texture2D (_MainTex, xlv_TEXCOORD1.xy)))
+     + 
+      (0.15 * texture2D (_MainTex, xlv_TEXCOORD1.zw))
+    ) + (0.11 * texture2D (_MainTex, xlv_TEXCOORD2.xy))) + (0.11 * texture2D (_MainTex, xlv_TEXCOORD2.zw))) + (0.075 * texture2D (_MainTex, xlv_TEXCOORD3.xy)))
+   + 
+    (0.075 * texture2D (_MainTex, xlv_TEXCOORD3.zw))
+  ) + (0.0525 * texture2D (_MainTex, xlv_TEXCOORD4.xy))) + (0.0525 * texture2D (_MainTex, xlv_TEXCOORD4.zw)));
 }
 
 
@@ -3395,12 +3333,11 @@ Bind ""vertex"" Vertex
 Bind ""texcoord"" TexCoord0
 ConstBuffer ""$Globals"" 160
 Vector 96 [_Offsets]
-ConstBuffer ""UnityPerDraw"" 352
+ConstBuffer ""UnityPerDraw"" 336
 Matrix 0 [glstate_matrix_mvp]
 BindCB  ""$Globals"" 0
 BindCB  ""UnityPerDraw"" 1
 ""vs_4_0
-root12:aaacaaaa
 eefiecedhjcoffdmcdajbfdajdolgeoicmclpmhpabaaaaaafeadaaaaadaaaaaa
 cmaaaaaaiaaaaaaadiabaaaaejfdeheoemaaaaaaacaaaaaaaiaaaaaadiaaaaaa
 aaaaaaaaaaaaaaaaadaaaaaaaaaaaaaaapapaaaaebaaaaaaaaaaaaaaaaaaaaaa
@@ -3480,7 +3417,6 @@ SubProgram ""d3d11 "" {
 // Stats: 9 math, 9 textures
 SetTexture 0 [_MainTex] 2D 0
 ""ps_4_0
-root12:abaaabaa
 eefiecedmjmmcfkdlgnfjhkkonhjjkmjpdhmfpfmabaaaaaaieaeaaaaadaaaaaa
 cmaaaaaaoeaaaaaabiabaaaaejfdeheolaaaaaaaagaaaaaaaiaaaaaajiaaaaaa
 aaaaaaaaabaaaaaaadaaaaaaaaaaaaaaapaaaaaakeaaaaaaaaaaaaaaaaaaaaaa

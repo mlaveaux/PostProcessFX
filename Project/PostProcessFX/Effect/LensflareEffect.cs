@@ -35,7 +35,7 @@ namespace PostProcessFX
 						m_sunflare = (Flare)Resources.Load("50mmZoom.flare");
 						if (m_sunflare == null)
 						{
-							Utility.log("LensflareEffect: Could not load 50mmZoom.flare");
+							PPFXUtility.log("LensflareEffect: Could not load 50mmZoom.flare");
 						} 
 						else
 						{

@@ -24,7 +24,7 @@ namespace PostProcessFX.Config
 			}
 			catch (Exception ex)
 			{
-				Utility.log("EffectConfig: Failed to save config " + ex.Message);
+				PPFXUtility.logException("EffectConfig: Failed to save config " + filename, ex);
 			}
 			finally
 			{
@@ -45,8 +45,8 @@ namespace PostProcessFX.Config
 				return (T)xmlSerializer.Deserialize(reader);
 			}
 			catch (Exception ex)
-			{
-				Utility.log("EffectConfig: " + ex.Message);
+            {
+                PPFXUtility.logException("EffectConfig: Failed to load config " + filename, ex);
 			}
 			finally
 			{

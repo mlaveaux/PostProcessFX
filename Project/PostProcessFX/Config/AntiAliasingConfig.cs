@@ -9,7 +9,7 @@ namespace PostProcessFX.Config
 	/**
 	 * These settings are important for anti aliasing. 
 	 */
-	class AntiAliasingConfig
+	public class AntiAliasingConfig
 	{
 		public int mode = 0;
 

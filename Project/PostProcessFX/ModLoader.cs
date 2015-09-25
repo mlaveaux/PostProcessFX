@@ -22,14 +22,10 @@ namespace PostProcessFX
         } 
         
         public void OnEnabled()
-        {
-            Utility.log("PostProcessFX enabled.");
-        }
+        {}
 
         public void OnDisabled()
-        {
-            Utility.log("PostProcessFX disabled.");
-        }
+        {}
 	}
 
 	public class ModLoader : ILoadingExtension
@@ -43,7 +39,7 @@ namespace PostProcessFX
 				UIView view = UIView.GetAView();
                 if (view == null)
                 {
-                    Utility.log("PostProcessFX: Can't find the UIView component.");
+                    PPFXUtility.log("PostProcessFX: Can't find the UIView component.");
                 }
                 else
                 {
@@ -58,7 +54,7 @@ namespace PostProcessFX
 			}
 			catch (Exception ex)
 			{
-				Utility.log("PostProcessFX: failed to initialize " + ex.Message);
+				PPFXUtility.log("PostProcessFX: failed to initialize " + ex.Message);
 			}
 		}
 

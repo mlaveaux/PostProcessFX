@@ -9,7 +9,7 @@ namespace PostProcessFX.Config
     /**
      * The motion blur configuration part.
      */
-	class MotionblurConfig
+	public class MotionblurConfig
 	{
 		public int mode = 0;
 		public float velocityScale = 0.375f;

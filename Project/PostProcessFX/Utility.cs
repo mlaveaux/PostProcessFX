@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace PostProcessFX
 {
-	class Utility
+	class PPFXUtility
 	{
 		public static float drawSliderWithLabel(float x, float y, float min, float max, String label, float configValue)
 		{
@@ -33,10 +33,24 @@ namespace PostProcessFX
 			return (int)GUI.HorizontalSlider(new Rect(x + xsize, y, 100, 20), configValue, min, max);
 		}
 
-        public static void log(object text)
+        public static void log(object message)
         {
-            DebugOutputPanel.print(text);
-            Utility.log(text);
+            //DebugOutputPanel.Show();
+            //DebugOutputPanel.print(text);
+            Debug.Log(message);
+        }
+
+        public static void logException(object message, Exception ex)
+        {
+            log(message);
+
+            Exception inner = ex.InnerException;
+
+            while (inner != null)
+            {
+                log("Exception: " + inner);
+                inner = inner.InnerException;
+            }
         }
 	}
 }

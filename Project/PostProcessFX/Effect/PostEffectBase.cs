@@ -20,7 +20,7 @@ namespace UnityStandardAssets.ImageEffects
         {
             if (!s)
             {
-                Utility.log("Missing shader in " + ToString());
+                PPFXUtility.log("Missing shader in " + ToString());
                 enabled = false;
                 return null;
             }
@@ -31,7 +31,7 @@ namespace UnityStandardAssets.ImageEffects
             if (!s.isSupported)
             {
                 NotSupported();
-                Utility.log("The shader " + s.ToString() + " on effect " + ToString() + " is not supported on this platform!");
+                PPFXUtility.log("The shader " + s.ToString() + " on effect " + ToString() + " is not supported on this platform!");
                 return null;
             }
             else
@@ -49,7 +49,7 @@ namespace UnityStandardAssets.ImageEffects
         {
             if (!s)
             {
-                Utility.log("Missing shader in " + ToString());
+                PPFXUtility.log("Missing shader in " + ToString());
                 return null;
             }
 
@@ -83,7 +83,7 @@ namespace UnityStandardAssets.ImageEffects
 
         public virtual bool CheckResources()
         {
-            Utility.log("CheckResources () for " + ToString() + " should be overwritten.");
+            PPFXUtility.log("CheckResources () for " + ToString() + " should be overwritten.");
             return isSupported;
         }
 
@@ -140,13 +140,13 @@ namespace UnityStandardAssets.ImageEffects
 
         protected void ReportAutoDisable()
         {
-            Utility.log("The image effect " + ToString() + " has been disabled as it's not supported on the current platform.");
+            PPFXUtility.log("The image effect " + ToString() + " has been disabled as it's not supported on the current platform.");
         }
 
         // deprecated but needed for old effects to survive upgrading
         bool CheckShader(Shader s)
         {
-            Utility.log("The shader " + s.ToString() + " on effect " + ToString() + " is not part of the Unity 3.2+ effects suite anymore. For best performance and quality, please ensure you are using the latest Standard Assets Image Effects (Pro only) package.");
+            PPFXUtility.log("The shader " + s.ToString() + " on effect " + ToString() + " is not part of the Unity 3.2+ effects suite anymore. For best performance and quality, please ensure you are using the latest Standard Assets Image Effects (Pro only) package.");
             if (!s.isSupported)
             {
                 NotSupported();

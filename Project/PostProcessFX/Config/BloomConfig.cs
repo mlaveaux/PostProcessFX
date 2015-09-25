@@ -6,7 +6,10 @@ using System.Threading.Tasks;
 
 namespace PostProcessFX.Config
 {
-	class BloomConfig
+    /**
+     * The configuration for the Bloom component. 
+     */
+	public class BloomConfig
 	{
 		// Bloom configuration
 		public bool bloomEnabled = true;
@@ -25,7 +28,7 @@ namespace PostProcessFX.Config
 		public float lensflareRotation = 0.0f;
 		public int lensflareBlurIterations = 1;
 
-		public Boolean lensflareSun = false;
+		public bool lensflareSun = false;
 
 		public static BloomConfig getDefaultPreset()
 		{

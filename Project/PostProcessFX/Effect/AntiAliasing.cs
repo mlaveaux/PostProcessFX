@@ -92,13 +92,13 @@ namespace UnityStandardAssets.ImageEffects
         {
             CheckSupport(false);
 
-            materialFXAAPreset2 = CreateMaterial(shaderFXAAPreset2, materialFXAAPreset2);
-            materialFXAAPreset3 = CreateMaterial(shaderFXAAPreset3, materialFXAAPreset3);
-            materialFXAAII = CreateMaterial(shaderFXAAII, materialFXAAII);
-            materialFXAAIII = CreateMaterial(shaderFXAAIII, materialFXAAIII);
-            nfaa = CreateMaterial(nfaaShader, nfaa);
-            ssaa = CreateMaterial(ssaaShader, ssaa);
-            dlaa = CreateMaterial(dlaaShader, dlaa);
+            materialFXAAPreset2 = CheckShaderAndCreateMaterial(shaderFXAAPreset2, materialFXAAPreset2);
+            materialFXAAPreset3 = CheckShaderAndCreateMaterial(shaderFXAAPreset3, materialFXAAPreset3);
+            materialFXAAII = CheckShaderAndCreateMaterial(shaderFXAAII, materialFXAAII);
+            materialFXAAIII = CheckShaderAndCreateMaterial(shaderFXAAIII, materialFXAAIII);
+            nfaa = CheckShaderAndCreateMaterial(nfaaShader, nfaa);
+            ssaa = CheckShaderAndCreateMaterial(ssaaShader, ssaa);
+            dlaa = CheckShaderAndCreateMaterial(dlaaShader, dlaa);
 
             if (!ssaaShader.isSupported)
             {

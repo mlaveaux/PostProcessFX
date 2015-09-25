@@ -18,7 +18,7 @@ namespace PostProcessFX
 		private MotionblurConfig m_activeConfig;
 		private MotionblurConfig m_savedConfig;
 
-		private static String configFilename = "PostProcessFX/motionblur_config.xml";
+        private static String configFilename = "PostProcessFX_motionblur_config.xml";
 
 		public MotionblurEffect()
 		{
@@ -49,18 +49,18 @@ namespace PostProcessFX
 			m_activeConfig.mode = (int)GUI.HorizontalSlider(new Rect(x, y, 100, 20), m_activeConfig.mode, 0.0f, 5.1f);
 			y += 25;
 
-			m_activeConfig.velocityScale = Utility.drawSliderWithLabel(x, y, 0.0f, 1.0f, "Velocity scale", m_activeConfig.velocityScale);
+			m_activeConfig.velocityScale = PPFXUtility.drawSliderWithLabel(x, y, 0.0f, 1.0f, "Velocity scale", m_activeConfig.velocityScale);
 			y += 25;
 
-			m_activeConfig.maxVelocity = Utility.drawSliderWithLabel(x, y, 0.0f, 20.0f, "Velocity max", m_activeConfig.maxVelocity);
+			m_activeConfig.maxVelocity = PPFXUtility.drawSliderWithLabel(x, y, 0.0f, 20.0f, "Velocity max", m_activeConfig.maxVelocity);
 			y += 25;
 
-			m_activeConfig.minVelocity = Utility.drawSliderWithLabel(x, y, 0.0f, 20.0f, "Velocity min", m_activeConfig.minVelocity);
+			m_activeConfig.minVelocity = PPFXUtility.drawSliderWithLabel(x, y, 0.0f, 20.0f, "Velocity min", m_activeConfig.minVelocity);
 			y += 25;
 
 			if (m_activeConfig.mode >= 3)
 			{
-				m_activeConfig.jitter = Utility.drawSliderWithLabel(x, y, 0.0f, 1.0f, "Jitter", m_activeConfig.jitter);
+				m_activeConfig.jitter = PPFXUtility.drawSliderWithLabel(x, y, 0.0f, 1.0f, "Jitter", m_activeConfig.jitter);
 				y += 25;
 			}
 
@@ -98,7 +98,7 @@ namespace PostProcessFX
 				m_motionblurComponent = Camera.main.gameObject.AddComponent<CameraMotionBlur>();
 				if (m_motionblurComponent == null)
 				{
-					Utility.log("MotionblurEffect: Could not add component CameraMotionBlur to Camera.");
+					PPFXUtility.log("MotionblurEffect: Could not add component CameraMotionBlur to Camera.");
 				}
 				else
 				{

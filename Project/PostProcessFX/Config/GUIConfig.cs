@@ -11,7 +11,7 @@ namespace PostProcessFX.Config
     /**
      * The configuration for the options menu.
      */
-	class GUIConfig
+	public class GUIConfig
 	{
 		// Global options.
 		public int toggleUIKey = (int)KeyCode.F9;

@@ -26,7 +26,7 @@ namespace PostProcessFX
 
 	class ConfigUI : MonoBehaviour
 	{
-		public const String configFilename = "PostProcessFX/GUIConfig.xml";
+		public const String configFilename = "PostProcessFX_gui_config.xml";
 
 		private String m_toggleKeyString;
 
@@ -78,7 +78,7 @@ namespace PostProcessFX
 			float x = m_config.menuPositionX;
 			float y = m_config.menuPositionY;
 
-			GUI.Box(new Rect(x, y, 320, 360), "");
+			GUI.Box(new Rect(x, y, 320, 380), "");
 
 			if (GUI.Button(new Rect(x, y, 300, 20), "PostProcessFX v2 UI"))
 			{
@@ -218,7 +218,7 @@ namespace PostProcessFX
 
 		public void OnDestroy()
 		{
-            Utility.log("PostProcessFX: Saving settings.");
+            PPFXUtility.log("PostProcessFX: Saving settings.");
             m_bloom.save();
             m_motionblur.save();
             m_antiAliasing.save();
