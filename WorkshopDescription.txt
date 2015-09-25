@@ -1,4 +1,4 @@
-Enable additional post processing effects.
+Enable additional post processing effects such as bloom, lensflare, different aa options and motion blur.
 
 [h1] Bloom and lensflare [/h1]
 
@@ -46,7 +46,7 @@ Supports CameraMotion, LocalBlur, Reconstruction, ReconstructionDX11 and Reconst
 	
 [h1] Additional Information [/h1]
 
-All effects can be disabled so they don't have any performance impact. An ingame UI is provided to twae the options and can be toggled with F9 (default), the toggle key can be changed in UI.[url=http://pastebin.com/qe5BwdA2]Here[/url] is a list of possible keycodes, fill in the string and not the corresponding number.
+All effects can be disabled so they don't have any performance impact. An ingame UI is provided to tweak the options and can be toggled with F9 (default), the toggle key can be changed in UI.[url=http://pastebin.com/qe5BwdA2]Here[/url] is a list of possible keycodes, fill in the string and not the corresponding number.
 
 [h1] Changelog [/h1]
 
