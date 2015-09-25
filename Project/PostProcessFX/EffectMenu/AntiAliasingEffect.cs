@@ -1,10 +1,13 @@
-﻿using PostProcessFX.EffectMenu;
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+
+using PostProcessFX.Config;
+using PostProcessFX.EffectMenu;
+
 using UnityEngine;
+using UnityStandardAssets.ImageEffects;
 
 namespace PostProcessFX
 {
@@ -14,20 +17,39 @@ namespace PostProcessFX
 	 */
 	class AntiAliasingEffect : IEffectMenu
 	{
-		public AntialiasingAsPostEffect AAComponent = null;
-		
-		public AntiAliasingEffect(EffectConfig config)
+		private Antialiasing m_component = null;
+		private AntiAliasingConfig m_activeConfig = null;
+        private AntiAliasingConfig m_savedConfig = null;
+
+        private static String configFilename = "PostProcessFX/aa_config.xml";
+
+		public AntiAliasingEffect()
 		{
-			AAComponent = Camera.main.GetComponent<AntialiasingAsPostEffect>();
-			applyConfig(config);
+			m_component = Camera.main.GetComponent<Antialiasing>();
+            
+            m_savedConfig = ConfigUtility.Deserialize<AntiAliasingConfig>(configFilename);
+            if (m_savedConfig == null)
+            {
+                m_savedConfig = AntiAliasingConfig.getDefaultPreset();
+            }
+
+            m_activeConfig = m_savedConfig;
+
+			applyConfig();
 		}
 
 		~AntiAliasingEffect()
 		{
-			Disable();
+			disable();
 		}
 
-		public void drawGUI(EffectConfig config, float x, float y)
+        public void save()
+        {
+            ConfigUtility.Serialize<AntiAliasingConfig>(configFilename, m_activeConfig);
+            m_savedConfig = m_activeConfig;
+        }
+
+		public void onGUI(float x, float y)
 		{
 			float currentX = x;
 			float currentY = y;
@@ -35,75 +57,75 @@ namespace PostProcessFX
 			GUI.Label(new Rect(currentX, currentY, 200, 20), "Anti Aliasing Mode: ");
 			currentY += 25;
 
-			config.antiAliasingMode = DrawGUI.drawIntSliderWithLabel(currentX, currentY, 0, 7,
-				getAntiAliasingType(config.antiAliasingMode), config.antiAliasingMode);
+			m_activeConfig.mode = Utility.drawIntSliderWithLabel(currentX, currentY, 0, 7,
+				getAntiAliasingType(m_activeConfig.mode), m_activeConfig.mode);
 			currentY += 25;
 
-			if (config.antiAliasingMode != 0)
+			if (m_activeConfig.mode != 0)
 			{
-				switch ((AAMode)(config.antiAliasingMode - 1))
+				switch ((AAMode)(m_activeConfig.mode - 1))
 				{
 					case AAMode.FXAA3Console:
-						config.FXAA3minThreshhold =  DrawGUI.drawSliderWithLabel(currentX, currentY, 0.0f, 1.0f, "min edge threshhold", config.FXAA3minThreshhold);
+						m_activeConfig.FXAA3minThreshhold = Utility.drawSliderWithLabel(currentX, currentY, 0.0f, 1.0f, "min edge threshhold", m_activeConfig.FXAA3minThreshhold);
 						currentY += 25;
 
-						config.FXAA3maxThreshhold = DrawGUI.drawSliderWithLabel(currentX, currentY, 0.0f, 1.0f, "max edge threshhold", config.FXAA3maxThreshhold);
+						m_activeConfig.FXAA3maxThreshhold = Utility.drawSliderWithLabel(currentX, currentY, 0.0f, 1.0f, "max edge threshhold", m_activeConfig.FXAA3maxThreshhold);
 						currentY += 25;
 
-						config.FXAA3sharpness = DrawGUI.drawSliderWithLabel(currentX, currentY, 0.0f, 4.0f, "sharpness", config.FXAA3sharpness);
+						m_activeConfig.FXAA3sharpness = Utility.drawSliderWithLabel(currentX, currentY, 0.0f, 4.0f, "sharpness", m_activeConfig.FXAA3sharpness);
 						currentY += 25;
 						break;
 
 					case AAMode.NFAA:
-						config.NFAAoffset = DrawGUI.drawSliderWithLabel(currentX, currentY, 0.0f, 1.0f, "edge offset", config.NFAAoffset);
+						m_activeConfig.NFAAoffset = Utility.drawSliderWithLabel(currentX, currentY, 0.0f, 1.0f, "edge offset", m_activeConfig.NFAAoffset);
 						currentY += 25;
 
-						config.NFAAblurRadius = DrawGUI.drawSliderWithLabel(currentX, currentY, 0.0f, 32.0f, "blur radius", config.NFAAblurRadius);
+						m_activeConfig.NFAAblurRadius = Utility.drawSliderWithLabel(currentX, currentY, 0.0f, 32.0f, "blur radius", m_activeConfig.NFAAblurRadius);
 						currentY += 25;
 						break;
 
 					case AAMode.DLAA:
-						config.DLAAsharp = GUI.Toggle(new Rect(currentX, currentY, 100, 20), config.DLAAsharp, "sharp");
+						m_activeConfig.DLAAsharp = GUI.Toggle(new Rect(currentX, currentY, 100, 20), m_activeConfig.DLAAsharp, "sharp");
 						currentY += 25;
 						break;
 				}
 			}
 
-			applyConfig(config);
+			applyConfig();
 		}
 
-		private void applyConfig(EffectConfig config)
+		private void applyConfig()
 		{
-			if (config.antiAliasingMode == 0)
+			if (m_activeConfig.mode == 0)
 			{
-				Disable();
+				disable();
 			}
 			else
 			{
-				Enable();
+				enable();
 
-				AAComponent.mode = (AAMode)config.antiAliasingMode - 1;
-				AAComponent.blurRadius = config.NFAAblurRadius;
-				AAComponent.dlaaSharp = config.DLAAsharp;
+				m_component.mode = (AAMode)m_activeConfig.mode - 1;
+				m_component.blurRadius = m_activeConfig.NFAAblurRadius;
+				m_component.dlaaSharp = m_activeConfig.DLAAsharp;
 
-				AAComponent.edgeSharpness = config.FXAA3sharpness;
-				AAComponent.edgeThreshold = config.FXAA3maxThreshhold;
-				AAComponent.edgeThresholdMin = config.FXAA3minThreshhold;
+				m_component.edgeSharpness = m_activeConfig.FXAA3sharpness;
+				m_component.edgeThreshold = m_activeConfig.FXAA3maxThreshhold;
+				m_component.edgeThresholdMin = m_activeConfig.FXAA3minThreshhold;
 			}
 		}
 				
-		private void Enable()
+		private void enable()
 		{
-			if (AAComponent == null)
+			if (m_component == null)
 			{
-				AAComponent = Camera.main.gameObject.AddComponent<AntialiasingAsPostEffect>();
-				if (AAComponent == null)
+				m_component = Camera.main.gameObject.AddComponent<Antialiasing>();
+				if (m_component == null)
 				{
-					Debug.LogError("AntiAliasingEffect: Could not add AntialiasingAsPostEffect to Camera.");
+					Utility.log("AntiAliasingEffect: Could not add AntialiasingAsPostEffect to Camera.");
 				}
 				else
 				{
-					AAComponent.enabled = false;
+					m_component.enabled = false;
 
 					Material dlaaMaterial = new Material(dlaaShaderText);
 					Material nfaaMaterial = new Material(nfaaShaderText);
@@ -113,25 +135,25 @@ namespace PostProcessFX
 					Material fxaaPreset3Material = new Material(fxaaPreset3ShaderText);
 					Material ssaaMaterial = new Material(ssaaShaderText);
 
-					AAComponent.nfaaShader = nfaaMaterial.shader;
-					AAComponent.dlaaShader = dlaaMaterial.shader;
-					AAComponent.shaderFXAAII = fxaa2Material.shader;
-					AAComponent.shaderFXAAIII = fxaa3ConsoleMaterial.shader;
-					AAComponent.shaderFXAAPreset2 = fxaaPreset2Material.shader;
-					AAComponent.shaderFXAAPreset3 = fxaaPreset3Material.shader;
-					AAComponent.ssaaShader = ssaaMaterial.shader;
+					m_component.nfaaShader = nfaaMaterial.shader;
+					m_component.dlaaShader = dlaaMaterial.shader;
+					m_component.shaderFXAAII = fxaa2Material.shader;
+					m_component.shaderFXAAIII = fxaa3ConsoleMaterial.shader;
+					m_component.shaderFXAAPreset2 = fxaaPreset2Material.shader;
+					m_component.shaderFXAAPreset3 = fxaaPreset3Material.shader;
+					m_component.ssaaShader = ssaaMaterial.shader;
 				}
 			}
 			
-			AAComponent.enabled = true;
+			m_component.enabled = true;
 		}
 
-		private void Disable()
+		private void disable()
 		{
-			if (AAComponent != null)
+			if (m_component != null)
 			{
-				MonoBehaviour.DestroyImmediate(AAComponent);
-				AAComponent = null;
+				MonoBehaviour.DestroyImmediate(m_component);
+				m_component = null;
 			}
 		}
 		

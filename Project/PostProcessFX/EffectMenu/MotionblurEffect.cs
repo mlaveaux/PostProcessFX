@@ -1,82 +1,104 @@
-﻿using PostProcessFX.EffectMenu;
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
+using PostProcessFX.EffectMenu;
+using PostProcessFX.Config;
+
 using UnityEngine;
+using UnityStandardAssets.ImageEffects;
 
 namespace PostProcessFX
 {
 	class MotionblurEffect : IEffectMenu
 	{
-		private CameraMotionBlur motionblurComponent = null;
+		private CameraMotionBlur m_motionblurComponent = null;
 
-		public MotionblurEffect(EffectConfig config)
+		private MotionblurConfig m_activeConfig;
+		private MotionblurConfig m_savedConfig;
+
+		private static String configFilename = "PostProcessFX/motionblur_config.xml";
+
+		public MotionblurEffect()
 		{
-			motionblurComponent = Camera.main.GetComponent<CameraMotionBlur>();
-			applyConfig(config);
+			m_motionblurComponent = Camera.main.GetComponent<CameraMotionBlur>();
+			
+            m_savedConfig = ConfigUtility.Deserialize<MotionblurConfig>(configFilename);
+			if (m_savedConfig == null)
+			{
+				m_savedConfig = MotionblurConfig.getDefaultConfig();
+			}
+
+			m_activeConfig = m_savedConfig;
+
+			applyConfig();
 		}
 
 		~MotionblurEffect()
 		{
-			Disable();
+			disable();
 		}
 		
-		public void drawGUI(EffectConfig config, float x, float y)
+		public void onGUI(float x, float y)
 		{
-			GUI.Label(new Rect(x, y, 200, 20), "Motionblur Mode: ");
-			GUI.Label(new Rect(x + 200, y, 120, 20), getMotionBlurType(config.motionBlurMode));
+			GUI.Label(new Rect(x, y, 150, 20), "Motionblur Mode: ");
+			GUI.Label(new Rect(x + 150, y, 150, 20), getMotionBlurType(m_activeConfig.mode));
 			y += 25;
 
-			config.motionBlurMode = (int)GUI.HorizontalSlider(new Rect(x, y, 100, 20), config.motionBlurMode, 0.0f, 5.1f);
+			m_activeConfig.mode = (int)GUI.HorizontalSlider(new Rect(x, y, 100, 20), m_activeConfig.mode, 0.0f, 5.1f);
 			y += 25;
 
-			config.motionblurVelocityScale = DrawGUI.drawSliderWithLabel(x, y, 0.0f, 1.0f, "Velocity scale", config.motionblurVelocityScale);
+			m_activeConfig.velocityScale = Utility.drawSliderWithLabel(x, y, 0.0f, 1.0f, "Velocity scale", m_activeConfig.velocityScale);
 			y += 25;
 
-			config.motionblurMaxVelocity = DrawGUI.drawSliderWithLabel(x, y, 0.0f, 20.0f, "Velocity max", config.motionblurMaxVelocity);
+			m_activeConfig.maxVelocity = Utility.drawSliderWithLabel(x, y, 0.0f, 20.0f, "Velocity max", m_activeConfig.maxVelocity);
 			y += 25;
 
-			config.motionblurMinVelocity = DrawGUI.drawSliderWithLabel(x, y, 0.0f, 20.0f, "Velocity min", config.motionblurMinVelocity);
+			m_activeConfig.minVelocity = Utility.drawSliderWithLabel(x, y, 0.0f, 20.0f, "Velocity min", m_activeConfig.minVelocity);
 			y += 25;
 
-			if (config.motionBlurMode >= 3)
+			if (m_activeConfig.mode >= 3)
 			{
-				config.motionblurJitter = DrawGUI.drawSliderWithLabel(x, y, 0.0f, 1.0f, "Jitter", config.motionblurJitter);
+				m_activeConfig.jitter = Utility.drawSliderWithLabel(x, y, 0.0f, 1.0f, "Jitter", m_activeConfig.jitter);
 				y += 25;
 			}
 
-			applyConfig(config);
+			applyConfig();
 		}
 
-		private void applyConfig(EffectConfig config)
+		public void save()
 		{
-			if (config.motionBlurMode == 0)
+			ConfigUtility.Serialize<MotionblurConfig>(configFilename, m_activeConfig);
+			m_savedConfig = m_activeConfig;
+		}
+
+		private void applyConfig()
+		{
+			if (m_activeConfig.mode == 0)
 			{
-				Disable();
+				disable();
 			}
 			else
 			{
-				Enable();
+				enable();
 
-				motionblurComponent.filterType = (CameraMotionBlur.MotionBlurFilter)config.motionBlurMode - 1;
-				motionblurComponent.velocityScale = config.motionblurVelocityScale;
-				motionblurComponent.minVelocity = config.motionblurMinVelocity;
-				motionblurComponent.maxVelocity = config.motionblurMaxVelocity;
-				motionblurComponent.jitter = config.motionblurJitter;
+				m_motionblurComponent.filterType = (CameraMotionBlur.MotionBlurFilter)m_activeConfig.mode - 1;
+				m_motionblurComponent.velocityScale = m_activeConfig.velocityScale;
+				m_motionblurComponent.minVelocity = m_activeConfig.minVelocity;
+				m_motionblurComponent.maxVelocity = m_activeConfig.maxVelocity;
+				m_motionblurComponent.jitter = m_activeConfig.jitter;
 			}
 		}
 
-		private void Enable()
+		private void enable()
 		{
-			if (motionblurComponent == null)
+			if (m_motionblurComponent == null)
 			{
-				motionblurComponent = Camera.main.gameObject.AddComponent<CameraMotionBlur>();
-				if (motionblurComponent == null)
+				m_motionblurComponent = Camera.main.gameObject.AddComponent<CameraMotionBlur>();
+				if (m_motionblurComponent == null)
 				{
-					Debug.LogError("MotionblurEffect: Could not add component CameraMotionBlur to Camera.");
+					Utility.log("MotionblurEffect: Could not add component CameraMotionBlur to Camera.");
 				}
 				else
 				{
@@ -85,21 +107,21 @@ namespace PostProcessFX
 					Texture2D motionblurJitter = new Texture2D(64, 64);
 					motionblurJitter.LoadImage(motionblurJitterTextureData);
 
-					motionblurComponent.dx11MotionBlurShader = dx11MotionBlurMaterial.shader;
-					motionblurComponent.shader = motionBlurMaterial.shader;
-					motionblurComponent.noiseTexture = motionblurJitter;
+					m_motionblurComponent.dx11MotionBlurShader = dx11MotionBlurMaterial.shader;
+					m_motionblurComponent.shader = motionBlurMaterial.shader;
+					m_motionblurComponent.noiseTexture = motionblurJitter;
 				}
 			}
 			
-			motionblurComponent.enabled = true;
+			m_motionblurComponent.enabled = true;
 		}
 
-		private void Disable()
+		private void disable()
 		{
-			if (motionblurComponent != null)
+			if (m_motionblurComponent != null)
 			{
-				MonoBehaviour.DestroyImmediate(motionblurComponent);
-				motionblurComponent = null;
+				MonoBehaviour.DestroyImmediate(m_motionblurComponent);
+				m_motionblurComponent = null;
 			}
 		}
 

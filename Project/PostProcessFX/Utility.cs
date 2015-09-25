@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace PostProcessFX
 {
-	class DrawGUI
+	class Utility
 	{
 		public static float drawSliderWithLabel(float x, float y, float min, float max, String label, float configValue)
 		{
@@ -32,5 +32,11 @@ namespace PostProcessFX
 			GUI.Label(new Rect(x, y, xsize, ysize), label);
 			return (int)GUI.HorizontalSlider(new Rect(x + xsize, y, 100, 20), configValue, min, max);
 		}
+
+        public static void log(object text)
+        {
+            DebugOutputPanel.print(text);
+            Utility.log(text);
+        }
 	}
 }

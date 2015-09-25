@@ -6,6 +6,7 @@ using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
 using ColossalFramework.UI;
+using PostProcessFX.Config;
 
 namespace PostProcessFX
 {
@@ -25,18 +26,15 @@ namespace PostProcessFX
 
 	class ConfigUI : MonoBehaviour
 	{
-		public const String configFilename = "PostProcessFXConfig.xml";
+		public const String configFilename = "PostProcessFX/GUIConfig.xml";
 
 		private String m_toggleKeyString;
 
 		private BloomEffect m_bloom;
 		private MotionblurEffect m_motionblur;
 		private AntiAliasingEffect m_antiAliasing;
-		private SSAOEffect m_ssaoEffect;
-		private ScreenSpaceReflectionEffect m_screenReflection;
-		private DepthOfFieldEffect m_dofEffect;
 				
-		private EffectConfig m_config = null;
+		private GUIConfig m_config = null;
 		private MonoBehaviour m_parent;
 		private MenuType m_activeMenu;
 
@@ -47,21 +45,19 @@ namespace PostProcessFX
 
 		public ConfigUI()
 		{
-			m_config = EffectConfig.Deserialize(configFilename);
-			if (m_config == null)
-			{
-				m_config = new EffectConfig();
-				EffectConfig.Serialize(configFilename, m_config);
-			}
+            m_config = ConfigUtility.Deserialize<GUIConfig>(configFilename);
+            if (m_config == null)
+            {
+                m_config = GUIConfig.getDefaultConfig();
+            }
 
-			m_bloom = new BloomEffect(m_config);
-			m_antiAliasing = new AntiAliasingEffect(m_config);
-			m_motionblur = new MotionblurEffect(m_config);
-			m_ssaoEffect = new SSAOEffect(m_config);
-			m_screenReflection = new ScreenSpaceReflectionEffect(m_config);
-			m_dofEffect = new DepthOfFieldEffect(m_config);
+            m_bloom = new BloomEffect();
+			m_antiAliasing = new AntiAliasingEffect();
+			m_motionblur = new MotionblurEffect();
 			
 			m_toggleKeyString = Enum.GetName(typeof(KeyCode), m_config.toggleUIKey);
+
+            OnDestroy();
 		}
 
 		public void setParent(MonoBehaviour parent)
@@ -71,7 +67,7 @@ namespace PostProcessFX
 
 		public void OnGUI()
 		{
-			if (m_config.guiActive)
+            if (m_config.active)
 			{
 				drawGUI();
 			}
@@ -82,16 +78,16 @@ namespace PostProcessFX
 			float x = m_config.menuPositionX;
 			float y = m_config.menuPositionY;
 
-			GUI.Box(new Rect(x, y, 320, 340), "");
+			GUI.Box(new Rect(x, y, 320, 360), "");
 
-			if (GUI.Button(new Rect(x, y, 300, 20), "PostProcessFX ControlUI"))
+			if (GUI.Button(new Rect(x, y, 300, 20), "PostProcessFX v2 UI"))
 			{
 				m_dragging = true;
 			}
 
 			if (GUI.Button(new Rect(x + 300, y, 20, 20), "X"))
 			{
-				m_config.guiActive = false;
+                m_config.active = false;
 			}
 
 			x += 10;
@@ -115,24 +111,8 @@ namespace PostProcessFX
 			{
 				m_activeMenu = MenuType.Motionblur;
 			}
-
-			/*if (GUI.Button(new Rect(x + 285, y, 90, 20), "DepthOfField"))
-			{
-				m_activeMenu = MenuType.DepthOfField;
-			}*/
-
-			/*if (GUI.Button(new Rect(x + 285, y, 75, 20), "SSAO"))
-			{
-				m_activeMenu = MenuType.SSAO;
-			}
-
-			if (GUI.Button(new Rect(x + 360, y, 75, 20), "Reflection"))
-			{
-				m_activeMenu = MenuType.Reflection;
-			}*/
-
-
-			y += 25;
+			
+            y += 25;
 			switch (m_activeMenu)
 			{
 				case MenuType.Global:
@@ -158,27 +138,15 @@ namespace PostProcessFX
 					break;
 
 				case MenuType.AntiAliasing:
-					m_antiAliasing.drawGUI(m_config, x, y);
+					m_antiAliasing.onGUI(x, y);
 					break;
 
 				case MenuType.Bloom:
-					m_bloom.drawGUI(m_config, x, y);
+					m_bloom.onGUI(x, y);
 					break;
 
 				case MenuType.Motionblur:
-					m_motionblur.drawGUI(m_config, x, y);
-					break;
-
-				case MenuType.SSAO:
-					m_ssaoEffect.drawGUI(m_config, x, y);
-					break;
-
-				case MenuType.Reflection:
-					m_screenReflection.drawGUI(m_config, x, y);
-					break;
-
-				case MenuType.DepthOfField:
-					m_dofEffect.drawGUI(m_config, x, y);
+					m_motionblur.onGUI(x, y);
 					break;
 			}
 		}
@@ -211,7 +179,7 @@ namespace PostProcessFX
 			{
 				if (!m_toggle)
 				{
-					m_config.guiActive = !m_config.guiActive;
+                    m_config.active = !m_config.active;
 				}
 				m_toggle = true;
 			}
@@ -250,7 +218,12 @@ namespace PostProcessFX
 
 		public void OnDestroy()
 		{
-			EffectConfig.Serialize(configFilename, m_config);
+            Utility.log("PostProcessFX: Saving settings.");
+            m_bloom.save();
+            m_motionblur.save();
+            m_antiAliasing.save();
+
+            ConfigUtility.Serialize<GUIConfig>(configFilename, m_config);
 		}
 
 		public void OnMouseUp() 

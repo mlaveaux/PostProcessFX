@@ -19,7 +19,17 @@ namespace PostProcessFX
 		public string Name
 		{
 			get { return "PostProcessFX"; }
-		}
+        } 
+        
+        public void OnEnabled()
+        {
+            Utility.log("PostProcessFX enabled.");
+        }
+
+        public void OnDisabled()
+        {
+            Utility.log("PostProcessFX disabled.");
+        }
 	}
 
 	public class ModLoader : ILoadingExtension
@@ -27,34 +37,34 @@ namespace PostProcessFX
 		private ConfigUI m_configUI;
 
 		public void OnLevelLoaded(LoadMode mode)
-		{
+        {
 			try
 			{
-				UIView view = UIView.GetAView();				
+				UIView view = UIView.GetAView();
+                if (view == null)
+                {
+                    Utility.log("PostProcessFX: Can't find the UIView component.");
+                }
+                else
+                {
+                    m_configUI = view.gameObject.GetComponent<ConfigUI>();
+                    if (m_configUI == null)
+                    {
+                        m_configUI = view.gameObject.AddComponent<ConfigUI>();
+                    }
 
-				m_configUI = view.gameObject.GetComponent<ConfigUI>();
-				if (m_configUI == null)
-				{
-					m_configUI = view.gameObject.AddComponent<ConfigUI>();
-				}
-
-				m_configUI.setParent(view);
+                    m_configUI.setParent(view);
+                }
 			}
 			catch (Exception ex)
 			{
-				Debug.LogError("PostProcessFX: failed to initialize " + ex.Message);
+				Utility.log("PostProcessFX: failed to initialize " + ex.Message);
 			}
 		}
 
-		public void OnLevelUnloading()
-		{
+		public void OnLevelUnloading() {}
 
-		}
-
-		public void OnCreated(ILoading loading)
-		{
-
-		}
+		public void OnCreated(ILoading loading)	{}
 
 		public void OnReleased()
 		{
