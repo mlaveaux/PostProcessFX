@@ -52,6 +52,8 @@ All effects can be disabled so they don't have any performance impact. An ingame
 
 [h1] Changelog [/h1]
 
+    - Fixed the effects for After Dark patch.
+    - Added some presets and the options to load the saved configuration.
 	- Added draggable config ui.
 	- Options are split into tabs, added more options and renamed some options.
 
