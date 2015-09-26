@@ -78,9 +78,9 @@ namespace PostProcessFX
 			float x = m_config.menuPositionX;
 			float y = m_config.menuPositionY;
 
-			GUI.Box(new Rect(x, y, 320, 380), "");
+			GUI.Box(new Rect(x, y, 320, 400), "");
 
-			if (GUI.Button(new Rect(x, y, 300, 20), "PostProcessFX v2 UI"))
+			if (GUI.Button(new Rect(x, y, 300, 20), "PostProcessFX UI"))
 			{
 				m_dragging = true;
 			}

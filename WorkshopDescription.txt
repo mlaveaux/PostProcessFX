@@ -6,13 +6,15 @@ Can be fully controlled with the ingame UI with the following settings:
 
     - bloomIntensity: The intensity of the bloom effect.
     - bloomThreshhold: Lower means bloom occurs with lower light intensity.
-    - bloomBlur: The amount of blur applied to the bloom effect.
-    - lensflareRotation: In which rotation the lensflare expands.
-    - lensflareWidth: The width of the lensflare effect.
+    - bloomSpread: The amount that the bloom is blurred.
+    - bloomBlurIteration: Higher iterations cause a more smoothed blur.
     - lensflareIntensity: The intensity of the lensflare effect.
     - lensflareThreshhold: Lower means that less bloom is needed to create lensflare.
-    - lensFlareSaturation: Higher saturation makes the lensflare more like the bloom color.
-    - lensflareBlurIterations: How much the lensflare ends are blurred.
+    - lensFlareSaturation: Higher saturation makes the lensflare more like the light color.
+    - lensflareRotation: In which rotation the lensflare expands.
+    - lensflareWidth: The width of the lensflare effect.
+    - lensflareBlurIterations: Higher iterations cause a more smoothed lens flare ends.
+    - Enable ghosting lensflare: Causes camera ghosting effects to appear from bright light sources.
 	
 [h1] Anti Aliasing [/h1]
 

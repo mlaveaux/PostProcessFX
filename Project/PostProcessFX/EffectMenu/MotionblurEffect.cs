@@ -16,21 +16,18 @@ namespace PostProcessFX
 		private CameraMotionBlur m_motionblurComponent = null;
 
 		private MotionblurConfig m_activeConfig;
-		private MotionblurConfig m_savedConfig;
 
         private static String configFilename = "PostProcessFX_motionblur_config.xml";
 
 		public MotionblurEffect()
 		{
 			m_motionblurComponent = Camera.main.GetComponent<CameraMotionBlur>();
-			
-            m_savedConfig = ConfigUtility.Deserialize<MotionblurConfig>(configFilename);
-			if (m_savedConfig == null)
-			{
-				m_savedConfig = MotionblurConfig.getDefaultConfig();
-			}
 
-			m_activeConfig = m_savedConfig;
+            m_activeConfig = ConfigUtility.Deserialize<MotionblurConfig>(configFilename);
+            if (m_activeConfig == null)
+			{
+                m_activeConfig = MotionblurConfig.getDefaultConfig();
+			}
 
 			applyConfig();
 		}
@@ -41,8 +38,18 @@ namespace PostProcessFX
 		}
 		
 		public void onGUI(float x, float y)
-		{
-			GUI.Label(new Rect(x, y, 150, 20), "Motionblur Mode: ");
+        {
+            if (GUI.Button(new Rect(x, y, 75, 20), "Load"))
+            {
+                m_activeConfig = ConfigUtility.Deserialize<MotionblurConfig>(configFilename);
+                if (m_activeConfig == null)
+                {
+                    m_activeConfig = MotionblurConfig.getDefaultConfig();
+                }
+            }
+            y += 25;
+
+            GUI.Label(new Rect(x, y, 150, 20), "Motionblur Mode: ");
 			GUI.Label(new Rect(x + 150, y, 150, 20), getMotionBlurType(m_activeConfig.mode));
 			y += 25;
 
@@ -70,7 +77,6 @@ namespace PostProcessFX
 		public void save()
 		{
 			ConfigUtility.Serialize<MotionblurConfig>(configFilename, m_activeConfig);
-			m_savedConfig = m_activeConfig;
 		}
 
 		private void applyConfig()

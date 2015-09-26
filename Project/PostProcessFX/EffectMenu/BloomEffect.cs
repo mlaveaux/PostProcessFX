@@ -21,7 +21,6 @@ namespace PostProcessFX
         private LensflareEffect m_lensflare = null;
 
         private BloomConfig m_activeConfig; // The configuration that is being used.
-        private BloomConfig m_savedConfig; // The configuration that was stored.
 
         private static String configFilename = "PostProcessFX_bloom_config.xml";
 
@@ -34,21 +33,18 @@ namespace PostProcessFX
 
             m_lensflare = new LensflareEffect();
 
-            m_savedConfig = ConfigUtility.Deserialize<BloomConfig>(configFilename);
-            if (m_savedConfig == null)
+            m_activeConfig = ConfigUtility.Deserialize<BloomConfig>(configFilename);
+            if (m_activeConfig == null)
             {
-                m_savedConfig = BloomConfig.getDefaultPreset();
+                m_activeConfig = BloomConfig.getDefaultPreset();
             }
-
-            m_activeConfig = m_savedConfig;
-
+            
             applyConfig();
         }
 
         public void save()
         {
             ConfigUtility.Serialize<BloomConfig>(configFilename, m_activeConfig);
-            m_savedConfig = m_activeConfig;
         }
 
         public void onGUI(float x, float y)
@@ -68,9 +64,13 @@ namespace PostProcessFX
                 m_activeConfig = BloomConfig.getHighPreset();
             }
 
-            if (GUI.Button(new Rect(x + 225, y, 75, 20), "Reset"))
+            if (GUI.Button(new Rect(x + 225, y, 75, 20), "Load"))
             {
-                m_activeConfig = m_savedConfig;
+                m_activeConfig = ConfigUtility.Deserialize<BloomConfig>(configFilename);
+                if (m_activeConfig == null)
+                {
+                    m_activeConfig = BloomConfig.getDefaultPreset();
+                }
             }
 
             y += 25;
@@ -80,13 +80,13 @@ namespace PostProcessFX
             m_activeConfig.intensity = PPFXUtility.drawSliderWithLabel(x, y, 0.0f, 2.0f, "bloomIntensity", m_activeConfig.intensity);
             y += 25;
 
-            m_activeConfig.threshhold = PPFXUtility.drawSliderWithLabel(x, y, 0.0f, 6.0f, "bloomThreshhold", m_activeConfig.threshhold);
+            m_activeConfig.threshhold = PPFXUtility.drawSliderWithLabel(x, y, 0.0f, 1.0f, "bloomThreshhold", m_activeConfig.threshhold);
             y += 25;
 
-            m_activeConfig.blurSpread = PPFXUtility.drawSliderWithLabel(x, y, 0.0f, 10.0f, "bloomSpread", m_activeConfig.blurSpread);
+            m_activeConfig.blurSpread = PPFXUtility.drawSliderWithLabel(x, y, 0.0f, 5.0f, "bloomSpread", m_activeConfig.blurSpread);
             y += 25;
 
-            m_activeConfig.blurIterations = PPFXUtility.drawIntSliderWithLabel(x, y, 1, 5, "bloomBlurIterations", m_activeConfig.blurIterations);
+            m_activeConfig.blurIterations = PPFXUtility.drawIntSliderWithLabel(x, y, 1, 8, "bloomBlurIterations", m_activeConfig.blurIterations);
             y += 25;
 
             m_activeConfig.lensflareEnabled = GUI.Toggle(new Rect(x, y, 200.0f, 20.0f), m_activeConfig.lensflareEnabled, "enable lensflare.");
@@ -95,8 +95,8 @@ namespace PostProcessFX
             m_activeConfig.lensflareIntensity = PPFXUtility.drawSliderWithLabel(x, y, 0.0f, 2.0f, "lensflareIntensity", m_activeConfig.lensflareIntensity);
             y += 25;
 
-            /*m_activeConfig.lensflareThreshhold = Utility.drawSliderWithLabel(x, y, 0.0f, 10.0f, "lensflareThreshhold", m_activeConfig.lensflareThreshhold);
-            y += 25;*/
+            m_activeConfig.lensflareThreshhold = PPFXUtility.drawSliderWithLabel(x, y, 0.0f, 0.25f, "lensflareThreshhold", m_activeConfig.lensflareThreshhold);
+            y += 25;
 
             m_activeConfig.lensflareSaturation = PPFXUtility.drawSliderWithLabel(x, y, 0.0f, 1.0f, "lensflareSaturation", m_activeConfig.lensflareSaturation);
             y += 25;
@@ -104,13 +104,13 @@ namespace PostProcessFX
             m_activeConfig.lensflareRotation = PPFXUtility.drawSliderWithLabel(x, y, 0.0f, 3.14f, "lensflareRotation", m_activeConfig.lensflareRotation);
             y += 25;
 
-            m_activeConfig.lensflareStretchWidth = PPFXUtility.drawSliderWithLabel(x, y, 0.0f, 5.0f, "lensflareWidth", m_activeConfig.lensflareStretchWidth);
+            m_activeConfig.lensflareStretchWidth = PPFXUtility.drawSliderWithLabel(x, y, 0.0f, 2.0f, "lensflareWidth", m_activeConfig.lensflareStretchWidth);
             y += 25;
 
-            m_activeConfig.lensflareBlurIterations = PPFXUtility.drawIntSliderWithLabel(x, y, 1, 5, "lensflareBlurIterations", m_activeConfig.lensflareBlurIterations);
+            m_activeConfig.lensflareBlurIterations = PPFXUtility.drawIntSliderWithLabel(x, y, 1, 8, "lensflareBlurIterations", m_activeConfig.lensflareBlurIterations);
             y += 25;
 
-            m_activeConfig.lensflareSun = GUI.Toggle(new Rect(x, y, 200.0f, 20.0f), m_activeConfig.lensflareSun, "Enable sun lensflare.");
+            m_activeConfig.lensflareGhosting = GUI.Toggle(new Rect(x, y, 200.0f, 20.0f), m_activeConfig.lensflareGhosting, "Enable ghosting lensflare.");
             y += 25;
 
             applyConfig();
@@ -131,9 +131,10 @@ namespace PostProcessFX
                 m_bloomComponent.flareRotation = m_activeConfig.lensflareRotation;
                 m_bloomComponent.hollyStretchWidth = m_activeConfig.lensflareStretchWidth;
                 m_bloomComponent.hollywoodFlareBlurIterations = m_activeConfig.lensflareBlurIterations;
-                m_bloomComponent.lensflareIntensity = m_activeConfig.lensflareIntensity;
+                m_bloomComponent.lensflareIntensity = m_activeConfig.lensflareEnabled ? m_activeConfig.lensflareIntensity : 0.0f;
                 m_bloomComponent.lensFlareSaturation = m_activeConfig.lensflareSaturation;
-                //m_bloomComponent.lensflareThreshhold = m_activeConfig.lensflareThreshhold;
+                m_bloomComponent.lensflareThreshold = m_activeConfig.lensflareThreshhold;
+                m_bloomComponent.lensflareMode = m_activeConfig.lensflareGhosting ? Bloom.LensFlareStyle.Combined : Bloom.LensFlareStyle.Anamorphic;
             }
             else
             {
