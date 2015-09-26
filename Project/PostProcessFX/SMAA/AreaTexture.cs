@@ -6,50 +6,50 @@ using System.Collections;
 
 namespace PostProcessFX
 {
-	public class AreaTexture : MonoBehaviour
-	{
-		public Texture2D alphaTex;
-		public Texture2D luminTex;
+    public class AreaTexture : MonoBehaviour
+    {
+        public Texture2D alphaTex;
+        public Texture2D luminTex;
 
-		void Awake()
-		{
-			//Debug.Log("BYTES: "+areaTexBytes.Length * 8 + ", " + (160 * 560) * 16);
+        void Awake()
+        {
+            //Debug.Log("BYTES: "+areaTexBytes.Length * 8 + ", " + (160 * 560) * 16);
 
-			//create texture
-			alphaTex = new Texture2D(160, 560, TextureFormat.Alpha8, false);
-			alphaTex.wrapMode = TextureWrapMode.Repeat;
-			alphaTex.anisoLevel = 0;
-			alphaTex.filterMode = FilterMode.Point;
+            //create texture
+            alphaTex = new Texture2D(160, 560, TextureFormat.Alpha8, false);
+            alphaTex.wrapMode = TextureWrapMode.Repeat;
+            alphaTex.anisoLevel = 0;
+            alphaTex.filterMode = FilterMode.Point;
 
-			luminTex = new Texture2D(160, 560, TextureFormat.Alpha8, false);
-			luminTex.wrapMode = TextureWrapMode.Repeat;
-			luminTex.anisoLevel = 0;
-			luminTex.filterMode = FilterMode.Point;
+            luminTex = new Texture2D(160, 560, TextureFormat.Alpha8, false);
+            luminTex.wrapMode = TextureWrapMode.Repeat;
+            luminTex.anisoLevel = 0;
+            luminTex.filterMode = FilterMode.Point;
 
-			for (int i = 0; i < 160 * 560; i++)
-			{
-				int x = i % 160;
-				int y = i / 160;
-				float component1 = ((float)areaTexBytes[i * 2] / (float)0xff);
-				float component2 = ((float)areaTexBytes[i * 2 + 1] / (float)0xff);
-				
-				alphaTex.SetPixel(x, y, new Color(0, 0, 0, component1));
-				luminTex.SetPixel(x, y, new Color(0, 0, 0, component2));
+            for (int i = 0; i < 160 * 560; i++)
+            {
+                int x = i % 160;
+                int y = i / 160;
+                float component1 = ((float)areaTexBytes[i * 2] / (float)0xff);
+                float component2 = ((float)areaTexBytes[i * 2 + 1] / (float)0xff);
 
-				//Debug.Log("setting pix " + (i % 160) + " " + (i / 160));
-				//Thread.Sleep(10);
-			}
+                alphaTex.SetPixel(x, y, new Color(0, 0, 0, component1));
+                luminTex.SetPixel(x, y, new Color(0, 0, 0, component2));
 
-			alphaTex.Apply();
-			luminTex.Apply();
-		}
+                //Debug.Log("setting pix " + (i % 160) + " " + (i / 160));
+                //Thread.Sleep(10);
+            }
 
-		void Update()
-		{
+            alphaTex.Apply();
+            luminTex.Apply();
+        }
 
-		}
+        void Update()
+        {
 
-		private static readonly byte[] areaTexBytes = {
+        }
+
+        private static readonly byte[] areaTexBytes = {
 		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
 		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
 		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x1f, 0x00, 0x00, 
@@ -14985,5 +14985,5 @@ namespace PostProcessFX
 		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
 		0x00, 0x00, 0x00, 0x00 };
 
-	}
+    }
 }

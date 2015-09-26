@@ -11,35 +11,40 @@ using UnityStandardAssets.ImageEffects;
 
 namespace PostProcessFX
 {
-	class MotionblurEffect : IEffectMenu
-	{
-		private CameraMotionBlur m_motionblurComponent = null;
+    class MotionblurEffect : IEffectMenu
+    {
+        private CameraMotionBlur m_motionblurComponent = null;
 
-		private MotionblurConfig m_activeConfig;
+        private MotionblurConfig m_activeConfig;
 
         private static String configFilename = "PostProcessFX_motionblur_config.xml";
 
-		public MotionblurEffect()
-		{
-			m_motionblurComponent = Camera.main.GetComponent<CameraMotionBlur>();
+        public MotionblurEffect()
+        {
+            m_motionblurComponent = Camera.main.GetComponent<CameraMotionBlur>();
 
             m_activeConfig = ConfigUtility.Deserialize<MotionblurConfig>(configFilename);
             if (m_activeConfig == null)
-			{
+            {
                 m_activeConfig = MotionblurConfig.getDefaultConfig();
-			}
+            }
 
-			applyConfig();
-		}
+            applyConfig();
+        }
 
-		~MotionblurEffect()
-		{
-			disable();
-		}
-		
-		public void onGUI(float x, float y)
+        ~MotionblurEffect()
         {
-            if (GUI.Button(new Rect(x, y, 75, 20), "Load"))
+            disable();
+        }
+
+        public void onGUI(float x, float y)
+        {
+            if (GUI.Button(new Rect(x, y, 75, 20), "default"))
+            {
+                m_activeConfig = MotionblurConfig.getDefaultConfig();
+            }
+
+            if (GUI.Button(new Rect(x + 75, y, 75, 20), "Load"))
             {
                 m_activeConfig = ConfigUtility.Deserialize<MotionblurConfig>(configFilename);
                 if (m_activeConfig == null)
@@ -50,108 +55,108 @@ namespace PostProcessFX
             y += 25;
 
             GUI.Label(new Rect(x, y, 150, 20), "Motionblur Mode: ");
-			GUI.Label(new Rect(x + 150, y, 150, 20), getMotionBlurType(m_activeConfig.mode));
-			y += 25;
+            GUI.Label(new Rect(x + 150, y, 150, 20), getMotionBlurType(m_activeConfig.mode));
+            y += 25;
 
-			m_activeConfig.mode = (int)GUI.HorizontalSlider(new Rect(x, y, 100, 20), m_activeConfig.mode, 0.0f, 5.1f);
-			y += 25;
+            m_activeConfig.mode = (int)GUI.HorizontalSlider(new Rect(x, y, 100, 20), m_activeConfig.mode, 0.0f, 5.1f);
+            y += 25;
 
-			m_activeConfig.velocityScale = PPFXUtility.drawSliderWithLabel(x, y, 0.0f, 1.0f, "Velocity scale", m_activeConfig.velocityScale);
-			y += 25;
+            m_activeConfig.velocityScale = PPFXUtility.drawSliderWithLabel(x, y, 0.0f, 1.0f, "Velocity scale", m_activeConfig.velocityScale);
+            y += 25;
 
-			m_activeConfig.maxVelocity = PPFXUtility.drawSliderWithLabel(x, y, 0.0f, 20.0f, "Velocity max", m_activeConfig.maxVelocity);
-			y += 25;
+            m_activeConfig.maxVelocity = PPFXUtility.drawSliderWithLabel(x, y, 0.0f, 20.0f, "Velocity max", m_activeConfig.maxVelocity);
+            y += 25;
 
-			m_activeConfig.minVelocity = PPFXUtility.drawSliderWithLabel(x, y, 0.0f, 20.0f, "Velocity min", m_activeConfig.minVelocity);
-			y += 25;
+            m_activeConfig.minVelocity = PPFXUtility.drawSliderWithLabel(x, y, 0.0f, 20.0f, "Velocity min", m_activeConfig.minVelocity);
+            y += 25;
 
-			if (m_activeConfig.mode >= 3)
-			{
-				m_activeConfig.jitter = PPFXUtility.drawSliderWithLabel(x, y, 0.0f, 1.0f, "Jitter", m_activeConfig.jitter);
-				y += 25;
-			}
+            if (m_activeConfig.mode >= 3)
+            {
+                m_activeConfig.jitter = PPFXUtility.drawSliderWithLabel(x, y, 0.0f, 1.0f, "Jitter", m_activeConfig.jitter);
+                y += 25;
+            }
 
-			applyConfig();
-		}
+            applyConfig();
+        }
 
-		public void save()
-		{
-			ConfigUtility.Serialize<MotionblurConfig>(configFilename, m_activeConfig);
-		}
+        public void save()
+        {
+            ConfigUtility.Serialize<MotionblurConfig>(configFilename, m_activeConfig);
+        }
 
-		private void applyConfig()
-		{
-			if (m_activeConfig.mode == 0)
-			{
-				disable();
-			}
-			else
-			{
-				enable();
+        private void applyConfig()
+        {
+            if (m_activeConfig.mode == 0)
+            {
+                disable();
+            }
+            else
+            {
+                enable();
 
-				m_motionblurComponent.filterType = (CameraMotionBlur.MotionBlurFilter)m_activeConfig.mode - 1;
-				m_motionblurComponent.velocityScale = m_activeConfig.velocityScale;
-				m_motionblurComponent.minVelocity = m_activeConfig.minVelocity;
-				m_motionblurComponent.maxVelocity = m_activeConfig.maxVelocity;
-				m_motionblurComponent.jitter = m_activeConfig.jitter;
-			}
-		}
+                m_motionblurComponent.filterType = (CameraMotionBlur.MotionBlurFilter)m_activeConfig.mode - 1;
+                m_motionblurComponent.velocityScale = m_activeConfig.velocityScale;
+                m_motionblurComponent.minVelocity = m_activeConfig.minVelocity;
+                m_motionblurComponent.maxVelocity = m_activeConfig.maxVelocity;
+                m_motionblurComponent.jitter = m_activeConfig.jitter;
+            }
+        }
 
-		private void enable()
-		{
-			if (m_motionblurComponent == null)
-			{
-				m_motionblurComponent = Camera.main.gameObject.AddComponent<CameraMotionBlur>();
-				if (m_motionblurComponent == null)
-				{
-					PPFXUtility.log("MotionblurEffect: Could not add component CameraMotionBlur to Camera.");
-				}
-				else
-				{
-					Material dx11MotionBlurMaterial = new Material(dx11MotionBlurShaderText);
-					Material motionBlurMaterial = new Material(motionBlurShaderText);
-					Texture2D motionblurJitter = new Texture2D(64, 64);
-					motionblurJitter.LoadImage(motionblurJitterTextureData);
+        private void enable()
+        {
+            if (m_motionblurComponent == null)
+            {
+                m_motionblurComponent = Camera.main.gameObject.AddComponent<CameraMotionBlur>();
+                if (m_motionblurComponent == null)
+                {
+                    PPFXUtility.log("MotionblurEffect: Could not add component CameraMotionBlur to Camera.");
+                }
+                else
+                {
+                    Material dx11MotionBlurMaterial = new Material(dx11MotionBlurShaderText);
+                    Material motionBlurMaterial = new Material(motionBlurShaderText);
+                    Texture2D motionblurJitter = new Texture2D(64, 64);
+                    motionblurJitter.LoadImage(motionblurJitterTextureData);
 
-					m_motionblurComponent.dx11MotionBlurShader = dx11MotionBlurMaterial.shader;
-					m_motionblurComponent.shader = motionBlurMaterial.shader;
-					m_motionblurComponent.noiseTexture = motionblurJitter;
-				}
-			}
-			
-			m_motionblurComponent.enabled = true;
-		}
+                    m_motionblurComponent.dx11MotionBlurShader = dx11MotionBlurMaterial.shader;
+                    m_motionblurComponent.shader = motionBlurMaterial.shader;
+                    m_motionblurComponent.noiseTexture = motionblurJitter;
+                }
+            }
 
-		private void disable()
-		{
-			if (m_motionblurComponent != null)
-			{
-				MonoBehaviour.DestroyImmediate(m_motionblurComponent);
-				m_motionblurComponent = null;
-			}
-		}
+            m_motionblurComponent.enabled = true;
+        }
+
+        private void disable()
+        {
+            if (m_motionblurComponent != null)
+            {
+                MonoBehaviour.DestroyImmediate(m_motionblurComponent);
+                m_motionblurComponent = null;
+            }
+        }
 
 
-		private String getMotionBlurType(int filter)
-		{
-			switch (filter)
-			{
-				case 1:
-					return "CameraMotion";
-				case 2:
-					return "LocalBlur";
-				case 3:
-					return "Reconstruction";
-				case 4:
-					return "ReconstructionDX11";
-				case 5:
-					return "ReconstructionDisc";
-				default:
-					return "Disabled";
-			}
-		}
+        private String getMotionBlurType(int filter)
+        {
+            switch (filter)
+            {
+                case 1:
+                    return "CameraMotion";
+                case 2:
+                    return "LocalBlur";
+                case 3:
+                    return "Reconstruction";
+                case 4:
+                    return "ReconstructionDX11";
+                case 5:
+                    return "ReconstructionDisc";
+                default:
+                    return "Disabled";
+            }
+        }
 
-		private static byte[] motionblurJitterTextureData = {0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00, 0x0d,
+        private static byte[] motionblurJitterTextureData = {0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00, 0x0d,
   0x49, 0x48, 0x44, 0x52, 0x00, 0x00, 0x00, 0x40, 0x00, 0x00, 0x00, 0x40,
   0x08, 0x06, 0x00, 0x00, 0x00, 0xaa, 0x69, 0x71, 0xde, 0x00, 0x00, 0x20,
   0x00, 0x49, 0x44, 0x41, 0x54, 0x78, 0x01, 0x1d, 0x9b, 0x77, 0x40, 0x8e,
@@ -1365,7 +1370,7 @@ namespace PostProcessFX
   0x07, 0xb0, 0xe7, 0x37, 0x52, 0x00, 0x00, 0x00, 0x00, 0x49, 0x45, 0x4e,
   0x44, 0xae, 0x42, 0x60, 0x82, 0x0a};
 
-		private const String dx11MotionBlurShaderText = @"// Compiled shader for PC, Mac & Linux Standalone, uncompressed size: 15.0KB
+        private const String dx11MotionBlurShaderText = @"// Compiled shader for PC, Mac & Linux Standalone, uncompressed size: 15.0KB
 
 // Skipping shader variants that would not be included into build of current scene.
 
@@ -1695,7 +1700,7 @@ doaaaaab""
 Fallback Off
 }";
 
-		private const String motionBlurShaderText = @"// Compiled shader for PC, Mac & Linux Standalone, uncompressed size: 71.4KB
+        private const String motionBlurShaderText = @"// Compiled shader for PC, Mac & Linux Standalone, uncompressed size: 71.4KB
 
 // Skipping shader variants that would not be included into build of current scene.
 
@@ -3926,5 +3931,5 @@ egaobaaaabaaaaaaagaabaaaaeaaaaaadoaaaaab""
 }
 Fallback Off
 }";
-	}
+    }
 }

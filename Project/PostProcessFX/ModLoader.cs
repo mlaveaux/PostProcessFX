@@ -9,34 +9,34 @@ using ColossalFramework.UI;
 
 namespace PostProcessFX
 {
-	public class ModDescription : IUserMod
-	{
-		public string Description
-		{
-			get { return "Enable bloom, lensflare, motionblur and anti aliasing effects."; }
-		}
+    public class ModDescription : IUserMod
+    {
+        public string Description
+        {
+            get { return "Enable bloom, lensflare, motionblur and anti aliasing effects."; }
+        }
 
-		public string Name
-		{
-			get { return "PostProcessFX"; }
-        } 
-        
+        public string Name
+        {
+            get { return "PostProcessFX"; }
+        }
+
         public void OnEnabled()
-        {}
+        { }
 
         public void OnDisabled()
-        {}
-	}
+        { }
+    }
 
-	public class ModLoader : ILoadingExtension
-	{
-		private ConfigUI m_configUI;
+    public class ModLoader : ILoadingExtension
+    {
+        private ConfigUI m_configUI;
 
-		public void OnLevelLoaded(LoadMode mode)
+        public void OnLevelLoaded(LoadMode mode)
         {
-			try
-			{
-				UIView view = UIView.GetAView();
+            try
+            {
+                UIView view = UIView.GetAView();
                 if (view == null)
                 {
                     PPFXUtility.log("PostProcessFX: Can't find the UIView component.");
@@ -51,20 +51,20 @@ namespace PostProcessFX
 
                     m_configUI.setParent(view);
                 }
-			}
-			catch (Exception ex)
-			{
-				PPFXUtility.log("PostProcessFX: failed to initialize " + ex.Message);
-			}
-		}
+            }
+            catch (Exception ex)
+            {
+                PPFXUtility.log("PostProcessFX: failed to initialize " + ex.Message);
+            }
+        }
 
-		public void OnLevelUnloading() {}
+        public void OnLevelUnloading() { }
 
-		public void OnCreated(ILoading loading)	{}
+        public void OnCreated(ILoading loading) { }
 
-		public void OnReleased()
-		{
-			m_configUI.OnDestroy();
-		}
-	}
+        public void OnReleased()
+        {
+            m_configUI.OnDestroy();
+        }
+    }
 }

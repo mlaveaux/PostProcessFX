@@ -38,7 +38,7 @@ namespace PostProcessFX
             {
                 m_activeConfig = BloomConfig.getDefaultPreset();
             }
-            
+
             applyConfig();
         }
 
