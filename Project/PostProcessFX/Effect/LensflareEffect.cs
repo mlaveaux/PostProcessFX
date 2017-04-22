@@ -32,7 +32,7 @@ namespace PostProcessFX
                 {
                     if (light.type == LightType.Directional)
                     {
-                        m_sunflare = (Flare)Resources.Load("50mmZoom.flare");
+                        m_sunflare = null;  //(Flare)Resources.Load("50mmZoom.flare");
                         if (m_sunflare == null)
                         {
                             PPFXUtility.log("LensflareEffect: Could not load 50mmZoom.flare");

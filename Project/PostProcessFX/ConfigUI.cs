@@ -45,18 +45,25 @@ namespace PostProcessFX
 
         public ConfigUI()
         {
+            //  Load the GUIConfig or otherwise return to default settings
             m_config = ConfigUtility.Deserialize<GUIConfig>(configFilename);
             if (m_config == null)
             {
                 m_config = GUIConfig.getDefaultConfig();
             }
 
-            m_bloom = new BloomEffect();
-            m_antiAliasing = new AntiAliasingEffect();
-            m_motionblur = new MotionblurEffect();
+            // Load the unitypackage with the materials
+            AssetBundle assetbundle = AssetBundle.LoadFromFile("PostProcessFX.unitypackage");
 
+            // Create effects from the assetbundle, they should read the required assets by themselves.
+            m_bloom = new BloomEffect(assetbundle);
+            m_antiAliasing = new AntiAliasingEffect(assetbundle);
+            m_motionblur = new MotionblurEffect(assetbundle);
+            
+            // Obtain the UI toggle key
             m_toggleKeyString = Enum.GetName(typeof(KeyCode), m_config.toggleUIKey);
 
+            // Save the settings at least once
             OnDestroy();
         }
 
@@ -80,7 +87,7 @@ namespace PostProcessFX
 
             GUI.Box(new Rect(x, y, 320, 400), "");
 
-            if (GUI.Button(new Rect(x, y, 300, 20), "PostProcessFX UI"))
+            if (GUI.Button(new Rect(x, y, 300, 20), "PostProcessFX UI v1.6.0-f4"))
             {
                 m_dragging = true;
             }
@@ -218,17 +225,22 @@ namespace PostProcessFX
 
         public void OnDestroy()
         {
-            PPFXUtility.log("PostProcessFX: Saving settings.");
-            m_bloom.save();
-            m_motionblur.save();
-            m_antiAliasing.save();
-
-            ConfigUtility.Serialize<GUIConfig>(configFilename, m_config);
+            save();
         }
 
         public void OnMouseUp()
         {
             m_dragging = false;
+        }
+
+        private void save()
+        {
+            PPFXUtility.log("PostProcessFX: Saving settings...");
+            m_bloom.save();
+            m_motionblur.save();
+            m_antiAliasing.save();
+
+            ConfigUtility.Serialize<GUIConfig>(configFilename, m_config);
         }
     }
 }

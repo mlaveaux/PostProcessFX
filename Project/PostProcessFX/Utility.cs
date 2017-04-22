@@ -36,7 +36,7 @@ namespace PostProcessFX
         public static void log(object message)
         {
             //DebugOutputPanel.Show();
-            //DebugOutputPanel.print(text);
+            //DebugOutputPanel.print(message);
             Debug.Log(message);
         }
 

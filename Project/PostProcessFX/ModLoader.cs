@@ -6,6 +6,8 @@ using System.Text;
 using ICities;
 using UnityEngine;
 using ColossalFramework.UI;
+using System.IO;
+using System.Reflection;
 
 namespace PostProcessFX
 {
@@ -22,7 +24,16 @@ namespace PostProcessFX
         }
 
         public void OnEnabled()
-        { }
+        {
+            PPFXUtility.log("PostProcessFX v1.6.0.2 unpacking shaders...");
+
+            // Take the embedded unitypackage and save it next to the executable.
+            Stream embeddedStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("PostProcessFX.Resources.shaders.unitypackage");
+            var fileStream = File.Create("PostProcessFX.unitypackage");
+            embeddedStream.Seek(0, SeekOrigin.Begin);
+            embeddedStream.CopyTo(fileStream);
+            fileStream.Close();
+        }
 
         public void OnDisabled()
         { }
