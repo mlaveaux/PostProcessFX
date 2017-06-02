@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace PostProcessFX.Config
+﻿namespace PostProcessFX.Config
 {
     /**
      * These settings are important for anti aliasing. 
