@@ -3,7 +3,6 @@
 using UnityEngine;
 using PostProcessFX.Config;
 
-
 namespace PostProcessFX
 {
     /**
@@ -27,7 +26,6 @@ namespace PostProcessFX
         private String m_toggleKeyString;
 
         private BloomEffect m_bloom;
-        private MotionblurEffect m_motionblur;
         private AntiAliasingEffect m_antiAliasing;
 
         private GUIConfig m_config = null;
@@ -63,7 +61,6 @@ namespace PostProcessFX
             // Create effects from the assetbundle, they should read the required assets by themselves.
             m_bloom = new BloomEffect(assetBundle);
             m_antiAliasing = new AntiAliasingEffect(assetBundle);
-            m_motionblur = new MotionblurEffect(assetBundle);
         }
         
         public void OnGUI()
@@ -107,7 +104,14 @@ namespace PostProcessFX
                 m_activeMenu = MenuType.Motionblur;
             }
 
+            if (GUI.Button(new Rect(x + 300, y, 90, 20), "SSAO"))
+            {
+                m_activeMenu = MenuType.SSAO;
+            }
+
             y += 25;
+
+            // Select what sub-menu to show depending on the active menu.
             switch (m_activeMenu)
             {
                 case MenuType.Global:
@@ -144,8 +148,17 @@ namespace PostProcessFX
                     break;
 
                 case MenuType.Motionblur:
-                    if (m_motionblur != null)
+                    /*if (m_motionblur != null)
+                    {
                         m_motionblur.onGUI(x, y);
+                    }*/
+                    break;
+
+                case MenuType.SSAO:
+                    /*if (m_ambientObscurance != null)
+                    {
+                        m_ambientObscurance.onGUI(x, y);
+                    }*/
                     break;
             }
         }
@@ -230,7 +243,6 @@ namespace PostProcessFX
             // For some reason there can be an exception in the constructor, but the object is still created.
             PPFXUtility.log("PostProcessFX: Saving settings.");
             if (m_bloom != null ) m_bloom.save();
-            if (m_motionblur != null) m_motionblur.save();
             if (m_antiAliasing != null) m_antiAliasing.save();
 
             ConfigUtility.Serialize<GUIConfig>(configFilename, m_config);
