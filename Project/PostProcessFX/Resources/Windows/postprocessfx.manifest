@@ -1,0 +1,37 @@
+ManifestFileVersion: 0
+CRC: 2417021219
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: f7a4589cfe358a78155076ac475384d2
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: 5d01dcf45061b746ed0687bd3a2d9275
+HashAppended: 0
+ClassTypes:
+- Class: 21
+  Script: {instanceID: 0}
+- Class: 28
+  Script: {instanceID: 0}
+- Class: 48
+  Script: {instanceID: 0}
+- Class: 121
+  Script: {instanceID: 0}
+Assets:
+- Assets/Flares/Flare50mm.psd
+- Assets/Shaders/AntiAliasing/NFAA.shader
+- Assets/Shaders/AntiAliasing/SSAA.shader
+- Assets/Shaders/AntiAliasing/FXAAPreset3.shader
+- Assets/Flares/50mmZoom.flare
+- Assets/Shaders/Motionblur/CameraMotionBlurDX11.shader
+- Assets/Shaders/Motionblur/CameraMotionBlur.shader
+- Assets/Shaders/AntiAliasing/DLAA.shader
+- Assets/Flares/Flare50mm.mat
+- Assets/Shaders/Bloom/BrightPassFilter2.shader
+- Assets/Shaders/AntiAliasing/FXAA2.shader
+- Assets/Shaders/Bloom/LensFlareCreate.shader
+- Assets/Shaders/AntiAliasing/FXAA3Console.shader
+- Assets/Shaders/AntiAliasing/FXAAPreset2.shader
+- Assets/Shaders/Bloom/BlurAndFlares.shader
+- Assets/Shaders/Bloom/BlendForBloom.shader
+Dependencies: []
