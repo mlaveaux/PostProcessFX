@@ -1,3 +1,5 @@
 Project/PostProcessFX/bin/*
 Project/PostProcessFX/obj/*
-Project/PostProcessFX.v12.suo
+
+*.meta
+*.suo
