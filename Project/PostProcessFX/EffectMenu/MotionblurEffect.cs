@@ -28,7 +28,8 @@ namespace PostProcessFX
 
             // Get existing component if it exists.
             m_component = Camera.main.GetComponent<CameraMotionBlur>();
-            motionBlurShader = PPFXUtility.checkAndLoadAsset<Shader>(bundle, "Shaders/MotionBlur.shader");
+            motionBlurShader = PPFXUtility.checkAndLoadAsset<Shader>(bundle, "Assets/Shaders/MotionBlur/CameraMotionBlur.shader");
+            dx11MotionBlurShader = PPFXUtility.checkAndLoadAsset<Shader>(bundle, "Assets/Shaders/MotionBlur/CameraMotionBlurDX11.shader");
 
             m_activeConfig = ConfigUtility.Deserialize<MotionblurConfig>(configFilename);
             if (m_activeConfig == null)

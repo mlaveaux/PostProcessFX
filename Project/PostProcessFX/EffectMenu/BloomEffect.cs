@@ -40,10 +40,10 @@ namespace PostProcessFX
             m_lensflare = new LensflareEffect(bundle);
 
             // Load shaders from the asset bundle
-            lensFlareCreate = PPFXUtility.checkAndLoadAsset<Shader>(bundle, "Shaders/LensFlareCreate.shader");
-            blendForBloom = PPFXUtility.checkAndLoadAsset<Shader>(bundle, "Shaders/BlendForBloom.shader");
-            blurAndFlares = PPFXUtility.checkAndLoadAsset<Shader>(bundle, "Shaders/BlurAndFlares.shader");
-            brightPass2 = PPFXUtility.checkAndLoadAsset<Shader>(bundle, "Shaders/BrightPass2.shader");            
+            lensFlareCreate = PPFXUtility.checkAndLoadAsset<Shader>(bundle, "Assets/Shaders/Bloom/LensFlareCreate.shader");
+            blendForBloom = PPFXUtility.checkAndLoadAsset<Shader>(bundle, "Assets/Shaders/Bloom/BlendForBloom.shader");
+            blurAndFlares = PPFXUtility.checkAndLoadAsset<Shader>(bundle, "Assets/Shaders/Bloom/BlurAndFlares.shader");
+            brightPass2 = PPFXUtility.checkAndLoadAsset<Shader>(bundle, "Assets/Shaders/Bloom/BrightPassFilter2.shader");            
 
             // Read the config for bloom
             m_activeConfig = ConfigUtility.Deserialize<BloomConfig>(configFilename);

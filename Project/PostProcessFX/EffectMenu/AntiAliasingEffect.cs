@@ -33,18 +33,16 @@ namespace PostProcessFX
         
         public AntiAliasingEffect(AssetBundle bundle)
         {
-            Debug.Assert(bundle != null);
-
             // Get existing component if it exists.
             m_component = Camera.main.GetComponent<Antialiasing>();
 
-            dlaaShader = PPFXUtility.checkAndLoadAsset<Shader>(bundle, "Shaders/DLAA.shader");
-            nfaaMaterial = PPFXUtility.checkAndLoadAsset<Shader>(bundle, "Shaders/NFAA.shader");
-            fxaa2Material = PPFXUtility.checkAndLoadAsset<Shader>(bundle, "Shaders/FXAA2.shader");
-            fxaa3ConsoleMaterial = PPFXUtility.checkAndLoadAsset<Shader>(bundle, "Shaders/FXAA3Console.shader");
-            fxaaPreset2Material = PPFXUtility.checkAndLoadAsset<Shader>(bundle, "Shaders/FXAAPreset2.shader");
-            fxaaPreset3Material = PPFXUtility.checkAndLoadAsset<Shader>(bundle, "Shaders/FXAAPreset3.shader");
-            ssaaMaterial = PPFXUtility.checkAndLoadAsset<Shader>(bundle, "Shaders/SSAA.shader");
+            dlaaShader = PPFXUtility.checkAndLoadAsset<Shader>(bundle, "Assets/Shaders/AntiAliasing/DLAA.shader");
+            nfaaMaterial = PPFXUtility.checkAndLoadAsset<Shader>(bundle, "Assets/Shaders/AntiAliasing/NFAA.shader");
+            fxaa2Material = PPFXUtility.checkAndLoadAsset<Shader>(bundle, "Assets/Shaders/AntiAliasing/FXAA2.shader");
+            fxaa3ConsoleMaterial = PPFXUtility.checkAndLoadAsset<Shader>(bundle, "Assets/Shaders/AntiAliasing/FXAA3Console.shader");
+            fxaaPreset2Material = PPFXUtility.checkAndLoadAsset<Shader>(bundle, "Assets/Shaders/AntiAliasing/FXAAPreset2.shader");
+            fxaaPreset3Material = PPFXUtility.checkAndLoadAsset<Shader>(bundle, "Assets/Shaders/AntiAliasing/FXAAPreset3.shader");
+            ssaaMaterial = PPFXUtility.checkAndLoadAsset<Shader>(bundle, "Assets/Shaders/AntiAliasing/SSAA.shader");
 
             m_activeConfig = ConfigUtility.Deserialize<AntiAliasingConfig>(configFilename);
             if (m_activeConfig == null)
