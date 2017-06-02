@@ -1,18 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 using ICities;
 using UnityEngine;
-using ColossalFramework.UI;
-using System.IO;
-using System.Reflection;
 
 namespace PostProcessFX
 {
     public class ModDescription : IUserMod
     {
+        public static string VersionString = "1.7.0.7";
+        public static string ModName = "PostProcessFX";
+
         public string Description
         {
             get { return "Enable bloom, lensflare, motionblur and anti aliasing effects."; }
@@ -20,62 +17,59 @@ namespace PostProcessFX
 
         public string Name
         {
-            get { return "PostProcessFX"; }
+            get { return ModName; }
         }
 
         public void OnEnabled()
         {
-            PPFXUtility.log("PostProcessFX v1.6.0.2 unpacking shaders...");
+            PPFXUtility.log(ModName + " " + VersionString + " enabled.");
 
-            // Take the embedded unitypackage and save it next to the executable.
-            Stream embeddedStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("PostProcessFX.Resources.shaders.unitypackage");
-            var fileStream = File.Create("PostProcessFX.unitypackage");
-            embeddedStream.Seek(0, SeekOrigin.Begin);
-            embeddedStream.CopyTo(fileStream);
-            fileStream.Close();
+            // When we are already in the level we can also trigger it here.
+            ModLoader.addConfigUI();
         }
 
         public void OnDisabled()
-        { }
+        {
+            PPFXUtility.log(ModName + " " + VersionString + " disabled.");
+        }
     }
 
     public class ModLoader : ILoadingExtension
     {
-        private ConfigUI m_configUI;
-
-        public void OnLevelLoaded(LoadMode mode)
+        public static void addConfigUI()
         {
-            try
+            GameObject cameraObject = Camera.main.gameObject;
+            if (cameraObject != null)
             {
-                UIView view = UIView.GetAView();
-                if (view == null)
+                // Remove any existing config UI that was added by us.
+                Component oldUI = cameraObject.GetComponent("ConfigUI");
+                if (oldUI != null)
                 {
-                    PPFXUtility.log("PostProcessFX: Can't find the UIView component.");
+                    PPFXUtility.log("Destroying the old ConfigUI game object.");
+                    Component.Destroy(oldUI);
                 }
-                else
-                {
-                    m_configUI = view.gameObject.GetComponent<ConfigUI>();
-                    if (m_configUI == null)
-                    {
-                        m_configUI = view.gameObject.AddComponent<ConfigUI>();
-                    }
 
-                    m_configUI.setParent(view);
-                }
-            }
-            catch (Exception ex)
-            {
-                PPFXUtility.log("PostProcessFX: failed to initialize " + ex.Message);
+                // Then try to add the new one again.
+                ConfigUI newUI = cameraObject.AddComponent<ConfigUI>();
+                if (newUI != null)
+                {
+                    PPFXUtility.log("Added the ConfigUI game object.");
+                }                
             }
         }
+        
+        public void OnLevelLoaded(LoadMode mode)
+        {
+            // Level is loaded so try to add the config ui to the camera.
+            addConfigUI();
+        }
 
-        public void OnLevelUnloading() { }
+        public void OnLevelUnloading()
+        { }
 
         public void OnCreated(ILoading loading) { }
 
         public void OnReleased()
-        {
-            m_configUI.OnDestroy();
-        }
+        { }
     }
 }
