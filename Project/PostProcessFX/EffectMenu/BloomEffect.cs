@@ -17,7 +17,7 @@ namespace PostProcessFX
      */
     class BloomEffect : IEffectMenu
     {
-        private Bloom m_bloomComponent = null;
+        private Bloom m_component = null;
         private LensflareEffect m_lensflare = null;
 
         // Shaders loaded from the assetbundle
@@ -35,25 +35,15 @@ namespace PostProcessFX
          */
         public BloomEffect(AssetBundle bundle)
         {
-            // Get the existing component
-            m_bloomComponent = Camera.main.GetComponent<Bloom>();
-            m_lensflare = new LensflareEffect();
+            // Get the existing component if it exists
+            m_component = Camera.main.GetComponent<Bloom>();
+            m_lensflare = new LensflareEffect(bundle);
 
             // Load shaders from the asset bundle
-            if (bundle)
-            {
-                try
-                {
-                    lensFlareCreate = bundle.LoadAsset<Shader>("Shaders/LensFlareCreate.shader");
-                    blendForBloom = bundle.LoadAsset<Shader>("Shaders/BlendForBloom.shader");
-                    blurAndFlares = bundle.LoadAsset<Shader>("Shaders/BlurAndFlares.shader");
-                    brightPass2 = bundle.LoadAsset<Shader>("Shaders/BrightPass2.shader");
-                }
-                catch(Exception ex)
-                {
-                    PPFXUtility.log(ex);
-                }
-            }
+            lensFlareCreate = PPFXUtility.checkAndLoadAsset<Shader>(bundle, "Shaders/LensFlareCreate.shader");
+            blendForBloom = PPFXUtility.checkAndLoadAsset<Shader>(bundle, "Shaders/BlendForBloom.shader");
+            blurAndFlares = PPFXUtility.checkAndLoadAsset<Shader>(bundle, "Shaders/BlurAndFlares.shader");
+            brightPass2 = PPFXUtility.checkAndLoadAsset<Shader>(bundle, "Shaders/BrightPass2.shader");            
 
             // Read the config for bloom
             m_activeConfig = ConfigUtility.Deserialize<BloomConfig>(configFilename);
@@ -145,19 +135,19 @@ namespace PostProcessFX
             {
                 enable();
 
-                m_bloomComponent.bloomIntensity = m_activeConfig.intensity;
-                m_bloomComponent.bloomBlurIterations = m_activeConfig.blurIterations;
-                m_bloomComponent.bloomThreshold = m_activeConfig.threshhold;
+                m_component.bloomIntensity = m_activeConfig.intensity;
+                m_component.bloomBlurIterations = m_activeConfig.blurIterations;
+                m_component.bloomThreshold = m_activeConfig.threshhold;
                 //m_bloomComponent.blurWidth = m_activeConfig.blurWidth;
-                m_bloomComponent.sepBlurSpread = m_activeConfig.blurSpread;
+                m_component.sepBlurSpread = m_activeConfig.blurSpread;
 
-                m_bloomComponent.flareRotation = m_activeConfig.lensflareRotation;
-                m_bloomComponent.hollyStretchWidth = m_activeConfig.lensflareStretchWidth;
-                m_bloomComponent.hollywoodFlareBlurIterations = m_activeConfig.lensflareBlurIterations;
-                m_bloomComponent.lensflareIntensity = m_activeConfig.lensflareEnabled ? m_activeConfig.lensflareIntensity : 0.0f;
-                m_bloomComponent.lensFlareSaturation = m_activeConfig.lensflareSaturation;
-                m_bloomComponent.lensflareThreshold = m_activeConfig.lensflareThreshhold;
-                m_bloomComponent.lensflareMode = m_activeConfig.lensflareGhosting ? Bloom.LensFlareStyle.Combined : Bloom.LensFlareStyle.Anamorphic;
+                m_component.flareRotation = m_activeConfig.lensflareRotation;
+                m_component.hollyStretchWidth = m_activeConfig.lensflareStretchWidth;
+                m_component.hollywoodFlareBlurIterations = m_activeConfig.lensflareBlurIterations;
+                m_component.lensflareIntensity = m_activeConfig.lensflareEnabled ? m_activeConfig.lensflareIntensity : 0.0f;
+                m_component.lensFlareSaturation = m_activeConfig.lensflareSaturation;
+                m_component.lensflareThreshold = m_activeConfig.lensflareThreshhold;
+                m_component.lensflareMode = m_activeConfig.lensflareGhosting ? Bloom.LensFlareStyle.Combined : Bloom.LensFlareStyle.Anamorphic;
             }
             else
             {
@@ -176,20 +166,20 @@ namespace PostProcessFX
 
         public void enable()
         {
-            if (m_bloomComponent == null)
+            if (m_component == null)
             {
-                m_bloomComponent = Camera.main.gameObject.AddComponent<Bloom>();
-                if (m_bloomComponent == null)
+                m_component = Camera.main.gameObject.AddComponent<Bloom>();
+                if (m_component == null)
                 {
                     PPFXUtility.log("BloomEffect: Could not add component Bloom to Camera.");
                     disable();
                 }
                 else
                 {
-                    m_bloomComponent.lensFlareShader = lensFlareCreate;
-                    m_bloomComponent.screenBlendShader = blendForBloom;
-                    m_bloomComponent.blurAndFlaresShader = blurAndFlares;
-                    m_bloomComponent.brightPassFilterShader = brightPass2;
+                    m_component.lensFlareShader = lensFlareCreate;
+                    m_component.screenBlendShader = blendForBloom;
+                    m_component.blurAndFlaresShader = blurAndFlares;
+                    m_component.brightPassFilterShader = brightPass2;
                     m_activeConfig.bloomEnabled = true;
                 }
             }
@@ -198,10 +188,10 @@ namespace PostProcessFX
 
         public void disable()
         {
-            if (m_bloomComponent != null)
+            if (m_component != null)
             {
-                MonoBehaviour.DestroyImmediate(m_bloomComponent);
-                m_bloomComponent = null;
+                MonoBehaviour.DestroyImmediate(m_component);
+                m_component = null;
             }
 
             m_activeConfig.bloomEnabled = false;
