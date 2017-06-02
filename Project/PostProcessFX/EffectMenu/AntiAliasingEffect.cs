@@ -19,7 +19,6 @@ namespace PostProcessFX
     {
         private Antialiasing m_component = null;
         private AntiAliasingConfig m_activeConfig = null;
-        private AntiAliasingConfig m_savedConfig = null;
 
         // Shaders loaded from the asset bundle
         Shader dlaaShader;
@@ -34,15 +33,18 @@ namespace PostProcessFX
         
         public AntiAliasingEffect(AssetBundle bundle)
         {
+            Debug.Assert(bundle != null);
+
+            // Get existing component if it exists.
             m_component = Camera.main.GetComponent<Antialiasing>();
 
-            dlaaShader = bundle.LoadAsset<Shader>("Shaders/DLAA.shader");
-            nfaaMaterial = bundle.LoadAsset<Shader>("Shaders/NFAA.shader");
-            fxaa2Material = bundle.LoadAsset<Shader>("Shaders/FXAA2.shader");
-            fxaa3ConsoleMaterial = bundle.LoadAsset<Shader>("Shaders/FXAA3Console.shader");
-            fxaaPreset2Material = bundle.LoadAsset<Shader>("Shaders/FXAAPreset2.shader");
-            fxaaPreset3Material = bundle.LoadAsset<Shader>("Shaders/FXAAPreset3.shader");
-            ssaaMaterial = bundle.LoadAsset<Shader>("Shaders/SSAA.shader");
+            dlaaShader = PPFXUtility.checkAndLoadAsset<Shader>(bundle, "Shaders/DLAA.shader");
+            nfaaMaterial = PPFXUtility.checkAndLoadAsset<Shader>(bundle, "Shaders/NFAA.shader");
+            fxaa2Material = PPFXUtility.checkAndLoadAsset<Shader>(bundle, "Shaders/FXAA2.shader");
+            fxaa3ConsoleMaterial = PPFXUtility.checkAndLoadAsset<Shader>(bundle, "Shaders/FXAA3Console.shader");
+            fxaaPreset2Material = PPFXUtility.checkAndLoadAsset<Shader>(bundle, "Shaders/FXAAPreset2.shader");
+            fxaaPreset3Material = PPFXUtility.checkAndLoadAsset<Shader>(bundle, "Shaders/FXAAPreset3.shader");
+            ssaaMaterial = PPFXUtility.checkAndLoadAsset<Shader>(bundle, "Shaders/SSAA.shader");
 
             m_activeConfig = ConfigUtility.Deserialize<AntiAliasingConfig>(configFilename);
             if (m_activeConfig == null)
@@ -61,7 +63,6 @@ namespace PostProcessFX
         public void save()
         {
             ConfigUtility.Serialize<AntiAliasingConfig>(configFilename, m_activeConfig);
-            m_savedConfig = m_activeConfig;
         }
 
         public void onGUI(float x, float y)
@@ -151,13 +152,12 @@ namespace PostProcessFX
                 m_component = Camera.main.gameObject.AddComponent<Antialiasing>();
                 if (m_component == null)
                 {
-                    PPFXUtility.log("AntiAliasingEffect: Could not add AntialiasingAsPostEffect to Camera.");
+                    PPFXUtility.log("AntiAliasingEffect: Could not add Antialiasing to Camera.");
                 }
                 else
                 {
                     m_component.enabled = false;
-
-
+                    
                     m_component.nfaaShader = nfaaMaterial;
                     m_component.dlaaShader = dlaaShader;
                     m_component.shaderFXAAII = fxaa2Material;
