@@ -13,8 +13,7 @@ namespace PostProcessFX
 {
     class MotionblurEffect : IEffectMenu
     {
-
-        private CameraMotionBlur m_motionblurComponent = null;
+        private CameraMotionBlur m_component = null;
         private MotionblurConfig m_activeConfig;
 
         // The shaders embedded in the AssetBundle
@@ -25,12 +24,11 @@ namespace PostProcessFX
 
         public MotionblurEffect(AssetBundle bundle)
         {
-            m_motionblurComponent = Camera.main.GetComponent<CameraMotionBlur>();
+            Debug.Assert(bundle != null);
 
-            if (bundle)
-            {
-                motionBlurShader = bundle.LoadAsset<Shader>("Shaders/MotionBlur.shader");
-            }
+            // Get existing component if it exists.
+            m_component = Camera.main.GetComponent<CameraMotionBlur>();
+            motionBlurShader = PPFXUtility.checkAndLoadAsset<Shader>(bundle, "Shaders/MotionBlur.shader");
 
             m_activeConfig = ConfigUtility.Deserialize<MotionblurConfig>(configFilename);
             if (m_activeConfig == null)
@@ -103,20 +101,20 @@ namespace PostProcessFX
             {
                 enable();
 
-                m_motionblurComponent.filterType = (CameraMotionBlur.MotionBlurFilter)m_activeConfig.mode - 1;
-                m_motionblurComponent.velocityScale = m_activeConfig.velocityScale;
-                m_motionblurComponent.minVelocity = m_activeConfig.minVelocity;
-                m_motionblurComponent.maxVelocity = m_activeConfig.maxVelocity;
-                m_motionblurComponent.jitter = m_activeConfig.jitter;
+                m_component.filterType = (CameraMotionBlur.MotionBlurFilter)m_activeConfig.mode - 1;
+                m_component.velocityScale = m_activeConfig.velocityScale;
+                m_component.minVelocity = m_activeConfig.minVelocity;
+                m_component.maxVelocity = m_activeConfig.maxVelocity;
+                m_component.jitter = m_activeConfig.jitter;
             }
         }
 
         private void enable()
         {
-            if (m_motionblurComponent == null)
+            if (m_component == null)
             {
-                m_motionblurComponent = Camera.main.gameObject.AddComponent<CameraMotionBlur>();
-                if (m_motionblurComponent == null)
+                m_component = Camera.main.gameObject.AddComponent<CameraMotionBlur>();
+                if (m_component == null)
                 {
                     PPFXUtility.log("MotionblurEffect: Could not add component CameraMotionBlur to Camera.");
                 }
@@ -125,21 +123,21 @@ namespace PostProcessFX
                     Texture2D motionblurJitter = new Texture2D(64, 64);
                     motionblurJitter.LoadImage(motionblurJitterTextureData);
 
-                    m_motionblurComponent.dx11MotionBlurShader = dx11MotionBlurShader;
-                    m_motionblurComponent.shader = motionBlurShader;
-                    m_motionblurComponent.noiseTexture = motionblurJitter;
+                    m_component.dx11MotionBlurShader = dx11MotionBlurShader;
+                    m_component.shader = motionBlurShader;
+                    m_component.noiseTexture = motionblurJitter;
                 }
             }
 
-            m_motionblurComponent.enabled = true;
+            m_component.enabled = true;
         }
 
         private void disable()
         {
-            if (m_motionblurComponent != null)
+            if (m_component != null)
             {
-                MonoBehaviour.DestroyImmediate(m_motionblurComponent);
-                m_motionblurComponent = null;
+                MonoBehaviour.DestroyImmediate(m_component);
+                m_component = null;
             }
         }
 

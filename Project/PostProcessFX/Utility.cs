@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 using UnityEngine;
+using ColossalFramework.Plugins;
 
 namespace PostProcessFX
 {
@@ -35,9 +33,8 @@ namespace PostProcessFX
 
         public static void log(object message)
         {
-            //DebugOutputPanel.Show();
-            //DebugOutputPanel.print(message);
-            Debug.Log(message);
+            DebugOutputPanel.AddMessage( PluginManager.MessageType.Message, ModDescription.ModName + ":" + message.ToString());
+            Debug.Log(ModDescription.ModName + ":" + message);
         }
 
         public static void logException(object message, Exception ex)
@@ -51,6 +48,25 @@ namespace PostProcessFX
                 log("Exception: " + inner);
                 inner = inner.InnerException;
             }
+        }
+
+        /**
+         * Check the existence of an asset in the bundle, throws on failure.  
+         */
+        public static T checkAndLoadAsset<T>(AssetBundle bundle, string name) where T:UnityEngine.Object
+        {
+            if (bundle == null)
+            {
+                throw new ArgumentException("Asset bundle is null");
+            }
+
+            T asset = bundle.LoadAsset<T>(name);
+            if (asset == null)
+            {
+                throw new ArgumentException("Cannot find " + name + " in provided asset bundle");
+            }
+
+            return asset;
         }
     }
 }
