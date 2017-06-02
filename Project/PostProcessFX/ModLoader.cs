@@ -1,7 +1,9 @@
-﻿using System;
+﻿using System.Reflection;
 
 using ICities;
 using UnityEngine;
+
+using ColossalFramework.Plugins;
 
 namespace PostProcessFX
 {
@@ -9,6 +11,8 @@ namespace PostProcessFX
     {
         public static string VersionString = "1.7.0.7";
         public static string ModName = "PostProcessFX";
+
+        public static AssetBundle loadedBundle;
 
         public string Description
         {
@@ -22,7 +26,25 @@ namespace PostProcessFX
 
         public void OnEnabled()
         {
-            PPFXUtility.log(ModName + " " + VersionString + " enabled.");
+            PPFXUtility.log(ModName + " " + VersionString + " enabled, loading asset bundle.");
+
+            // Load the shader bundle
+            string modPath = PluginManager.instance.FindPluginInfo(Assembly.GetAssembly(typeof(ModDescription))).modPath;
+            string assetsUri = "file:///" + modPath.Replace("\\", "/") + "/Resources/Windows/postprocessfx";
+
+            WWW www = new WWW(assetsUri);
+            // Need to wait until the WWW loading has been done, this blocks the game.
+            /*while (!www.isDone)
+            {
+                System.Threading.Thread.Sleep(1000);
+                PPFXUtility.log("Waiting for asset bundle to be loaded...");
+            }*/
+
+            loadedBundle = www.assetBundle;
+            if (loadedBundle == null)
+            {
+                throw new BrokenAssetException("Assetbundle with uri " + assetsUri + " couldn't be loaded.");
+            }
 
             // When we are already in the level we can also trigger it here.
             ModLoader.addConfigUI();
@@ -30,7 +52,13 @@ namespace PostProcessFX
 
         public void OnDisabled()
         {
-            PPFXUtility.log(ModName + " " + VersionString + " disabled.");
+            PPFXUtility.log(ModName + " " + VersionString + " disabled, unloading asset bundle.");
+
+            if (loadedBundle)
+            {
+                loadedBundle.Unload(true);
+                AssetBundle.Destroy(loadedBundle);
+            }
         }
     }
 
@@ -38,24 +66,26 @@ namespace PostProcessFX
     {
         public static void addConfigUI()
         {
-            GameObject cameraObject = Camera.main.gameObject;
-            if (cameraObject != null)
-            {
-                // Remove any existing config UI that was added by us.
-                Component oldUI = cameraObject.GetComponent("ConfigUI");
-                if (oldUI != null)
-                {
-                    PPFXUtility.log("Destroying the old ConfigUI game object.");
-                    Component.Destroy(oldUI);
-                }
+            if (Camera.main == null || Camera.main.gameObject == null) { return; }
 
-                // Then try to add the new one again.
-                ConfigUI newUI = cameraObject.AddComponent<ConfigUI>();
-                if (newUI != null)
-                {
-                    PPFXUtility.log("Added the ConfigUI game object.");
-                }                
+            GameObject cameraObject = Camera.main.gameObject;
+            // Remove any existing config UI that was added by us.
+            Component oldUI = cameraObject.GetComponent("ConfigUI");
+            if (oldUI != null)
+            {
+                PPFXUtility.log("Destroying the old ConfigUI game object.");
+                Component.Destroy(oldUI);
             }
+
+            // Then try to add the new one again.
+            ConfigUI newUI = cameraObject.AddComponent<ConfigUI>();
+            if (newUI != null)
+            {
+                PPFXUtility.log("Added the ConfigUI game object.");
+            }
+
+            newUI.assetBundle = ModDescription.loadedBundle;
+            newUI.Initialize();
         }
         
         public void OnLevelLoaded(LoadMode mode)

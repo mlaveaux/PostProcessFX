@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Reflection;
 
 using UnityEngine;
 using PostProcessFX.Config;
 
-using ColossalFramework.Plugins;
 
 namespace PostProcessFX
 {
@@ -40,6 +38,10 @@ namespace PostProcessFX
         private float m_lastMouseX;
         private float m_lastMouseY;
 
+        // This is actually the parameter from ConfigUI, but as that isn't possible we just
+        // initialize it and call Initialize.
+        public AssetBundle assetBundle;
+
         public ConfigUI()
         {
             //  Load the GUIConfig or otherwise return to default settings
@@ -48,26 +50,6 @@ namespace PostProcessFX
             {
                 m_config = GUIConfig.getDefaultConfig();
             }
-
-            // Load the shader bundle
-            string modPath = PluginManager.instance.FindPluginInfo(Assembly.GetAssembly(typeof(ModDescription))).modPath;
-            string assetsUri = "file:///" + modPath.Replace("\\", "/") + "/Resources/shaders.unitypackage";
-            
-            WWW www = new WWW(assetsUri);
-            // Need to wait until the WWW loading has been done, this blocks the game.
-            while (!www.isDone)
-            { }
-
-            AssetBundle assetBundle = www.assetBundle;
-            if (assetBundle == null)
-            {
-                throw new BrokenAssetException("Assetbundle with uri " + assetsUri + " couldn't be loaded.");
-            }
-
-            // Create effects from the assetbundle, they should read the required assets by themselves.
-            m_bloom = new BloomEffect(assetBundle);
-            m_antiAliasing = new AntiAliasingEffect(assetBundle);
-            m_motionblur = new MotionblurEffect(assetBundle);
             
             // Obtain the UI toggle key
             m_toggleKeyString = Enum.GetName(typeof(KeyCode), m_config.toggleUIKey);
@@ -75,17 +57,19 @@ namespace PostProcessFX
             // Save the settings at least once
             save();
         }
+
+        public void Initialize()
+        {
+            // Create effects from the assetbundle, they should read the required assets by themselves.
+            m_bloom = new BloomEffect(assetBundle);
+            m_antiAliasing = new AntiAliasingEffect(assetBundle);
+            m_motionblur = new MotionblurEffect(assetBundle);
+        }
         
         public void OnGUI()
         {
-            if (m_config.active)
-            {
-                drawGUI();
-            }
-        }
-
-        public void drawGUI()
-        {            
+            if (!m_config.active) { return; }
+            
             float x = m_config.menuPositionX;
             float y = m_config.menuPositionY;
 
@@ -143,6 +127,7 @@ namespace PostProcessFX
                     }
                     catch (Exception ex)
                     {
+                        // Silently ignore this exception, because it just means that it cannot be converted to a keycode.
                         m_config.toggleUIKey = (int)KeyCode.F9;
                         m_toggleKeyString = "F9";
                     }
