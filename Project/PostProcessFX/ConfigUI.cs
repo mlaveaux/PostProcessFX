@@ -1,12 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.Reflection;
 
 using UnityEngine;
-using UnityEngine.UI;
-using ColossalFramework.UI;
 using PostProcessFX.Config;
+
+using ColossalFramework.Plugins;
 
 namespace PostProcessFX
 {
@@ -35,7 +33,6 @@ namespace PostProcessFX
         private AntiAliasingEffect m_antiAliasing;
 
         private GUIConfig m_config = null;
-        private MonoBehaviour m_parent;
         private MenuType m_activeMenu;
 
         private bool m_toggle = false;
@@ -52,26 +49,33 @@ namespace PostProcessFX
                 m_config = GUIConfig.getDefaultConfig();
             }
 
-            // Load the unitypackage with the materials
-            AssetBundle assetbundle = AssetBundle.LoadFromFile("PostProcessFX.unitypackage");
+            // Load the shader bundle
+            string modPath = PluginManager.instance.FindPluginInfo(Assembly.GetAssembly(typeof(ModDescription))).modPath;
+            string assetsUri = "file:///" + modPath.Replace("\\", "/") + "/Resources/shaders.unitypackage";
+            
+            WWW www = new WWW(assetsUri);
+            // Need to wait until the WWW loading has been done, this blocks the game.
+            while (!www.isDone)
+            { }
+
+            AssetBundle assetBundle = www.assetBundle;
+            if (assetBundle == null)
+            {
+                throw new BrokenAssetException("Assetbundle with uri " + assetsUri + " couldn't be loaded.");
+            }
 
             // Create effects from the assetbundle, they should read the required assets by themselves.
-            m_bloom = new BloomEffect(assetbundle);
-            m_antiAliasing = new AntiAliasingEffect(assetbundle);
-            m_motionblur = new MotionblurEffect(assetbundle);
+            m_bloom = new BloomEffect(assetBundle);
+            m_antiAliasing = new AntiAliasingEffect(assetBundle);
+            m_motionblur = new MotionblurEffect(assetBundle);
             
             // Obtain the UI toggle key
             m_toggleKeyString = Enum.GetName(typeof(KeyCode), m_config.toggleUIKey);
 
             // Save the settings at least once
-            OnDestroy();
+            save();
         }
-
-        public void setParent(MonoBehaviour parent)
-        {
-            m_parent = parent;
-        }
-
+        
         public void OnGUI()
         {
             if (m_config.active)
@@ -81,13 +85,13 @@ namespace PostProcessFX
         }
 
         public void drawGUI()
-        {
+        {            
             float x = m_config.menuPositionX;
             float y = m_config.menuPositionY;
 
             GUI.Box(new Rect(x, y, 320, 400), "");
 
-            if (GUI.Button(new Rect(x, y, 300, 20), "PostProcessFX UI v1.6.0-f4"))
+            if (GUI.Button(new Rect(x, y, 300, 20), ModDescription.ModName + " UI " + ModDescription.VersionString))
             {
                 m_dragging = true;
             }
@@ -126,7 +130,7 @@ namespace PostProcessFX
                     GUI.Label(new Rect(x, y, 200, 20), "ToggleUI");
                     y += 25;
 
-                    m_toggleKeyString = GUI.TextArea(new Rect(x, y, 200, 20), m_toggleKeyString);
+                    //m_toggleKeyString = GUI.TextArea(new Rect(x, y, 200, 20), m_toggleKeyString);
                     y += 25;
 
                     m_config.ctrlKey = GUI.Toggle(new Rect(x, y, 50, 20), m_config.ctrlKey, "ctrl");
@@ -145,15 +149,18 @@ namespace PostProcessFX
                     break;
 
                 case MenuType.AntiAliasing:
-                    m_antiAliasing.onGUI(x, y);
+                    if (m_antiAliasing != null)
+                        m_antiAliasing.onGUI(x, y);
                     break;
 
                 case MenuType.Bloom:
-                    m_bloom.onGUI(x, y);
+                    if (m_bloom != null)
+                        m_bloom.onGUI(x, y);
                     break;
 
                 case MenuType.Motionblur:
-                    m_motionblur.onGUI(x, y);
+                    if (m_motionblur != null)
+                        m_motionblur.onGUI(x, y);
                     break;
             }
         }
@@ -235,10 +242,11 @@ namespace PostProcessFX
 
         private void save()
         {
-            PPFXUtility.log("PostProcessFX: Saving settings...");
-            m_bloom.save();
-            m_motionblur.save();
-            m_antiAliasing.save();
+            // For some reason there can be an exception in the constructor, but the object is still created.
+            PPFXUtility.log("PostProcessFX: Saving settings.");
+            if (m_bloom != null ) m_bloom.save();
+            if (m_motionblur != null) m_motionblur.save();
+            if (m_antiAliasing != null) m_antiAliasing.save();
 
             ConfigUtility.Serialize<GUIConfig>(configFilename, m_config);
         }
