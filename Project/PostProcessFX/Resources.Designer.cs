@@ -59,15 +59,5 @@ namespace PostProcessFX {
                 resourceCulture = value;
             }
         }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Byte[].
-        /// </summary>
-        internal static byte[] shaders {
-            get {
-                object obj = ResourceManager.GetObject("shaders", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
     }
 }
