@@ -1,4 +1,5 @@
-﻿using PostProcessFX;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace UnityStandardAssets.ImageEffects
@@ -11,11 +12,13 @@ namespace UnityStandardAssets.ImageEffects
         protected bool supportDX11 = false;
         protected bool isSupported = true;
 
+        private List<Material> createdMaterials = new List<Material>();
+
         protected Material CheckShaderAndCreateMaterial(Shader s, Material m2Create)
         {
             if (!s)
             {
-                PPFXUtility.log("Missing shader in " + ToString());
+                Debug.Log("Missing shader in " + ToString());
                 enabled = false;
                 return null;
             }
@@ -26,17 +29,15 @@ namespace UnityStandardAssets.ImageEffects
             if (!s.isSupported)
             {
                 NotSupported();
-                PPFXUtility.log("The shader " + s.ToString() + " on effect " + ToString() + " is not supported on this platform!");
+                Debug.Log("The shader " + s.ToString() + " on effect " + ToString() + " is not supported on this platform!");
                 return null;
             }
-            else
-            {
-                m2Create = new Material(s);
-                m2Create.hideFlags = HideFlags.DontSave;
-                if (m2Create)
-                    return m2Create;
-                else return null;
-            }
+
+            m2Create = new Material(s);
+            createdMaterials.Add(m2Create);
+            m2Create.hideFlags = HideFlags.DontSave;
+
+            return m2Create;
         }
 
 
@@ -44,7 +45,7 @@ namespace UnityStandardAssets.ImageEffects
         {
             if (!s)
             {
-                PPFXUtility.log("Missing shader in " + ToString());
+                Debug.Log("Missing shader in " + ToString());
                 return null;
             }
 
@@ -55,19 +56,36 @@ namespace UnityStandardAssets.ImageEffects
             {
                 return null;
             }
-            else
-            {
-                m2Create = new Material(s);
-                m2Create.hideFlags = HideFlags.DontSave;
-                if (m2Create)
-                    return m2Create;
-                else return null;
-            }
+
+            m2Create = new Material(s);
+            createdMaterials.Add(m2Create);
+            m2Create.hideFlags = HideFlags.DontSave;
+
+            return m2Create;
         }
 
         void OnEnable()
         {
             isSupported = true;
+        }
+
+        void OnDestroy()
+        {
+            RemoveCreatedMaterials();
+        }
+
+        private void RemoveCreatedMaterials()
+        {
+            while (createdMaterials.Count > 0)
+            {
+                Material mat = createdMaterials[0];
+                createdMaterials.RemoveAt(0);
+#if UNITY_EDITOR
+                DestroyImmediate (mat);
+#else
+                Destroy(mat);
+#endif
+            }
         }
 
         protected bool CheckSupport()
@@ -78,7 +96,7 @@ namespace UnityStandardAssets.ImageEffects
 
         public virtual bool CheckResources()
         {
-            PPFXUtility.log("CheckResources () for " + ToString() + " should be overwritten.");
+            Debug.LogWarning("CheckResources () for " + ToString() + " should be overwritten.");
             return isSupported;
         }
 
@@ -94,7 +112,7 @@ namespace UnityStandardAssets.ImageEffects
             supportHDRTextures = SystemInfo.SupportsRenderTextureFormat(RenderTextureFormat.ARGBHalf);
             supportDX11 = SystemInfo.graphicsShaderLevel >= 50 && SystemInfo.supportsComputeShaders;
 
-            if (!SystemInfo.supportsImageEffects || !SystemInfo.supportsRenderTextures)
+            if (!SystemInfo.supportsImageEffects)
             {
                 NotSupported();
                 return false;
@@ -135,13 +153,13 @@ namespace UnityStandardAssets.ImageEffects
 
         protected void ReportAutoDisable()
         {
-            PPFXUtility.log("The image effect " + ToString() + " has been disabled as it's not supported on the current platform.");
+            Debug.LogWarning("The image effect " + ToString() + " has been disabled as it's not supported on the current platform.");
         }
 
         // deprecated but needed for old effects to survive upgrading
         bool CheckShader(Shader s)
         {
-            PPFXUtility.log("The shader " + s.ToString() + " on effect " + ToString() + " is not part of the Unity 3.2+ effects suite anymore. For best performance and quality, please ensure you are using the latest Standard Assets Image Effects (Pro only) package.");
+            Debug.Log("The shader " + s.ToString() + " on effect " + ToString() + " is not part of the Unity 3.2+ effects suite anymore. For best performance and quality, please ensure you are using the latest Standard Assets Image Effects (Pro only) package.");
             if (!s.isSupported)
             {
                 NotSupported();

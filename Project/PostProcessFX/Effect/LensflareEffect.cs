@@ -12,9 +12,9 @@ namespace PostProcessFX
     {
         private Flare m_sunflare = null;
 
-        public LensflareEffect()
+        public LensflareEffect(AssetBundle bundle)
         {
-            enable();
+            m_sunflare = PPFXUtility.checkAndLoadAsset<Flare>(bundle, "Assets/Flares/50mmZoom.flare");
         }
 
         ~LensflareEffect()
@@ -32,17 +32,10 @@ namespace PostProcessFX
                 {
                     if (light.type == LightType.Directional)
                     {
-                        m_sunflare = null;  //(Flare)Resources.Load("50mmZoom.flare");
-                        if (m_sunflare == null)
+                        if (m_sunflare != null)
                         {
-                            PPFXUtility.log("LensflareEffect: Could not load 50mmZoom.flare");
+                            light.flare = m_sunflare;
                         }
-                        else
-                        {
-                            m_sunflare = new Flare();
-                        }
-
-                        light.flare = m_sunflare;
                     }
                 }
             }
@@ -50,9 +43,14 @@ namespace PostProcessFX
 
         public void disable()
         {
-            if (m_sunflare != null)
+            Light[] lights = GameObject.FindObjectsOfType<Light>();
+
+            foreach (Light light in lights)
             {
-                MonoBehaviour.DestroyImmediate(m_sunflare);
+                if (light.type == LightType.Directional)
+                {
+                    light.flare = null;
+                }
             }
         }
     }
