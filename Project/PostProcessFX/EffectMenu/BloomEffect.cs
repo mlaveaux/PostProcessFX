@@ -76,16 +76,16 @@ namespace PostProcessFX
             m_activeConfig.bloomEnabled = GUI.Toggle(new Rect(x, y, 200.0f, 20.0f), m_activeConfig.bloomEnabled, "enable bloom");
             y += 25;
 
-            m_activeConfig.intensity = PPFXUtility.drawSliderWithLabel(x, y, 0.0f, 2.0f, "Intensity", m_activeConfig.intensity);
+            m_activeConfig.intensity = PPFXUtility.drawSliderWithLabel(x, y, 0.0f, 1.0f, "Intensity", m_activeConfig.intensity);
             y += 25;
 
-            m_activeConfig.radius = PPFXUtility.drawSliderWithLabel(x, y, 0.0f, 2.0f, "Radius", m_activeConfig.radius);
+            m_activeConfig.radius = PPFXUtility.drawSliderWithLabel(x, y, 1.0f, 7.0f, "Radius", m_activeConfig.radius);
             y += 25;
 
-            m_activeConfig.threshold = PPFXUtility.drawSliderWithLabel(x, y, 0.0f, 2.0f, "Threshold", m_activeConfig.threshold);
+            m_activeConfig.threshold = PPFXUtility.drawSliderWithLabel(x, y, 0.0f, 1.0f, "Threshold", m_activeConfig.threshold);
             y += 25;
 
-            m_activeConfig.softKnee = PPFXUtility.drawSliderWithLabel(x, y, 0.0f, 2.0f, "softKnee", m_activeConfig.softKnee);
+            m_activeConfig.softKnee = PPFXUtility.drawSliderWithLabel(x, y, 0.0f, 1.0f, "softKnee", m_activeConfig.softKnee);
             y += 25;
 
             m_activeConfig.highQuality = GUI.Toggle(new Rect(x, y, 200.0f, 20.0f), m_activeConfig.highQuality, "enable high quality");
@@ -117,6 +117,13 @@ namespace PostProcessFX
 
         public void enable()
         {
+            // Remove all old bloom components
+            Component bloom = Camera.main.GetComponent("Bloom");
+            if (bloom != null)
+            {
+                MonoBehaviour.DestroyImmediate(bloom);
+            }
+
             m_component = Camera.main.GetComponent<Bloom>();
             if (m_component == null)
             {
