@@ -58,7 +58,7 @@ namespace PostProcessFX.EffectMenu
             m_activeConfig.source = (OcclusionSource)PPFXUtility.drawIntSliderWithLabel(x, y, 0, 1, "Occlusion Source: ", m_activeConfig.getOcclusionSourceLabel(), (int)m_activeConfig.source);
             y += 25;
 
-            m_activeConfig.downsampling = GUI.Toggle(new Rect(x, y, 200.0f, 20.0f), m_activeConfig.downsampling, "enable downsampling");
+            m_activeConfig.downsampling = GUI.Toggle(new Rect(x, y, 200.0f, 20.0f), m_activeConfig.downsampling, "Enable downsampling");
             y += 25;
 
             // Apply the changed configuration.
