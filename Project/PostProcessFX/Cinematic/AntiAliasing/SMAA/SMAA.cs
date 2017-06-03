@@ -42,9 +42,10 @@ namespace UnityStandardAssets.CinematicEffects
 
         public enum EdgeDetectionMethod
         {
-            Luma = 1,
-            Color = 2,
-            Depth = 3
+            Luma = 0,
+            Color = 1,
+            Depth = 2,
+            Maximum = 3
         }
 
         [Serializable]
@@ -188,7 +189,7 @@ namespace UnityStandardAssets.CinematicEffects
                     return new TemporalSettings
                     {
                         enabled = false,
-                        fuzzSize = 2f
+                        fuzzSize = 0.5f
                     };
                 }
             }
@@ -385,7 +386,10 @@ namespace UnityStandardAssets.CinematicEffects
             material.SetVector(m_Params1, new Vector4(preset.threshold, preset.depthThreshold, preset.maxSearchSteps, preset.maxDiagonalSearchSteps));
             material.SetVector(m_Params2, new Vector2(preset.cornerRounding, preset.localContrastAdaptationFactor));
 
-            material.SetMatrix(m_ReprojectionMatrix, m_PreviousViewProjectionMatrix * Matrix4x4.Inverse(viewProjectionMatrix));
+            Matrix4x4 matrix = m_PreviousViewProjectionMatrix * Matrix4x4.Inverse(viewProjectionMatrix);
+            matrix.m11 *= -1.0f; // The last accumulation buffer is upside down.
+
+            material.SetMatrix(m_ReprojectionMatrix, matrix);
 
             float subsampleIndex = (m_FlipFlop < 0.0f) ? 2.0f : 1.0f;
             material.SetVector(m_SubsampleIndices, new Vector4(subsampleIndex, subsampleIndex, subsampleIndex, 0.0f));
