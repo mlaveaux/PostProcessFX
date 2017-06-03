@@ -15,47 +15,43 @@ Can be fully controlled with the ingame UI with the following settings:
     - lensflareWidth: The width of the lensflare effect.
     - lensflareBlurIterations: Higher iterations cause a more smoothed lens flare ends.
     - Enable ghosting lensflare: Causes camera ghosting effects to appear from bright light sources.
-	
+    
 [h1] Anti Aliasing [/h1]
 
-Supports FXAA2, FXAA3, NFAA, SSAA, DLAA. 
+Supports FXAA, SMAA and TAA.
 
     - FXAA is Fast Approximate Anti Aliasing.
-	    (Following settings only available on FXAA3)
-	    - min edge threshhold: Change what fxaa considers an edge.
-	    - max edge threshhold: Change what fxaa considers an edge.
-	    - sharpness: How sharp the image should be.
+        - Five presets ranging from very low to ultra.
 
-    - NFAA is Normal Filter Anti Aliasing.
-	    - edge offset: Offset the actual edge.
-	    - blur radius: Higher results in a more blurred image.
-
-    - SSAA is Screen Space Anti Aliasing, simple edge blur.
-
-    - DLAA is Directionally Localized Anti Aliasing, which is the most expensive.
-	    - sharp: Whether DLAA should produce a sharp image.
+    - SMAA is Enhanced Subpixel Morphological Antialiasing 
+        - Four presets ranging from low to ultra.
+        - Enable Temporal: Enables SMAA T2x, this samples over two frames and has a slight performance impact.
 
 Not as effective as the DynamicResolution mod by nlight, but cheaper and can be combined if desired. 
 
-[h1] Motion Blur [/h1]
+[h1] Screen Space Ambient Occlusion [/h1]
 
-Supports CameraMotion, LocalBlur, Reconstruction, ReconstructionDX11 and ReconstructionDisk. 
+This is different implementation then the SSAO mod by Ulysius, so chose one depending on preference.
 
-	- Velocity Scale: Set the scaling between the min and max velocity.
-	- Min Velocity: Minimum velocity in pixels.
-	- Max Velocity: Maximum velocity in pixels.	
-	- All reconstruction types have jitter as extra option which controls the blurriness of the motion blur.
-	
+    - Intensity: How much the surfaces are darkened.
+    - Radius: Controls the spread of the occlusion.
+    - Sample Count: The amount of samples taken around each pixel, impacts performance.
+    - Occlusion: Either depth or depth + normal is used, looks slightly different.
+    - Enable Downsampling: Only sample at half resolution, impacts performance.
+    
 [h1] Additional Information [/h1]
 
 All effects can be disabled so they don't have any performance impact. An ingame UI is provided to tweak the options and can be toggled with F9 (default), the toggle key can be changed in UI.[url=http://pastebin.com/qe5BwdA2]Here[/url] is a list of possible keycodes, fill in the string and not the corresponding number.
 
 [h1] Changelog [/h1]
 
-    - Fixed the effects for After Dark patch.
+    - Improved the available anti aliasing options.
+    - Added a ambient occlusion effect.
+    - Fixed the effects for the Mass Transit patch.
+    - Fixed the effects for the After Dark patch.
     - Added some presets and the options to load the saved configuration.
-	- Added draggable config ui.
-	- Options are split into tabs, added more options and renamed some options.
+    - Added draggable config ui.
+    - Options are split into tabs, added more options and renamed some options.
 
 [h1] Recommended and Compactible Mods [/h1]
 
