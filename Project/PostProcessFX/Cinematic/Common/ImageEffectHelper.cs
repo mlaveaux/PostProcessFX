@@ -24,7 +24,7 @@ namespace UnityStandardAssets.CinematicEffects
 #if UNITY_5_5_OR_NEWER
                 if (!SystemInfo.supportsImageEffects)
 #else
-                if (!SystemInfo.supportsImageEffects || !SystemInfo.supportsRenderTextures)
+                if (!SystemInfo.supportsImageEffects)
 #endif
                 {
                     Debug.LogWarningFormat("Image effects aren't supported on this device ({0})", effect);
