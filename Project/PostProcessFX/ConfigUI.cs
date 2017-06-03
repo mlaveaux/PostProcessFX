@@ -2,6 +2,7 @@
 
 using UnityEngine;
 using PostProcessFX.Config;
+using PostProcessFX.EffectMenu;
 
 namespace PostProcessFX
 {
@@ -27,6 +28,7 @@ namespace PostProcessFX
 
         private BloomEffect m_bloom;
         private AntiAliasingEffect m_antiAliasing;
+        private AmbientOcclusionEffect m_ambientOcclusion;
 
         private GUIConfig m_config = null;
         private MenuType m_activeMenu;
@@ -61,6 +63,7 @@ namespace PostProcessFX
             // Create effects from the assetbundle, they should read the required assets by themselves.
             m_bloom = new BloomEffect(assetBundle);
             m_antiAliasing = new AntiAliasingEffect(assetBundle);
+            m_ambientOcclusion = new AmbientOcclusionEffect();
         }
         
         public void OnGUI()
@@ -94,17 +97,12 @@ namespace PostProcessFX
                 m_activeMenu = MenuType.Bloom;
             }
 
-            if (GUI.Button(new Rect(x + 120, y, 90, 20), "AntiAliasing"))
+            if (GUI.Button(new Rect(x + 120, y, 30, 20), "AA"))
             {
                 m_activeMenu = MenuType.AntiAliasing;
             }
-
-            if (GUI.Button(new Rect(x + 210, y, 90, 20), "Motionblur"))
-            {
-                m_activeMenu = MenuType.Motionblur;
-            }
-
-            if (GUI.Button(new Rect(x + 300, y, 90, 20), "SSAO"))
+            
+            if (GUI.Button(new Rect(x + 150, y, 30, 20), "AO"))
             {
                 m_activeMenu = MenuType.SSAO;
             }
@@ -115,10 +113,8 @@ namespace PostProcessFX
             switch (m_activeMenu)
             {
                 case MenuType.Global:
-                    GUI.Label(new Rect(x, y, 200, 20), "ToggleUI");
-                    y += 25;
-
-                    //m_toggleKeyString = GUI.TextArea(new Rect(x, y, 200, 20), m_toggleKeyString);
+                    GUI.Label(new Rect(x, y, 200, 20), "Toggle Key: ");
+                    m_toggleKeyString = GUI.TextArea(new Rect(x + 150, y, 150, 20), m_toggleKeyString);
                     y += 25;
 
                     m_config.ctrlKey = GUI.Toggle(new Rect(x, y, 50, 20), m_config.ctrlKey, "ctrl");
@@ -129,7 +125,7 @@ namespace PostProcessFX
                     {
                         m_config.toggleUIKey = (int)Enum.Parse(typeof(KeyCode), m_toggleKeyString);
                     }
-                    catch (Exception ex)
+                    catch (Exception)
                     {
                         // Silently ignore this exception, because it just means that it cannot be converted to a keycode.
                         m_config.toggleUIKey = (int)KeyCode.F9;
@@ -139,12 +135,16 @@ namespace PostProcessFX
 
                 case MenuType.AntiAliasing:
                     if (m_antiAliasing != null)
+                    {
                         m_antiAliasing.onGUI(x, y);
+                    }
                     break;
 
                 case MenuType.Bloom:
                     if (m_bloom != null)
+                    {
                         m_bloom.onGUI(x, y);
+                    }
                     break;
 
                 case MenuType.Motionblur:
@@ -155,10 +155,10 @@ namespace PostProcessFX
                     break;
 
                 case MenuType.SSAO:
-                    /*if (m_ambientObscurance != null)
+                    if (m_ambientOcclusion != null)
                     {
-                        m_ambientObscurance.onGUI(x, y);
-                    }*/
+                        m_ambientOcclusion.onGUI(x, y);
+                    }
                     break;
             }
         }
@@ -231,6 +231,11 @@ namespace PostProcessFX
         public void OnDestroy()
         {
             save();
+
+            // Destroy the other components that might have assets loaded
+            if (m_bloom != null) m_bloom.disable();
+            if (m_antiAliasing != null) m_antiAliasing.disable();
+            if (m_ambientOcclusion != null) m_ambientOcclusion.disable();
         }
 
         public void OnMouseUp()
@@ -244,6 +249,7 @@ namespace PostProcessFX
             PPFXUtility.log("PostProcessFX: Saving settings.");
             if (m_bloom != null ) m_bloom.save();
             if (m_antiAliasing != null) m_antiAliasing.save();
+            if (m_ambientOcclusion != null) m_ambientOcclusion.save();
 
             ConfigUtility.Serialize<GUIConfig>(configFilename, m_config);
         }
