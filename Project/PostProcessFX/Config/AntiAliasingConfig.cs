@@ -1,22 +1,69 @@
-﻿namespace PostProcessFX.Config
+﻿using static UnityStandardAssets.CinematicEffects.SMAA;
+
+namespace PostProcessFX.Config
 {
+    public enum AntiAliasingMode
+    {
+        Disabled = 0,
+        FXAA,
+        SMAA,
+        TAA,
+        Maximum
+    }
+
     /**
      * These settings are important for anti aliasing. 
      */
     public class AntiAliasingConfig
     {
-        public int mode = 0;
+        public AntiAliasingMode mode = AntiAliasingMode.Disabled; // None: 0, FXAA: 1, SMAA: 2, TAA: 3
 
-        public float FXAA3minThreshhold = 0.1f;
-        public float FXAA3maxThreshhold = 0.4f;
-        public float FXAA3sharpness = 8;
-        public float NFAAoffset = 0.2f;
-        public float NFAAblurRadius = 18.0f;
-        public bool DLAAsharp = true;
+        // FXAA specific settings.
+        public int fxaaQuality = 2;
+
+        // SMAA specific settings.
+        public EdgeDetectionMethod smaaEdgeMethod = EdgeDetectionMethod.Color;
+        public QualityPreset smaaQuality = QualityPreset.Medium;
+        public bool smaaTemporal = false;
+        public bool smaaPredication = false;
 
         public static AntiAliasingConfig getDefaultPreset()
         {
             return new AntiAliasingConfig();
+        }
+
+        public string getLabelFromMode()
+        {
+            return mode.ToString();
+        }
+
+        public string getLabelFromFxaaQuality()
+        {
+            switch(fxaaQuality)
+            {
+                case 0:
+                    return "Very Low";
+                case 1:
+                    return "Low";
+                case 2:
+                    return "Medium";
+                case 3:
+                    return "High";
+                case 4:
+                    return "Ultra";
+            }
+
+            return "Undefined";
+        }
+
+        public string getLabelFromSmaaQuality()
+        {
+            return smaaQuality.ToString();
+        }
+
+        public string getLabelFromEdgeDetection()
+        {
+            return smaaEdgeMethod.ToString();
         }
     }
 }
