@@ -1,13 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+
+using UnityEngine;
 
 using PostProcessFX.Config;
 using PostProcessFX.EffectMenu;
+using UnityStandardAssets.CinematicEffects;
 
-using UnityEngine;
-using UnityStandardAssets.ImageEffects;
+// Nice namespaces, automatically poluted by some random SMAA export.
+using static UnityStandardAssets.CinematicEffects.SMAA;
 
 namespace PostProcessFX
 {
@@ -17,33 +17,16 @@ namespace PostProcessFX
      */
     class AntiAliasingEffect : IEffectMenu
     {
-        private Antialiasing m_component = null;
+        private AntiAliasing         m_antiAliasingComponent = null;
+        private CineTemporalAntiAliasing m_temporalComponent = null;
         private AntiAliasingConfig m_activeConfig = null;
 
         // Shaders loaded from the asset bundle
-        Shader dlaaShader;
-        Shader nfaaMaterial;
-        Shader fxaa2Material;
-        Shader fxaa3ConsoleMaterial;
-        Shader fxaaPreset2Material;
-        Shader fxaaPreset3Material;
-        Shader ssaaMaterial;
 
         private static String configFilename = "PostProcessFX_aa_config.xml";
         
         public AntiAliasingEffect(AssetBundle bundle)
         {
-            // Get existing component if it exists.
-            m_component = Camera.main.GetComponent<Antialiasing>();
-
-            dlaaShader = PPFXUtility.checkAndLoadAsset<Shader>(bundle, "Assets/Shaders/AntiAliasing/DLAA.shader");
-            nfaaMaterial = PPFXUtility.checkAndLoadAsset<Shader>(bundle, "Assets/Shaders/AntiAliasing/NFAA.shader");
-            fxaa2Material = PPFXUtility.checkAndLoadAsset<Shader>(bundle, "Assets/Shaders/AntiAliasing/FXAA2.shader");
-            fxaa3ConsoleMaterial = PPFXUtility.checkAndLoadAsset<Shader>(bundle, "Assets/Shaders/AntiAliasing/FXAA3Console.shader");
-            fxaaPreset2Material = PPFXUtility.checkAndLoadAsset<Shader>(bundle, "Assets/Shaders/AntiAliasing/FXAAPreset2.shader");
-            fxaaPreset3Material = PPFXUtility.checkAndLoadAsset<Shader>(bundle, "Assets/Shaders/AntiAliasing/FXAAPreset3.shader");
-            ssaaMaterial = PPFXUtility.checkAndLoadAsset<Shader>(bundle, "Assets/Shaders/AntiAliasing/SSAA.shader");
-
             m_activeConfig = ConfigUtility.Deserialize<AntiAliasingConfig>(configFilename);
             if (m_activeConfig == null)
             {
@@ -52,28 +35,26 @@ namespace PostProcessFX
 
             applyConfig();
         }
-
-        ~AntiAliasingEffect()
-        {
-            disable();
-        }
-
+        
         public void save()
         {
             ConfigUtility.Serialize<AntiAliasingConfig>(configFilename, m_activeConfig);
         }
 
+        public void disable()
+        {
+            disable(m_antiAliasingComponent);
+            disable(m_temporalComponent);
+        }
+
         public void onGUI(float x, float y)
         {
-            float currentX = x;
-            float currentY = y;
-
-            if (GUI.Button(new Rect(x, currentY, 75, 20), "Default"))
+            if (GUI.Button(new Rect(x, y, 75, 20), "Default"))
             {
                 m_activeConfig = AntiAliasingConfig.getDefaultPreset();
             }
 
-            if (GUI.Button(new Rect(x + 75, currentY, 75, 20), "Load"))
+            if (GUI.Button(new Rect(x + 75, y, 75, 20), "Load"))
             {
                 m_activeConfig = ConfigUtility.Deserialize<AntiAliasingConfig>(configFilename);
                 if (m_activeConfig == null)
@@ -81,45 +62,28 @@ namespace PostProcessFX
                     m_activeConfig = AntiAliasingConfig.getDefaultPreset();
                 }
             }
-            currentY += 25;
-
-            GUI.Label(new Rect(currentX, currentY, 200, 20), "Anti Aliasing Mode: ");
-            currentY += 25;
-
-            m_activeConfig.mode = PPFXUtility.drawIntSliderWithLabel(currentX, currentY, 0, 7,
-                getAntiAliasingType(m_activeConfig.mode), m_activeConfig.mode);
-            currentY += 25;
-
-            if (m_activeConfig.mode != 0)
+            y += 25;
+            
+            m_activeConfig.mode = (AntiAliasingMode)PPFXUtility.drawIntSliderWithLabel(x, y, 0, (int)AntiAliasingMode.Maximum - 2, "Mode: ", m_activeConfig.getLabelFromMode(), (int)m_activeConfig.mode);
+            y += 25;
+                        
+            if (m_activeConfig.mode == AntiAliasingMode.FXAA)
             {
-                switch ((AAMode)(m_activeConfig.mode - 1))
-                {
-                    case AAMode.FXAA3Console:
-                        m_activeConfig.FXAA3minThreshhold = PPFXUtility.drawSliderWithLabel(currentX, currentY, 0.0f, 1.0f, "min edge threshhold", m_activeConfig.FXAA3minThreshhold);
-                        currentY += 25;
-
-                        m_activeConfig.FXAA3maxThreshhold = PPFXUtility.drawSliderWithLabel(currentX, currentY, 0.0f, 1.0f, "max edge threshhold", m_activeConfig.FXAA3maxThreshhold);
-                        currentY += 25;
-
-                        m_activeConfig.FXAA3sharpness = PPFXUtility.drawSliderWithLabel(currentX, currentY, 0.0f, 4.0f, "sharpness", m_activeConfig.FXAA3sharpness);
-                        currentY += 25;
-                        break;
-
-                    case AAMode.NFAA:
-                        m_activeConfig.NFAAoffset = PPFXUtility.drawSliderWithLabel(currentX, currentY, 0.0f, 1.0f, "edge offset", m_activeConfig.NFAAoffset);
-                        currentY += 25;
-
-                        m_activeConfig.NFAAblurRadius = PPFXUtility.drawSliderWithLabel(currentX, currentY, 0.0f, 32.0f, "blur radius", m_activeConfig.NFAAblurRadius);
-                        currentY += 25;
-                        break;
-
-                    case AAMode.DLAA:
-                        m_activeConfig.DLAAsharp = GUI.Toggle(new Rect(currentX, currentY, 100, 20), m_activeConfig.DLAAsharp, "sharp");
-                        currentY += 25;
-                        break;
-                }
+                m_activeConfig.fxaaQuality = PPFXUtility.drawIntSliderWithLabel(x, y, 0, 4, m_activeConfig.getLabelFromFxaaQuality(), m_activeConfig.fxaaQuality);
+                y += 25;
             }
 
+            if (m_activeConfig.mode == AntiAliasingMode.SMAA)
+            {
+                m_activeConfig.smaaQuality = (QualityPreset)PPFXUtility.drawIntSliderWithLabel(x, y, 0, (int)QualityPreset.Custom - 1, m_activeConfig.getLabelFromSmaaQuality(), (int)m_activeConfig.smaaQuality);
+                y += 25;
+
+                m_activeConfig.smaaTemporal = GUI.Toggle(new Rect(x, y, 200.0f, 20.0f), m_activeConfig.smaaTemporal, "Enable temporal");
+                y += 25;
+                
+                //m_activeConfig.smaaPredication = GUI.Toggle(new Rect(x, y, 200.0f, 20.0f), m_activeConfig.smaaPredication, "enable predication");
+            }
+            
             applyConfig();
         }
 
@@ -129,77 +93,74 @@ namespace PostProcessFX
             {
                 disable();
             }
+            else if (m_activeConfig.mode == AntiAliasingMode.SMAA || m_activeConfig.mode == AntiAliasingMode.FXAA)
+            {
+                disable(m_temporalComponent);
+
+                m_antiAliasingComponent = Camera.main.GetComponent<AntiAliasing>();
+                if (m_antiAliasingComponent == null)
+                {
+                    m_antiAliasingComponent = Camera.main.gameObject.AddComponent<AntiAliasing>();
+                    if (m_antiAliasingComponent == null)
+                    {
+                        m_activeConfig.mode = 0;
+                        throw new Exception("AntiAliasingEffect: Couldn't add Antialiasing to Camera.");
+                    }
+                }
+                m_antiAliasingComponent.enabled = true;
+
+                switch (m_activeConfig.mode)
+                {
+                    case AntiAliasingMode.FXAA:
+                        m_antiAliasingComponent.method = (int)AntiAliasing.Method.Fxaa;
+                        break;
+                    case AntiAliasingMode.SMAA:
+                        m_antiAliasingComponent.method = (int)AntiAliasing.Method.Smaa;
+                        break;
+                }
+
+                m_antiAliasingComponent.m_FXAA.preset = FXAA.availablePresets[m_activeConfig.fxaaQuality];
+
+                // Enable the required SMAA settings
+                m_antiAliasingComponent.m_SMAA.settings.quality = m_activeConfig.smaaQuality;
+                m_antiAliasingComponent.m_SMAA.settings.edgeDetectionMethod = m_activeConfig.smaaEdgeMethod;
+                m_antiAliasingComponent.m_SMAA.temporal.enabled = m_activeConfig.smaaTemporal;
+                m_antiAliasingComponent.m_SMAA.predication.enabled = m_activeConfig.smaaPredication;
+            }
             else
             {
-                enable();
+                disable(m_antiAliasingComponent);
 
-                m_component.mode = (AAMode)m_activeConfig.mode - 1;
-                m_component.blurRadius = m_activeConfig.NFAAblurRadius;
-                m_component.dlaaSharp = m_activeConfig.DLAAsharp;
-
-                m_component.edgeSharpness = m_activeConfig.FXAA3sharpness;
-                m_component.edgeThreshold = m_activeConfig.FXAA3maxThreshhold;
-                m_component.edgeThresholdMin = m_activeConfig.FXAA3minThreshhold;
-            }
-        }
-
-        private void enable()
-        {
-            if (m_component == null)
-            {
-                m_component = Camera.main.gameObject.AddComponent<Antialiasing>();
-                if (m_component == null)
+                m_temporalComponent = Camera.main.GetComponent<CineTemporalAntiAliasing>();
+                if (m_temporalComponent == null)
                 {
-                    PPFXUtility.log("AntiAliasingEffect: Could not add Antialiasing to Camera.");
+                    m_temporalComponent = Camera.main.gameObject.AddComponent<CineTemporalAntiAliasing>();
+                    if (m_temporalComponent == null)
+                    {
+                        m_activeConfig.mode = 0;
+                        throw new Exception("AntiAliasingEffect: Couldn't add TemporalAntiAliasing to Camera.");
+                    }
                 }
-                else
-                {
-                    m_component.enabled = false;
-                    
-                    m_component.nfaaShader = nfaaMaterial;
-                    m_component.dlaaShader = dlaaShader;
-                    m_component.shaderFXAAII = fxaa2Material;
-                    m_component.shaderFXAAIII = fxaa3ConsoleMaterial;
-                    m_component.shaderFXAAPreset2 = fxaaPreset2Material;
-                    m_component.shaderFXAAPreset3 = fxaaPreset3Material;
-                    m_component.ssaaShader = ssaaMaterial;
-                }
-            }
 
-            m_component.enabled = true;
-        }
+                m_temporalComponent.enabled = true;
 
-        private void disable()
-        {
-            if (m_component != null)
-            {
-                MonoBehaviour.DestroyImmediate(m_component);
-                m_component = null;
+                m_temporalComponent.settings.jitterSettings.sampleCount = 2;
+                m_temporalComponent.settings.jitterSettings.spread = 0.05f;
+
+                m_temporalComponent.settings.sharpenFilterSettings.amount = 0.0f;
+
+                //m_temporalComponent.settings.blendSettings.motionAmplification = 70.0f;
+                //m_temporalComponent.settings.blendSettings.stationary = 1.0f;
+                //m_temporalComponent.settings.blendSettings.moving = 0.0f;
             }
         }
-
-        private String getAntiAliasingType(int mode)
+        
+        public void disable(Component component)
         {
-            switch (mode)
+            if (component != null)
             {
-                case 1:
-                    return "FXAA2";
-                case 2:
-                    return "FXAA3Console";
-                case 3:
-                    return "FXAAPresetA";
-                case 4:
-                    return "FXAAPresetB";
-                case 5:
-                    return "NFAA";
-                case 6:
-                    return "SSAA";
-                case 7:
-                    return "DLAA";
-                case 8:
-                    return "SMAA";
-                default:
-                    return "Disabled";
+                MonoBehaviour.DestroyImmediate(component);
+                component = null;
             }
         }
     }
