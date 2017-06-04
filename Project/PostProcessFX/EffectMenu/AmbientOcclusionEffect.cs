@@ -86,24 +86,29 @@ namespace PostProcessFX.EffectMenu
         {
             if (m_activeConfig.enabled)
             {
-                m_component = Camera.main.GetComponent<AmbientOcclusion>();
+                // Find any existing ambient occlusion.
                 if (m_component == null)
                 {
-                    m_component = Camera.main.gameObject.AddComponent<AmbientOcclusion>();
+                    m_component = ModDescription.camera.GetComponent<AmbientOcclusion>();
+                }
+
+                // Add it if it was not available.
+                if (m_component == null)
+                {
+                    m_component = ModDescription.camera.AddComponent<AmbientOcclusion>();
                     if (m_component == null)
                     {
                         m_activeConfig.enabled = false;
                         throw new Exception("Couldn't add AmbientOcclusion to Camera.");
                     }
                 }
-                    
-                m_component.enabled = true;
 
                 m_component.settings.intensity = m_activeConfig.intensity;
                 m_component.settings.radius = m_activeConfig.radius;
                 m_component.settings.sampleCount = m_activeConfig.sampleCount;
                 m_component.settings.occlusionSource = m_activeConfig.source;
                 m_component.settings.downsampling = m_activeConfig.downsampling;
+                m_component.enabled = true;
             }
             else
             {

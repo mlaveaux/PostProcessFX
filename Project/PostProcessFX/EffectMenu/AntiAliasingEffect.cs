@@ -25,7 +25,7 @@ namespace PostProcessFX
 
         private static String configFilename = "PostProcessFX_aa_config.xml";
         
-        public AntiAliasingEffect(AssetBundle bundle)
+        public AntiAliasingEffect()
         {
             m_activeConfig = ConfigUtility.Deserialize<AntiAliasingConfig>(configFilename);
             if (m_activeConfig == null)
@@ -43,8 +43,11 @@ namespace PostProcessFX
 
         public void disable()
         {
-            disable(m_antiAliasingComponent);
-            disable(m_temporalComponent);
+            if (m_antiAliasingComponent != null)
+            {
+                MonoBehaviour.DestroyImmediate(m_antiAliasingComponent);
+                m_antiAliasingComponent = null;
+            }
         }
 
         public void onGUI(float x, float y)
@@ -95,42 +98,46 @@ namespace PostProcessFX
             }
             else if (m_activeConfig.mode == AntiAliasingMode.SMAA || m_activeConfig.mode == AntiAliasingMode.FXAA)
             {
-                disable(m_temporalComponent);
-
-                m_antiAliasingComponent = Camera.main.GetComponent<AntiAliasing>();
+                // First try to get it from the camera.
                 if (m_antiAliasingComponent == null)
                 {
-                    m_antiAliasingComponent = Camera.main.gameObject.AddComponent<AntiAliasing>();
+                    m_antiAliasingComponent = ModDescription.camera.GetComponent<AntiAliasing>();
+                }
+
+                // If that fails then just add it
+                if (m_antiAliasingComponent == null)
+                {
+                    m_antiAliasingComponent = ModDescription.camera.AddComponent<AntiAliasing>();
                     if (m_antiAliasingComponent == null)
                     {
                         m_activeConfig.mode = 0;
                         throw new Exception("AntiAliasingEffect: Couldn't add Antialiasing to Camera.");
                     }
                 }
+                
                 m_antiAliasingComponent.enabled = true;
 
                 switch (m_activeConfig.mode)
                 {
                     case AntiAliasingMode.FXAA:
+                        // Enabled the FXAA settings.
+                        m_antiAliasingComponent.m_FXAA.preset = FXAA.availablePresets[m_activeConfig.fxaaQuality];
                         m_antiAliasingComponent.method = (int)AntiAliasing.Method.Fxaa;
                         break;
                     case AntiAliasingMode.SMAA:
+                        // Enable the required SMAA settings
+                        m_antiAliasingComponent.m_SMAA.settings.quality = m_activeConfig.smaaQuality;
+                        m_antiAliasingComponent.m_SMAA.settings.edgeDetectionMethod = m_activeConfig.smaaEdgeMethod;
+                        m_antiAliasingComponent.m_SMAA.temporal.enabled = m_activeConfig.smaaTemporal;
+                        m_antiAliasingComponent.m_SMAA.predication.enabled = m_activeConfig.smaaPredication;
+                        m_antiAliasingComponent.m_SMAA.predication.strength = 0.5f;
+
                         m_antiAliasingComponent.method = (int)AntiAliasing.Method.Smaa;
                         break;
                 }
-
-                m_antiAliasingComponent.m_FXAA.preset = FXAA.availablePresets[m_activeConfig.fxaaQuality];
-
-                // Enable the required SMAA settings
-                m_antiAliasingComponent.m_SMAA.settings.quality = m_activeConfig.smaaQuality;
-                m_antiAliasingComponent.m_SMAA.settings.edgeDetectionMethod = m_activeConfig.smaaEdgeMethod;
-                m_antiAliasingComponent.m_SMAA.temporal.enabled = m_activeConfig.smaaTemporal;
-                m_antiAliasingComponent.m_SMAA.predication.enabled = m_activeConfig.smaaPredication;
             }
             else
             {
-                disable(m_antiAliasingComponent);
-
                 m_temporalComponent = Camera.main.GetComponent<CineTemporalAntiAliasing>();
                 if (m_temporalComponent == null)
                 {
@@ -152,15 +159,6 @@ namespace PostProcessFX
                 //m_temporalComponent.settings.blendSettings.motionAmplification = 70.0f;
                 //m_temporalComponent.settings.blendSettings.stationary = 1.0f;
                 //m_temporalComponent.settings.blendSettings.moving = 0.0f;
-            }
-        }
-        
-        public void disable(Component component)
-        {
-            if (component != null)
-            {
-                MonoBehaviour.DestroyImmediate(component);
-                component = null;
             }
         }
     }
