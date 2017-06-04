@@ -347,7 +347,9 @@ namespace UnityStandardAssets.CinematicEffects
                 fuzz.m03 = (0.25f * m_FlipFlop) * temporal.fuzzSize / camera.pixelWidth;
                 fuzz.m13 = (-0.25f * m_FlipFlop) * temporal.fuzzSize / camera.pixelHeight;
 
-                camera.projectionMatrix = fuzz * camera.projectionMatrix;
+                Matrix4x4 matrix = fuzz * camera.projectionMatrix;
+
+                camera.projectionMatrix = matrix;
             }
         }
 
@@ -361,9 +363,7 @@ namespace UnityStandardAssets.CinematicEffects
         {
             int width = camera.pixelWidth;
             int height = camera.pixelHeight;
-
-            bool isFirstFrame = false;
-
+            
             QualitySettings preset = quality;
 
             if (settings.quality != QualityPreset.Custom)
@@ -387,7 +387,7 @@ namespace UnityStandardAssets.CinematicEffects
             material.SetVector(m_Params2, new Vector2(preset.cornerRounding, preset.localContrastAdaptationFactor));
 
             Matrix4x4 matrix = m_PreviousViewProjectionMatrix * Matrix4x4.Inverse(viewProjectionMatrix);
-            matrix.m11 *= -1.0f; // The last accumulation buffer is upside down.
+            //matrix.m11 *= -1.0f; // The last accumulation buffer is upside down.
 
             material.SetMatrix(m_ReprojectionMatrix, matrix);
 
@@ -432,8 +432,6 @@ namespace UnityStandardAssets.CinematicEffects
 
                 m_Accumulation = RenderTexture.GetTemporary(width, height, 0, source.format, RenderTextureReadWrite.Linear);
                 m_Accumulation.hideFlags = HideFlags.HideAndDontSave;
-
-                isFirstFrame = true;
             }
 
             RenderTexture rt1 = TempRT(width, height, source.format);
@@ -472,14 +470,10 @@ namespace UnityStandardAssets.CinematicEffects
                         {
                             Graphics.Blit(m_Accumulation, destination);
                         }
-                        else if (!isFirstFrame)
+                        else
                         {
                             material.SetTexture(m_AccumulationTex, m_Accumulation);
                             Graphics.Blit(rt1, destination, material, passResolve);
-                        }
-                        else
-                        {
-                            Graphics.Blit(rt1, destination);
                         }
 
                         //Graphics.Blit(rt1, m_Accumulation);
