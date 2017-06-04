@@ -3,6 +3,8 @@
 using UnityEngine;
 using PostProcessFX.Config;
 using PostProcessFX.EffectMenu;
+using UnityStandardAssets.CinematicEffects;
+using System.Collections.Generic;
 
 namespace PostProcessFX
 {
@@ -11,13 +13,10 @@ namespace PostProcessFX
      */
     enum MenuType
     {
-        Global,
-        Bloom,
+        Bloom = 0,
         AntiAliasing,
-        Motionblur,
-        SSAO,
-        Reflection,
-        DepthOfField
+        AmbientOcclusion,
+        Global,
     }
 
     class ConfigUI : MonoBehaviour
@@ -25,31 +24,20 @@ namespace PostProcessFX
         public const String configFilename = "PostProcessFX_gui_config.xml";
 
         private String m_toggleKeyString;
-
-        private BloomEffect m_bloom;
-        private AntiAliasingEffect m_antiAliasing;
-        private AmbientOcclusionEffect m_ambientOcclusion;
-
+        
         private GUIConfig m_config = null;
         private MenuType m_activeMenu;
+        private Dictionary<MenuType, IEffectMenu> m_menus = new Dictionary<MenuType, IEffectMenu>();
 
         private bool m_toggle = false;
         private bool m_dragging = false;
         private float m_lastMouseX;
         private float m_lastMouseY;
-
-        // This is actually the parameter from ConfigUI, but as that isn't possible we just
-        // initialize it and call Initialize.
-        public AssetBundle assetBundle;
-
+        
         public ConfigUI()
         {
             //  Load the GUIConfig or otherwise return to default settings
             m_config = ConfigUtility.Deserialize<GUIConfig>(configFilename);
-            if (m_config == null)
-            {
-                m_config = GUIConfig.getDefaultConfig();
-            }
             
             // Obtain the UI toggle key
             m_toggleKeyString = Enum.GetName(typeof(KeyCode), m_config.toggleUIKey);
@@ -61,9 +49,34 @@ namespace PostProcessFX
         public void Initialize()
         {
             // Create effects from the assetbundle, they should read the required assets by themselves.
-            m_bloom = new BloomEffect(assetBundle);
-            m_antiAliasing = new AntiAliasingEffect(assetBundle);
-            m_ambientOcclusion = new AmbientOcclusionEffect();
+
+            // Wow such exception handling.
+            try
+            {
+                m_menus.Add(MenuType.Bloom, new BloomEffect());
+            }
+            catch(Exception ex)
+            {
+                PPFXUtility.log(ex);
+            }
+
+            try
+            {
+                m_menus.Add(MenuType.AntiAliasing, new AntiAliasingEffect());
+            }
+            catch (Exception ex)
+            {
+                PPFXUtility.log(ex);
+            }
+
+            try
+            {
+                m_menus.Add(MenuType.AmbientOcclusion, new AmbientOcclusionEffect());
+            }
+            catch (Exception ex)
+            {
+                PPFXUtility.log(ex);
+            }
         }
         
         public void OnGUI()
@@ -97,69 +110,54 @@ namespace PostProcessFX
                 m_activeMenu = MenuType.Bloom;
             }
 
-            if (GUI.Button(new Rect(x + 120, y, 30, 20), "AA"))
+            if (GUI.Button(new Rect(x + 120, y, 60, 20), "AA"))
             {
                 m_activeMenu = MenuType.AntiAliasing;
             }
             
-            if (GUI.Button(new Rect(x + 150, y, 30, 20), "AO"))
+            if (GUI.Button(new Rect(x + 180, y, 60, 20), "SSAO"))
             {
-                m_activeMenu = MenuType.SSAO;
+                m_activeMenu = MenuType.AmbientOcclusion;
             }
 
             y += 25;
 
-            // Select what sub-menu to show depending on the active menu.
-            switch (m_activeMenu)
+            // Handle the Global case as it is rendered here.
+            if (m_activeMenu == MenuType.Global) { 
+                GUI.Label(new Rect(x, y, 200, 20), "Toggle Key: ");
+                m_toggleKeyString = GUI.TextArea(new Rect(x + 150, y, 150, 20), m_toggleKeyString);
+                y += 25;
+
+                m_config.ctrlKey = GUI.Toggle(new Rect(x, y, 50, 20), m_config.ctrlKey, "ctrl");
+                m_config.shiftKey = GUI.Toggle(new Rect(x + 60, y, 50, 20), m_config.shiftKey, "shift");
+                m_config.altKey = GUI.Toggle(new Rect(x + 120, y, 50, 20), m_config.altKey, "alt");
+                y += 25;
+
+                try
+                {
+                    m_config.toggleUIKey = (int)Enum.Parse(typeof(KeyCode), m_toggleKeyString);
+                }
+                catch (Exception)
+                {
+                    // Silently ignore this exception, because it just means that it cannot be converted to a keycode.
+                    m_config.toggleUIKey = (int)KeyCode.F9;
+                    m_toggleKeyString = "F9";
+                }
+
+                if(GUI.Button(new Rect(x, y, 50, 20), "Save")) {
+                    save();
+                }
+            } else
             {
-                case MenuType.Global:
-                    GUI.Label(new Rect(x, y, 200, 20), "Toggle Key: ");
-                    m_toggleKeyString = GUI.TextArea(new Rect(x + 150, y, 150, 20), m_toggleKeyString);
-                    y += 25;
-
-                    m_config.ctrlKey = GUI.Toggle(new Rect(x, y, 50, 20), m_config.ctrlKey, "ctrl");
-                    m_config.shiftKey = GUI.Toggle(new Rect(x + 60, y, 50, 20), m_config.shiftKey, "shift");
-                    m_config.altKey = GUI.Toggle(new Rect(x + 120, y, 50, 20), m_config.altKey, "alt");
-
-                    try
-                    {
-                        m_config.toggleUIKey = (int)Enum.Parse(typeof(KeyCode), m_toggleKeyString);
-                    }
-                    catch (Exception)
-                    {
-                        // Silently ignore this exception, because it just means that it cannot be converted to a keycode.
-                        m_config.toggleUIKey = (int)KeyCode.F9;
-                        m_toggleKeyString = "F9";
-                    }
-                    break;
-
-                case MenuType.AntiAliasing:
-                    if (m_antiAliasing != null)
-                    {
-                        m_antiAliasing.onGUI(x, y);
-                    }
-                    break;
-
-                case MenuType.Bloom:
-                    if (m_bloom != null)
-                    {
-                        m_bloom.onGUI(x, y);
-                    }
-                    break;
-
-                case MenuType.Motionblur:
-                    /*if (m_motionblur != null)
-                    {
-                        m_motionblur.onGUI(x, y);
-                    }*/
-                    break;
-
-                case MenuType.SSAO:
-                    if (m_ambientOcclusion != null)
-                    {
-                        m_ambientOcclusion.onGUI(x, y);
-                    }
-                    break;
+                try
+                {
+                    m_menus[m_activeMenu].onGUI(x, y);
+                }
+                catch(Exception ex)
+                {
+                    PPFXUtility.log(ex);
+                    m_activeMenu = MenuType.Global;
+                }
             }
         }
 
@@ -232,10 +230,10 @@ namespace PostProcessFX
         {
             save();
 
-            // Destroy the other components that might have assets loaded
-            if (m_bloom != null) m_bloom.disable();
-            if (m_antiAliasing != null) m_antiAliasing.disable();
-            if (m_ambientOcclusion != null) m_ambientOcclusion.disable();
+            foreach (KeyValuePair<MenuType, IEffectMenu> keyValue in m_menus)
+            {
+                keyValue.Value.disable();
+            }
         }
 
         public void OnMouseUp()
@@ -247,9 +245,11 @@ namespace PostProcessFX
         {
             // For some reason there can be an exception in the constructor, but the object is still created.
             PPFXUtility.log("PostProcessFX: Saving settings.");
-            if (m_bloom != null ) m_bloom.save();
-            if (m_antiAliasing != null) m_antiAliasing.save();
-            if (m_ambientOcclusion != null) m_ambientOcclusion.save();
+
+            foreach (KeyValuePair<MenuType, IEffectMenu> keyValue in m_menus)
+            {
+                keyValue.Value.save();
+            }
 
             ConfigUtility.Serialize<GUIConfig>(configFilename, m_config);
         }
