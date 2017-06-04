@@ -25,7 +25,7 @@ namespace PostProcessFX.Config
         public EdgeDetectionMethod smaaEdgeMethod = EdgeDetectionMethod.Color;
         public QualityPreset smaaQuality = QualityPreset.Medium;
         public bool smaaTemporal = false;
-        public bool smaaPredication = false;
+        public bool smaaPredication = true;
 
         public static AntiAliasingConfig getDefaultPreset()
         {
