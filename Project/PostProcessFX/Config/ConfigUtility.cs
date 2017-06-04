@@ -30,7 +30,7 @@ namespace PostProcessFX.Config
             }
         }
 
-        public static T Deserialize<T>(String filename)
+        public static T Deserialize<T>(String filename)  where T : new()
         {
             TextReader reader = null;
             try
@@ -51,7 +51,7 @@ namespace PostProcessFX.Config
                 }
             }
 
-            return default(T);
+            return new T();
         }
     }
 }
