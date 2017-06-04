@@ -12,9 +12,9 @@ namespace PostProcessFX
     {
         private Flare m_sunflare = null;
 
-        public LensflareEffect(AssetBundle bundle)
+        public LensflareEffect()
         {
-            m_sunflare = PPFXUtility.checkAndLoadAsset<Flare>(bundle, "Assets/Flares/50mmZoom.flare");
+            m_sunflare = PPFXUtility.checkAndLoadAsset<Flare>(ModDescription.loadedBundle, "50mmZoom.flare");
         }
 
         ~LensflareEffect()
