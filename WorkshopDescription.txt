@@ -1,37 +1,40 @@
-Enable additional post processing effects such as bloom, lensflare, different aa options and motion blur.
+Enable additional post processing effects such as bloom, lensflare, different anti aliasing options and ambient occlusion.
 
 [h1] Bloom and lensflare [/h1]
 
 Can be fully controlled with the ingame UI with the following settings:
 
-    - bloomIntensity: The intensity of the bloom effect.
-    - bloomThreshhold: Lower means bloom occurs with lower light intensity.
-    - bloomSpread: The amount that the bloom is blurred.
-    - bloomBlurIteration: Higher iterations cause a more smoothed blur.
-    - lensflareIntensity: The intensity of the lensflare effect.
-    - lensflareThreshhold: Lower means that less bloom is needed to create lensflare.
-    - lensFlareSaturation: Higher saturation makes the lensflare more like the light color.
-    - lensflareRotation: In which rotation the lensflare expands.
-    - lensflareWidth: The width of the lensflare effect.
-    - lensflareBlurIterations: Higher iterations cause a more smoothed lens flare ends.
-    - Enable ghosting lensflare: Causes camera ghosting effects to appear from bright light sources.
+    - Enable Bloom: Enables the bloom effect.
+    - Intensity: The intensity of the bloom effect.
+    - Threshold: Lower means bloom occurs with lower light intensity.
+    - Spread: The amount that the bloom is blurred.
+    - Blur Iteration: Higher iterations cause a more smoothed blur.
+
+    - Enable Lensflare: Enables a lens flare effect.
+    - Intensity: The intensity of the lensflare effect.
+    - Threshhold: Lower means that less bloom is needed to create lensflare.
+    - Saturation: Higher saturation makes the lensflare more like the light color.
+    - Rotation: In which rotation the lensflare expands.
+    - Width: The width of the lensflare effect.
+    - Blur Iterations: Higher iterations cause a more smoothed lens flare ends.
+    - Style: Different lens flare styles.
     
 [h1] Anti Aliasing [/h1]
 
-Supports FXAA, SMAA and TAA.
+Supports FXAA and SMAA.
 
     - FXAA is Fast Approximate Anti Aliasing.
         - Five presets ranging from very low to ultra.
 
     - SMAA is Enhanced Subpixel Morphological Antialiasing 
         - Four presets ranging from low to ultra.
-        - Enable Temporal: Enables SMAA T2x, this samples over two frames and has a slight performance impact.
+        - Enable Temporal: Enables SMAA T2x, this setting causes some flickering however.
 
-Not as effective as the DynamicResolution mod by nlight, but cheaper and can be combined if desired. 
+Not as effective as the DynamicResolution mod, but cheaper and can be combined if desired. 
 
 [h1] Screen Space Ambient Occlusion [/h1]
 
-This is different implementation then the SSAO mod by Ulysius, so chose one depending on preference.
+This is different implementation then the other SSAO mod, so chose one depending on preference.
 
     - Intensity: How much the surfaces are darkened.
     - Radius: Controls the spread of the occlusion.
@@ -43,10 +46,13 @@ This is different implementation then the SSAO mod by Ulysius, so chose one depe
 
 All effects can be disabled so they don't have any performance impact. An ingame UI is provided to tweak the options and can be toggled with F9 (default), the toggle key can be changed in UI.[url=http://pastebin.com/qe5BwdA2]Here[/url] is a list of possible keycodes, fill in the string and not the corresponding number.
 
-[h1] Changelog [/h1]
+No longer compatible with Linux and Mac due to how the asset bundles must be set up, and I cannot test on these platforms.
+
+[h1] Changelog v1.7.2 [/h1]
 
     - Improved the available anti aliasing options.
-    - Added a ambient occlusion effect.
+    - Added another ambient occlusion effect.
+    - Removed motion blur.
     - Fixed the effects for the Mass Transit patch.
     - Fixed the effects for the After Dark patch.
     - Added some presets and the options to load the saved configuration.
@@ -55,7 +61,4 @@ All effects can be disabled so they don't have any performance impact. An ingame
 
 [h1] Recommended and Compactible Mods [/h1]
 
-- [url=http://steamcommunity.com/sharedfiles/filedetails/?id=410329674]SSAO[/url] by Ulysius.
-- [url=http://steamcommunity.com/sharedfiles/filedetails/?id=410805639]Sun Shafts[/url] by Ulysius.
-- [url=http://steamcommunity.com/sharedfiles/filedetails/?id=406629464]Dynamic Resolution[/url] by nlight.
-- [url=http://steamcommunity.com/sharedfiles/filedetails/?id=406684124]Los Santos[/url] by Grockefeller.
+The DynamicResolution and SunShafts mods are other great enhancements.
