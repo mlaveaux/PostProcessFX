@@ -12,10 +12,11 @@ namespace PostProcessFX
      */
     public class ModDescription : IUserMod
     {
-        public static string VersionString = "1.7.2-f1.2";
+        public static string VersionString = "1.7.2";
         public static string ModName = "PostProcessFX";
 
         public static AssetBundle loadedBundle;
+        public static GameObject camera;
 
         public string Description
         {
@@ -48,7 +49,7 @@ namespace PostProcessFX
             {
                 throw new BrokenAssetException("Assetbundle with uri " + assetsUri + " couldn't be loaded.");
             }
-            
+                        
             // When we are already in the level we can also trigger it here.
             ModLoader.addConfigUI();
         }
@@ -86,8 +87,7 @@ namespace PostProcessFX
             {
                 PPFXUtility.log("Added the ConfigUI game object.");
             }
-
-            newUI.assetBundle = ModDescription.loadedBundle;
+            
             newUI.Initialize();
         }
         
@@ -110,6 +110,9 @@ namespace PostProcessFX
 
         public void OnLevelLoaded(LoadMode mode)
         {
+            // Set the camera
+            ModDescription.camera = Camera.main.gameObject;
+
             // Level is loaded so try to add the config ui to the camera.
             addConfigUI();
         }
