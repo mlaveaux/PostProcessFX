@@ -93,31 +93,41 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Cinematic\AmbientOcclusion\AmbientOcclusion.cs" />
+    <Compile Include="Cinematic\AmbientOcclusion\Helpers\PropertyObserver.cs" />
+    <Compile Include="Cinematic\AmbientOcclusion\Helpers\Settings.cs" />
+    <Compile Include="Cinematic\AntiAliasing\AntiAliasing.cs" />
+    <Compile Include="Cinematic\AntiAliasing\FXAA\FXAA.cs" />
+    <Compile Include="Cinematic\AntiAliasing\IAntiAliasing.cs" />
+    <Compile Include="Cinematic\AntiAliasing\SMAA\SMAA.cs" />
+    <Compile Include="Cinematic\Bloom\Bloom.cs" />
+    <Compile Include="Cinematic\Common\ImageEffectHelper.cs" />
+    <Compile Include="Cinematic\Common\MinAttribute.cs" />
+    <Compile Include="Cinematic\Common\RenderTextureUtility.cs" />
+    <Compile Include="Cinematic\ScreenSpaceReflections\ScreenSpaceReflection.cs" />
+    <Compile Include="Cinematic\TemporalAntiAliasing\TemporalAntiAliasing.cs" />
+    <Compile Include="Config\AmbientOcclusionConfig.cs" />
     <Compile Include="Config\AntiAliasingConfig.cs" />
     <Compile Include="Config\BloomConfig.cs" />
+    <Compile Include="Config\NewBloomConfig.cs" />
     <Compile Include="Config\ConfigUtility.cs" />
     <Compile Include="Config\GUIConfig.cs" />
-    <Compile Include="Config\MotionblurConfig.cs" />
+    <Compile Include="EffectMenu\AmbientOcclusionEffect.cs" />
     <Compile Include="EffectMenu\AntiAliasingEffect.cs" />
     <Compile Include="EffectMenu\IEffectMenu.cs" />
-    <Compile Include="Effect\AntiAliasing.cs" />
+    <Compile Include="EffectMenu\ScreenSpaceReflectionEffect.cs" />
     <Compile Include="Effect\Bloom.cs" />
-    <Compile Include="Effect\CameraMotionBlur.cs" />
-    <Compile Include="Effect\PostEffectBase.cs" />
+    <Compile Include="Effect\PostEffectsBase.cs" />
     <Compile Include="Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="SMAA\AreaTexture.cs" />
     <Compile Include="EffectMenu\BloomEffect.cs" />
-    <Compile Include="Utility.cs" />
+    <Compile Include="PPFXUtility.cs" />
     <Compile Include="ConfigUI.cs" />
     <Compile Include="ModLoader.cs" />
-    <Compile Include="EffectMenu\MotionblurEffect.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SMAA\SearchTexture.cs" />
-    <Compile Include="SMAA\SMAAEffect.cs" />
     <Compile Include="Effect\LensflareEffect.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -129,6 +139,12 @@
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
     </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Cinematic\Bloom\Helpers\LensDirt00.png" />
+    <Content Include="Cinematic\Bloom\Helpers\LensDirt01.png" />
+    <Content Include="Cinematic\Bloom\Helpers\LensDirt02.png" />
+    <Content Include="Cinematic\Bloom\Helpers\LensDirt03.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
