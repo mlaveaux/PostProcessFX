@@ -1,12 +1,12 @@
 ManifestFileVersion: 0
-CRC: 3959372545
+CRC: 1242492060
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: 7af42e97a8642f33730299078958cbd6
+    Hash: 97f82ee5fffe4dabb94384fdf5002326
   TypeTreeHash:
     serializedVersion: 2
-    Hash: 0bf1ed99d583d058c26943f5907e683b
+    Hash: ac50165a34c7b2a86fa60b448483bc1f
 HashAppended: 0
 ClassTypes:
 - Class: 28
@@ -14,6 +14,8 @@ ClassTypes:
 - Class: 48
   Script: {instanceID: 0}
 - Class: 109
+  Script: {instanceID: 0}
+- Class: 121
   Script: {instanceID: 0}
 Assets:
 - Assets/Resources/AntiAliasing/FXAA3.cginc
@@ -28,6 +30,7 @@ Assets:
 - Assets/Resources/AntiAliasing/FXAA.shader
 - Assets/Resources/AntiAliasing/SMAA.shader
 - Assets/Resources/AmbientOcclusion/Composition.cginc
+- Assets/Resources/Flare/50mmZoom.flare
 - Assets/Resources/AntiAliasing/SMAA.cginc
 - Assets/Resources/BloomAndFlares/BrightPassFilter2.shader
 - Assets/Resources/AmbientOcclusion/SeparableBlur.cginc

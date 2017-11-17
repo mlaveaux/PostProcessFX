@@ -12,7 +12,7 @@ namespace PostProcessFX
      */
     public class ModDescription : IUserMod
     {
-        public static string VersionString = "1.7.2";
+        public static string VersionString = "1.9.0-f5";
         public static string ModName = "PostProcessFX";
 
         public static AssetBundle loadedBundle;
