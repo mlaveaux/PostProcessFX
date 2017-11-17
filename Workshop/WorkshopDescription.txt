@@ -19,6 +19,8 @@ Can be fully controlled with the ingame UI with the following settings:
     - Blur Iterations: Higher iterations cause a more smoothed lens flare ends.
     - Style: Different lens flare styles.
     
+Comparison [url=https://imgsli.com/MDkwMw]image[/url].
+
 [h1] Anti Aliasing [/h1]
 
 Supports FXAA and SMAA.
@@ -29,8 +31,12 @@ Supports FXAA and SMAA.
     - SMAA is Enhanced Subpixel Morphological Antialiasing 
         - Four presets ranging from low to ultra.
         - Enable Temporal: Enables SMAA T2x, this setting causes some flickering however.
+        
+    - NOTE: Temporal only works with bloom enabled (You can set intensity to zero and have to toggle bloom once after enabling temporal).
 
 Not as effective as the DynamicResolution mod, but cheaper and can be combined if desired. 
+
+Comparison [url=https://imgsli.com/MDkwNA]image[/url].
 
 [h1] Screen Space Ambient Occlusion [/h1]
 
@@ -41,12 +47,17 @@ This is different implementation then the other SSAO mod, so chose one depending
     - Sample Count: The amount of samples taken around each pixel, impacts performance.
     - Occlusion: Either depth or depth + normal is used, looks slightly different.
     - Enable Downsampling: Only sample at half resolution, impacts performance.
+
+Comparison [url=https://imgsli.com/MDkwMg]image[/url].
     
 [h1] Additional Information [/h1]
 
-All effects can be disabled so they don't have any performance impact. An ingame UI is provided to tweak the options and can be toggled with F9 (default), the toggle key can be changed in UI.[url=http://pastebin.com/qe5BwdA2]Here[/url] is a list of possible keycodes, fill in the string and not the corresponding number.
+All effects can be disabled so they don't have any performance impact. An ingame UI is provided to tweak the options and can be toggled with F9 (default), the toggle key can be changed in UI. [url=http://pastebin.com/qe5BwdA2]Here[/url] is a list of possible keycodes, fill in the string and not the corresponding number.
 
-No longer compatible with Linux and Mac due to how the asset bundles must be set up, and I cannot test on these platforms.
+[h1] Changelog v1.9.0 [/h1]
+
+    - Made compatible with Cities Skylines v.1.9.0.
+    - Attempted to make it work on Linux and OSX, but I cannot test that.
 
 [h1] Changelog v1.7.2 [/h1]
 
