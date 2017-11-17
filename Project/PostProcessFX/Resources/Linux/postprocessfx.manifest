@@ -1,0 +1,42 @@
+ManifestFileVersion: 0
+CRC: 3581693639
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: 604aab0f00ed019ead62b12181ddba37
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: ac50165a34c7b2a86fa60b448483bc1f
+HashAppended: 0
+ClassTypes:
+- Class: 28
+  Script: {instanceID: 0}
+- Class: 48
+  Script: {instanceID: 0}
+- Class: 109
+  Script: {instanceID: 0}
+- Class: 121
+  Script: {instanceID: 0}
+Assets:
+- Assets/Resources/AntiAliasing/FXAA3.cginc
+- Assets/Resources/AntiAliasing/AreaTex.tga
+- Assets/Resources/AmbientOcclusion/AmbientOcclusion 1.cginc
+- Assets/Resources/AmbientOcclusion/SeparableBlur 1.cginc
+- Assets/Resources/AntiAliasing/SearchTex.tga
+- Assets/Resources/AmbientOcclusion/Common.cginc
+- Assets/Resources/AmbientOcclusion/Common 1.cginc
+- Assets/Resources/AmbientOcclusion/AmbientOcclusion.cginc
+- Assets/Resources/AmbientOcclusion/AmbientOcclusion.shader
+- Assets/Resources/AntiAliasing/FXAA.shader
+- Assets/Resources/AntiAliasing/SMAA.shader
+- Assets/Resources/AmbientOcclusion/Composition.cginc
+- Assets/Resources/Flare/50mmZoom.flare
+- Assets/Resources/AntiAliasing/SMAA.cginc
+- Assets/Resources/BloomAndFlares/BrightPassFilter2.shader
+- Assets/Resources/AmbientOcclusion/SeparableBlur.cginc
+- Assets/Resources/AmbientOcclusion/Composition 1.cginc
+- Assets/Resources/BloomAndFlares/LensFlareCreate.shader
+- Assets/Resources/AmbientOcclusion/AmbientOcclusion 1.shader
+- Assets/Resources/BloomAndFlares/BlurAndFlares.shader
+- Assets/Resources/BloomAndFlares/BlendForBloom.shader
+Dependencies: []

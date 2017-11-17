@@ -32,11 +32,26 @@ namespace PostProcessFX
         {
             PPFXUtility.log(ModName + " " + VersionString + " enabled");
             
-            // Load the shader bundle
+            // Find the current directory of the mod
             string modPath = PluginManager.instance.FindPluginInfo(Assembly.GetAssembly(typeof(ModDescription))).modPath;
-            string assetsUri = "file:///" + modPath.Replace("\\", "/") + "/Resources/Windows/postprocessfx";
+			string assetsUri = "file:///" + modPath.Replace("\\", "/") + "/Resources/";
 
-            WWW www = new WWW(assetsUri);
+			// Add platform specific folder to it.
+			if (Application.platform == RuntimePlatform.WindowsPlayer) {
+				assetsUri += "Windows";
+			}
+			else if (Application.platform == RuntimePlatform.LinuxPlayer) {
+				assetsUri += "Linux";
+			}
+			else if (Application.platform == RuntimePlatform.OSXPlayer) {
+				assetsUri += "Mac";
+			}
+
+
+			// File is always called the same.
+			assetsUri += "/postprocessfx";
+
+			WWW www = new WWW(assetsUri);
             // Need to wait until the WWW loading has been done, this blocks the game.
             /*while (!www.isDone)
             {
@@ -47,7 +62,10 @@ namespace PostProcessFX
             loadedBundle = www.assetBundle;
             if (loadedBundle == null)
             {
-                throw new BrokenAssetException("Assetbundle with uri " + assetsUri + " couldn't be loaded.");
+                PPFXUtility.log("Assetbundle with uri " + assetsUri + " couldn't be loaded.");
+
+				// Don't throw, but just don't do anything.
+				return;
             }
                         
             // When we are already in the level we can also trigger it here.
