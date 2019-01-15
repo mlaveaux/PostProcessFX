@@ -3,15 +3,22 @@ using System.IO;
 
 public class CreateAssetBundles
 {
-	[MenuItem("Assets/Build AssetBundles")]
-	static void BuildAllAssetBundles()
+	static void BuildAssetBundle(string assetBundleDirectory, BuildTarget buildTarget) 
 	{
-		string assetBundleDirectory = "Assets/AssetBundles/Windows";
 		if(!Directory.Exists(assetBundleDirectory))
 		{
 			Directory.CreateDirectory(assetBundleDirectory);
 		}
 
-		BuildPipeline.BuildAssetBundles(assetBundleDirectory, BuildAssetBundleOptions.None, BuildTarget.StandaloneWindows);
+		BuildPipeline.BuildAssetBundles(assetBundleDirectory, BuildAssetBundleOptions.None, buildTarget);
+	}
+
+
+	[MenuItem("Assets/Build AssetBundles")]
+	static void BuildAllAssetBundles()
+	{
+		BuildAssetBundle ("Assets/AssetBundles/Windows", BuildTarget.StandaloneWindows);
+		BuildAssetBundle ("Assets/AssetBundles/Linux", BuildTarget.StandaloneLinuxUniversal);
+		BuildAssetBundle ("Assets/AssetBundles/Mac", BuildTarget.StandaloneOSXUniversal);		
 	}
 }
